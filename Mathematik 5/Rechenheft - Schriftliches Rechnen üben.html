@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rechenheft – Schriftlich rechnen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+/* Karierte Heftseite mit Register-Reitern je Rechenart */
+:root{
+  --paper:#fdfcf7; --desk:#e9eef3; --karo:#cfdcec; --text:#25303f; --muted:#5b6677; --ink:#1c3fa0;
+  --red:#cf2f2a; --green:#1d8248; --hl:#fff09a; --focus:#e6eeff;
+  --add:#e0592a; --sub:#2f7fc4; --mul:#8352bf; --div:#16877a; --rev:#a8791a; --tab:var(--add);
+  --qr-bg:#ffffff; --qr-fg:#111111;
+  --hand:"Patrick Hand","Comic Sans MS","Segoe Print",cursive;
+  --ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cs:clamp(30px,calc((100vw - 76px) / 10),46px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+    --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a;
+    --add:#ff7a4d; --sub:#5aa9ec; --mul:#ab85e8; --div:#3fc4b0; --rev:#e0ae45; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+  --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a;
+  --add:#ff7a4d; --sub:#5aa9ec; --mul:#ab85e8; --div:#3fc4b0; --rev:#e0ae45; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--desk);color:var(--text);font-family:var(--ui);font-size:16px;line-height:1.5}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tab);outline-offset:2px}
+.hidden{display:none!important}
+main{max-width:820px;margin:0 auto;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.cover{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.label{background:var(--paper);border:2px solid var(--text);border-radius:6px;padding:8px 18px 6px;transform:rotate(-1.2deg);box-shadow:3px 3px 0 var(--text)}
+.label h1{font-family:var(--hand);font-weight:400;font-size:44px;line-height:1;margin:0;color:var(--ink)}
+.label p{margin:0;font-size:13px;color:var(--muted)}
+.stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.brand{display:flex;align-items:flex-start;gap:12px}
+.cover .side{margin-left:auto}
+.qrbtn{flex:none;width:30px;height:30px;display:grid;place-items:center;border:2px solid var(--text);border-radius:7px;background:var(--paper);color:var(--text);box-shadow:2px 2px 0 var(--text);padding:0;transition:transform .06s,box-shadow .06s}
+.qrbtn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.modal.qrmodal{max-width:none;width:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.modal.qrmodal h2{margin:0}
+.qrbox{background:var(--qr-bg);padding:12px;border-radius:10px;border:2px solid var(--karo);line-height:0}
+.qrbox svg{display:block;width:min(calc(100vw - 100px),calc(100vh - 250px),460px);height:auto;min-width:160px}
+.qrurl{font-size:13px;color:var(--muted);margin:0;max-width:min(calc(100vw - 100px),calc(100vh - 250px),460px);overflow-wrap:anywhere;user-select:all}
+.modal.qrmodal .actions{margin:0}
+.levels{display:flex;gap:8px}
+.lvbtn{width:44px;height:44px;border:2px solid var(--text);border-radius:50%;background:var(--paper);font-family:var(--hand);font-size:28px;line-height:1;color:var(--text);box-shadow:2px 2px 0 var(--text);transition:transform .06s,box-shadow .06s}
+.lvbtn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.lvbtn[aria-pressed="true"]{background:var(--div);border-color:var(--text);color:#fff}
+.stat{background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;border:1px solid var(--karo)}
+.stat b{font-weight:700;font-variant-numeric:tabular-nums}
+
+.tabs{display:flex;gap:6px;margin:22px 0 0 10px;position:relative;z-index:1;overflow-x:auto;padding-top:2px}
+.tab{border:none;border-radius:12px 12px 0 0;padding:10px 16px 12px;font-weight:700;font-size:17px;color:#fff;opacity:.55;transform:translateY(6px);transition:transform .15s,opacity .15s;white-space:nowrap;flex:none}
+.tab[data-kind="add"]{background:var(--add)} .tab[data-kind="sub"]{background:var(--sub)} .tab[data-kind="mul"]{background:var(--mul)} .tab[data-kind="div"]{background:var(--div)} .tab[data-kind="rev"]{background:var(--rev)}
+.tab .badge{display:inline-block;min-width:22px;padding:0 6px;margin-left:6px;border-radius:999px;background:rgba(255,255,255,.3);font-size:13px;text-align:center}
+.tab[aria-selected="true"]{opacity:1;transform:none}
+.tab .sym{font-family:var(--hand);font-size:24px;line-height:0;margin-right:6px;vertical-align:-2px}
+.revinfo{font-size:14px;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:6px;width:fit-content;margin-top:6px}
+
+.sheet{position:relative;background:var(--paper);border-radius:4px 14px 14px 14px;border-top:6px solid var(--tab);padding:18px 16px 20px;box-shadow:0 2px 0 var(--karo),0 10px 30px rgba(20,30,50,.08);
+  background-image:linear-gradient(var(--karo) 1px,transparent 1px),linear-gradient(90deg,var(--karo) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px}
+.sheet::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:2px;background:color-mix(in srgb,var(--red) 45%,transparent);pointer-events:none}
+.inner{position:relative;padding-left:40px}
+.taskline{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;background:var(--paper);padding:4px 8px;border-radius:8px;width:fit-content}
+.taskline small{color:var(--muted);font-size:14px}
+.task{font-family:var(--hand);font-size:34px;line-height:1.1;color:var(--text)}
+.lvl{font-size:13px;font-weight:700;color:#fff;background:var(--tab);border-radius:999px;padding:1px 10px}
+.phases{list-style:none;display:flex;gap:6px;padding:0;margin:12px 0 4px;flex-wrap:wrap}
+.phases li{background:var(--paper);border:1.5px solid var(--karo);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--muted)}
+.phases li.now{border-color:var(--tab);color:var(--text);font-weight:700;box-shadow:inset 0 0 0 1px var(--tab)}
+.phases li.done{color:var(--green);border-color:var(--green)}
+
+.gridwrap{position:relative;overflow-x:auto;margin:14px 0 8px;padding:12px 4px 14px}
+.grid{display:grid;grid-template-columns:calc(var(--cs) * .8) repeat(var(--w),var(--cs));width:max-content;margin:0 auto;background:var(--paper);padding:6px 8px;border-radius:6px}
+.cell{width:var(--cs);height:var(--cs);border:1px solid var(--karo);margin:0 -1px -1px 0;display:grid;place-items:center;position:relative;font-family:var(--hand);font-size:calc(var(--cs) * .72);line-height:1;color:var(--text);background:transparent}
+input.cell{padding:0;text-align:center;border-radius:0;color:var(--ink);caret-color:transparent;appearance:none;-webkit-appearance:none}
+input.cell:focus{outline:none;background:var(--focus);box-shadow:inset 0 0 0 2px var(--ink);z-index:2}
+input.cell:disabled{opacity:1;-webkit-text-fill-color:currentColor;cursor:default}
+.cell.small{height:calc(var(--cs) * .56);font-size:calc(var(--cs) * .44);color:var(--ink)}
+.cell.sol{color:var(--ink)}
+.lab{display:grid;place-items:center;font-family:var(--hand);font-size:calc(var(--cs) * .7);line-height:1;color:var(--text);height:var(--cs)}
+.lab.small{height:calc(var(--cs) * .56);font-family:var(--ui);font-size:11px;color:var(--muted)}
+.cell.lb,.lab.lb{border-bottom:3px solid var(--text)}
+.ph{font-family:var(--ui);font-size:11px;font-weight:700;color:var(--muted);height:22px;display:grid;place-items:end center;padding-bottom:2px}
+.wait{background:color-mix(in srgb,var(--karo) 30%,transparent)!important}
+.cell.bad{color:var(--red)!important;-webkit-text-fill-color:var(--red);background:color-mix(in srgb,var(--red) 11%,transparent)!important;box-shadow:inset 0 0 0 2px var(--red)}
+.cell.ok{color:var(--green)!important;-webkit-text-fill-color:var(--green)}
+.cell.hl{background:var(--hl)!important}
+.cell.new{animation:ink .45s ease}
+@keyframes ink{from{transform:scale(1.5);opacity:0}to{transform:none;opacity:1}}
+
+.stamp{position:absolute;right:6%;top:40%;transform:rotate(-14deg);border:4px double var(--red);color:var(--red);font-family:var(--hand);font-size:40px;padding:0 16px;border-radius:10px;background:color-mix(in srgb,var(--paper) 80%,transparent);pointer-events:none;animation:stamp .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes stamp{from{transform:rotate(-14deg) scale(2.2);opacity:0}to{transform:rotate(-14deg) scale(1);opacity:1}}
+
+.note{background:var(--paper);border:2px solid var(--karo);border-radius:12px;padding:12px 14px;margin:8px 0 14px;max-width:62ch}
+.note p{margin:0}
+.note ul{margin:6px 0 0;padding-left:20px}
+.note li{margin:3px 0}
+.note.good{border-color:var(--green)}
+.note.good strong{color:var(--green)}
+.note.bad{border-color:var(--red)}
+.note.bad strong{color:var(--red)}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:2px solid var(--text);background:var(--paper);border-radius:10px;padding:9px 14px;font-weight:500;font-size:15px;box-shadow:2px 2px 0 var(--text);transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.btn.main{background:var(--tab);border-color:var(--tab);color:#fff;font-weight:700;box-shadow:2px 2px 0 var(--text)}
+.btn:disabled{opacity:.4;cursor:default}
+.opts{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:14px;color:var(--muted);background:var(--paper);width:fit-content;max-width:100%;padding:4px 8px;border-radius:8px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.opts select{border:1.5px solid var(--karo);border-radius:8px;background:var(--paper);padding:3px 6px}
+.opts input{width:18px;height:18px;accent-color:var(--tab)}
+
+.solution{margin-top:18px}
+.solution h2{font-family:var(--hand);font-weight:400;font-size:32px;margin:0;color:var(--ink);background:var(--paper);width:fit-content;padding:0 8px;border-radius:6px}
+.soltext{background:var(--paper);border-left:4px solid var(--tab);padding:10px 14px;border-radius:0 10px 10px 0;min-height:64px;max-width:62ch;font-size:16px}
+.solnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.solnav .count{font-size:14px;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:6px}
+
+.overlay{position:fixed;inset:0;background:rgba(15,20,35,.5);display:grid;place-items:center;padding:16px;z-index:20}
+.modal{background:var(--paper);border:2px solid var(--text);border-radius:14px;box-shadow:5px 5px 0 var(--text);padding:20px;max-width:420px;width:100%}
+.modal h2{font-family:var(--hand);font-weight:400;font-size:32px;margin:0 0 8px;color:var(--ink)}
+.modal .f{display:flex;align-items:center;gap:10px;margin:8px 0}
+.modal .f span{width:34px;font-family:var(--hand);font-size:28px;text-align:center}
+.modal input{flex:1;border:2px solid var(--karo);border-radius:8px;padding:8px 10px;font-family:var(--hand);font-size:24px;background:var(--paper);min-width:0}
+.modal .err{color:var(--red);min-height:22px;font-size:14px;margin:6px 0}
+.modal .actions{justify-content:flex-end;margin-top:8px}
+
+@media (max-width:560px){
+  .inner{padding-left:22px}
+  .sheet{padding-left:10px;padding-right:10px}
+  .sheet::before{left:22px}
+  .task{font-size:28px}
+  .label h1{font-size:36px}
+  .tab{padding:8px 11px 10px;font-size:15px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<main>
+  <header class="cover">
+    <div class="brand">
+    <button class="qrbtn" id="qrBtn" title="QR-Code zu dieser Seite zeigen" aria-label="QR-Code zu dieser Seite zeigen">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-6 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2z"/></svg>
+    </button>
+    <div class="label"><h1>Rechenheft</h1><p>Schriftlich rechnen üben</p></div>
+    </div>
+    <div class="side">
+      <div class="levels hidden" id="levels" role="group" aria-label="Stufe">
+        <button class="lvbtn" data-level="1" title="Stufe 1: Divisor einstellig, Dividend bis 7 000" aria-label="Stufe 1: Divisor einstellig, Dividend bis 7 000">1</button>
+        <button class="lvbtn" data-level="2" title="Stufe 2: Divisor 11–20, 22, 25 oder Zehnerzahl, Dividend bis 30 000" aria-label="Stufe 2: Divisor 11–20, 22, 25 oder Zehnerzahl, Dividend bis 30 000">2</button>
+        <button class="lvbtn" data-level="3" title="Stufe 3: Divisor 2–9 oder wie Stufe 2, Null im Ergebnis möglich" aria-label="Stufe 3: Divisor 2–9 oder wie Stufe 2, Null im Ergebnis möglich">3</button>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Rechenart">
+    <button class="tab" role="tab" data-kind="add"><span class="sym">+</span>Plus</button>
+    <button class="tab" role="tab" data-kind="sub"><span class="sym">−</span>Minus</button>
+    <button class="tab" role="tab" data-kind="mul"><span class="sym">·</span>Mal</button>
+    <button class="tab" role="tab" data-kind="div"><span class="sym">:</span>Geteilt</button>
+    <button class="tab" role="tab" data-kind="rev">🔁 Fehler-Training<span class="badge" id="revBadge">0</span></button>
+  </nav>
+
+  <section class="sheet">
+    <div class="inner">
+      <div class="taskline"><small>Aufgabe</small><span class="task" id="taskText"></span><span class="lvl hidden" id="lvlTag"></span></div>
+      <div class="revinfo hidden" id="revInfo"></div>
+      <div class="gridwrap" id="mainWrap"><div class="grid" id="grid"></div><div class="stamp hidden" id="stamp"></div></div>
+      <div class="note" id="note" aria-live="polite"></div>
+      <div class="actions" id="mainActions">
+        <button class="btn main" id="checkBtn">Prüfen</button>
+        <button class="btn" id="solBtn">👀 Musterlösung</button>
+        <button class="btn" id="resetBtn">↺ Nochmal von vorn</button>
+        <button class="btn" id="newBtn">Neue Aufgabe</button>
+        <button class="btn" id="ownBtn">✏ Eigene Aufgabe</button>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="helpChk"> Stellenwerte anzeigen (HT, ZT, T, H, Z, E)</label>
+      </div>
+
+      <div class="solution hidden" id="solution">
+        <h2>Musterlösung</h2>
+        <div class="gridwrap"><div class="grid" id="solGrid"></div></div>
+        <div class="soltext" id="solText" aria-live="polite"></div>
+        <div class="solnav">
+          <button class="btn" id="solPrev">◀ Zurück</button>
+          <button class="btn main" id="solNext">Weiter ▶</button>
+          <span class="count" id="solCount"></span>
+          <button class="btn" id="solClose">Selbst nochmal probieren</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay hidden" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ownTitle">
+    <h2 id="ownTitle">Eigene Aufgabe</h2>
+    <div id="ownFields"></div>
+    <div class="err" id="ownErr"></div>
+    <div class="actions"><button class="btn" id="ownCancel">Abbrechen</button><button class="btn main" id="ownOk">Rechnen</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="qrOverlay">
+  <div class="modal qrmodal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Rechenheft öffnen</h2>
+    <div class="qrbox" id="qrBox"></div>
+    <p class="qrurl" id="qrUrl"></p>
+    <div class="actions" style="justify-content:center"><button class="btn main" id="qrClose">Schließen</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/*LOGIC-START*/
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const len=n=>String(n).length;
+const dig=(n,p)=>Math.floor(n/Math.pow(10,p))%10;
+const fmt=n=>n.toLocaleString("de-DE");
+const PS=["E","Z","H","T","ZT","HT","M"];
+const PL=["Einer","Zehner","Hunderter","Tausender","Zehntausender","Hunderttausender","Millionen"];
+const plDat=p=>(PL[p]||"")+(p===6?"":"n");
+const SYM={add:"+",sub:"−",mul:"·",div:":"};
+const hasZero=n=>String(n).includes("0");
+
+/* ---------- Grundgerüst einer Aufgabe ---------- */
+function T(kind,nums,W){return{kind,nums,W,rows:[],cells:{},hint:"",seq:[],steps:[],place:()=>null}}
+function addRow(t,o){
+  const r={idx:t.rows.length,name:o.name||"",label:o.label||"",small:!!o.small,lb:!!o.lb,cells:[]};
+  for(let c=0;c<t.W;c++){const id=r.idx+"_"+c,cell={id,r:r.idx,c,type:"blank",lb:!!o.lb};r.cells.push(cell);t.cells[id]=cell}
+  t.rows.push(r);return r;
+}
+function given(t,r,c,ch){const x=t.rows[r].cells[c];x.type="given";x.ch=String(ch);return x}
+/* Reihenfolge der Aufrufe = Schreibreihenfolge; nur Kästchen mit Inhalt kommen in die Sprungfolge */
+function inp(t,r,c,exp,_,alt){const x=t.rows[r].cells[c];x.type="in";x.exp=String(exp);x.alt=alt||[String(exp)];if(x.exp!=="")t.seq.push(x.id);return x}
+function stepper(t){const vals={},steps=t.steps;return{
+  show(ids){ids.forEach(id=>{const x=t.cells[id];if(x&&x.exp)vals[id]=x.exp})},
+  push(text,hl,fresh){steps.push({text,hl:hl||[],fresh:fresh||[],vals:Object.assign({},vals)})}}}
+const cid=(r,c)=>r+"_"+c;
+function rightMap(n,end){const s=String(n),m={};for(let i=0;i<s.length;i++)m[end-(s.length-1-i)]=s[i];return m}
+
+/* ---------- Plus ---------- */
+function makeAdd(nums){
+  const W=6,E=5,sum=nums.reduce((a,b)=>a+b,0),t=T("add",nums,W),st=stepper(t);
+  t.text=nums.map(fmt).join(" + ");t.place=c=>E-c;
+  t.hint="Rechne von rechts nach links. Überträge schreibst du klein in die Ü-Zeile. Mit „Prüfen“ siehst du jederzeit, was schon stimmt.";
+  const opRows=nums.map((n,i)=>addRow(t,{name:`Die ${i+1}. Zahl`,label:i?"+":""}).idx);
+  const rc=addRow(t,{name:"Die Überträge",label:"Ü",small:true,lb:true}).idx;
+  const rr=addRow(t,{name:"Das Ergebnis"}).idx;
+  opRows.forEach((r,i)=>{const m=rightMap(nums[i],E);for(const c in m)given(t,r,+c,m[c])});
+  const res=rightMap(sum,E),car={};
+  let carry=0;const texts=[];
+  for(let p=0;p<len(sum);p++){
+    const ds=nums.filter(n=>len(n)>p).map(n=>dig(n,p)),s=ds.reduce((a,b)=>a+b,0)+carry,k=Math.floor(s/10),col=E-p;
+    const parts=ds.map(String);if(carry)parts.push(carry+" (Übertrag)");
+    let tx=PL[p]+": ";
+    if(parts.length>1)tx+=parts.join(" + ")+" = "+s+". ";else tx+="Hier steht nur "+parts[0]+". ";
+    if(p===len(sum)-1)tx+="Schreibe "+s+" ins Ergebnis.";
+    else{tx+="Schreibe "+(s%10)+" ins Ergebnis";tx+=k?", den Übertrag "+k+" schreibst du bei den "+plDat(p+1)+" in die Ü-Zeile.":".";}
+    if(k&&p<len(sum)-1)car[col-1]=String(k);
+    texts.push({tx,col,k:k&&p<len(sum)-1});carry=k;
+  }
+  for(let p=0;p<W;p++){const col=E-p;
+    inp(t,rr,col,res[col]!=null?res[col]:"",1,res[col]!=null?[res[col]]:["","0"]);
+    if(col-1>=0)inp(t,rc,col-1,car[col-1]||"",1,car[col-1]?[car[col-1]]:["","0"]);}
+  st.push("Die Zahlen stehen stellengerecht untereinander: Einer unter Einer, Zehner unter Zehner und so weiter. Du rechnest von rechts nach links.");
+  texts.forEach(o=>{const ids=[cid(rr,o.col)];if(o.k)ids.push(cid(rc,o.col-1));
+    st.show(ids);st.push(o.tx,t.rows.map(r=>cid(r.idx,o.col)),ids)});
+  st.push("Fertig! "+t.text+" = "+fmt(sum)+".",t.rows[rr].cells.map(x=>x.id));
+  t.result=sum;return t;
+}
+
+/* ---------- Minus (Ergänzungsverfahren) ---------- */
+function makeSub(nums){
+  const [a,b]=nums,W=6,E=5,diff=a-b,t=T("sub",nums,W),st=stepper(t);
+  t.text=fmt(a)+" − "+fmt(b);t.place=c=>E-c;
+  t.hint="Rechne von rechts nach links durch Ergänzen. Überträge schreibst du klein in die Ü-Zeile. Mit „Prüfen“ siehst du jederzeit, was schon stimmt.";
+  const r0=addRow(t,{name:"Die 1. Zahl"}).idx,r1=addRow(t,{name:"Die 2. Zahl",label:"−"}).idx;
+  const rc=addRow(t,{name:"Die Überträge",label:"Ü",small:true,lb:true}).idx,rr=addRow(t,{name:"Das Ergebnis"}).idx;
+  [[r0,a],[r1,b]].forEach(([r,n])=>{const m=rightMap(n,E);for(const c in m)given(t,r,+c,m[c])});
+  const res=rightMap(diff,E),car={},texts=[];let carry=0;
+  for(let p=0;p<len(a);p++){
+    const m=dig(a,p),bd=len(b)>p?dig(b,p):0,s=bd+carry,col=E-p;let r,k;
+    if(m>=s){r=m-s;k=0}else{r=m+10-s;k=1}
+    let tx=PL[p]+": ";
+    if(len(b)<=p&&!carry)tx+="Unten steht nichts mehr. Die "+m+" bleibt einfach stehen.";
+    else{
+      if(carry)tx+=(len(b)>p?bd:0)+" + 1 (Übertrag) = "+s+". ";
+      if(k)tx+="Von "+s+" bis "+m+" geht nicht, also ergänze von "+s+" bis "+(m+10)+": "+r+". Den Übertrag 1 schreibst du bei den "+plDat(p+1)+" in die Ü-Zeile.";
+      else tx+="Ergänze von "+s+" bis "+m+": "+r+".";
+    }
+    if(p>=len(diff))tx+=" Vorne schreibt man keine Null.";
+    if(k)car[col-1]="1";
+    texts.push({tx,col,k,w:p<len(diff)});carry=k;
+  }
+  for(let p=0;p<W;p++){const col=E-p;
+    inp(t,rr,col,res[col]!=null?res[col]:"",1,res[col]!=null?[res[col]]:["","0"]);
+    if(col-1>=0)inp(t,rc,col-1,car[col-1]||"",1,car[col-1]?["1"]:["","0"]);}
+  st.push("Die Zahlen stehen stellengerecht untereinander, die größere oben. Du rechnest von rechts nach links und ergänzt von unten nach oben.");
+  texts.forEach(o=>{const ids=[];if(o.w)ids.push(cid(rr,o.col));if(o.k)ids.push(cid(rc,o.col-1));
+    st.show(ids);st.push(o.tx,t.rows.map(r=>cid(r.idx,o.col)),ids)});
+  st.push("Fertig! "+t.text+" = "+fmt(diff)+". Probe: "+fmt(diff)+" + "+fmt(b)+" = "+fmt(a)+".",t.rows[rr].cells.map(x=>x.id));
+  t.result=diff;return t;
+}
+
+/* ---------- Mal ---------- */
+function makeMul(nums){
+  const [a,b]=nums,as=String(a),bs=String(b),La=as.length,Lb=bs.length,W=La+Lb+1,prod=a*b;
+  const t=T("mul",nums,W),st=stepper(t);
+  t.text=fmt(a)+" · "+fmt(b);t.place=c=>W-1-c;
+  /* Stellenwerte über der Aufgabe: für jeden Faktor einzeln */
+  t.placeTop=c=>c<La?La-1-c:(c===La?null:La+Lb-c);
+  const top=addRow(t,{name:"Aufgabe",lb:true}).idx;
+  for(let i=0;i<La;i++)given(t,top,i,as[i]);given(t,top,La,"·");for(let i=0;i<Lb;i++)given(t,top,La+1+i,bs[i]);
+  const topIds=t.rows[top].cells.map(x=>x.id);
+  const prows=[];
+  function partial(i,phase,r){
+    const bd=+bs[i],end=La+1+i,p=a*bd,m=rightMap(p,end);
+    for(let c=end;c>=0;c--)inp(t,r,c,m[c]!=null?m[c]:"",phase,m[c]!=null?[m[c]]:[""]);
+    let carry=0;
+    for(let j=0;j<La;j++){
+      const da=dig(a,j),x=da*bd+carry,last=j===La-1;
+      let tx=(j===0?(Lb>1?"Rechne "+fmt(a)+" · "+bd+". Die Zeile endet unter der "+bd+". ":"")+"Beginne bei den Einern. ":"")+da+" · "+bd+" = "+(da*bd);
+      if(carry)tx+=", plus Übertrag "+carry+" = "+x;
+      const ids=[];
+      if(last){tx+=". Schreibe "+x+".";String(x).split("").forEach((_,q)=>ids.push(cid(r,end-j-q)));}
+      else{tx+=". Schreibe "+(x%10)+(x>=10?", merke "+Math.floor(x/10)+".":".");ids.push(cid(r,end-j));}
+      st.show(ids);st.push(tx,[cid(top,La-1-j),cid(top,La+1+i)].concat(ids),ids);
+      carry=Math.floor(x/10);
+    }
+    return p;
+  }
+  if(Lb===1){
+    t.hint="Multipliziere von rechts nach links. Die Überträge merkst du dir im Kopf. Mit „Prüfen“ siehst du jederzeit, was schon stimmt.";
+    const rr=addRow(t,{name:"Das Ergebnis"}).idx;prows.push(rr);
+    partial(0,0,rr);
+    st.push("Fertig! "+t.text+" = "+fmt(prod)+".",t.rows[rr].cells.map(x=>x.id));
+  }else{
+    t.hint="Rechne zuerst mit der Zehnerziffer, dann mit der Einerziffer. Jede Zeile endet genau unter ihrer Ziffer. Danach addierst du beide Zeilen. Mit „Prüfen“ siehst du jederzeit, was schon stimmt.";
+    const p0r=addRow(t,{name:"Die 1. Zeile"}).idx,p1r=addRow(t,{name:"Die 2. Zeile"}).idx;
+    const rc=addRow(t,{name:"Die Überträge",label:"Ü",small:true,lb:true}).idx,rr=addRow(t,{name:"Das Ergebnis"}).idx;
+    const p0=partial(0,0,p0r),p1=partial(1,0,p1r);
+    const m0=rightMap(p0,La+1),m1=rightMap(p1,La+2),res=rightMap(prod,W-1),car={};
+    let carry=0;const adds=[],c0=W-len(prod);
+    for(let c=W-1;c>=c0;c--){
+      const ds=[m0[c],m1[c]].filter(x=>x!=null).map(Number);
+      const s=ds.reduce((x,y)=>x+y,0)+carry,k=Math.floor(s/10);
+      const parts=ds.map(String);if(carry)parts.push(carry+" (Übertrag)");
+      let tx=(parts.length>1?parts.join(" + ")+" = "+s:"Hier steht nur "+(parts[0]||"0"))+". ";
+      tx+="Schreibe "+(s%10)+(k?", den Übertrag "+k+" schreibst du in die Ü-Zeile.":".");
+      if(k)car[c-1]=String(k);
+      adds.push({c,tx,k:!!k});carry=k;
+    }
+    for(let c=W-1;c>=0;c--){
+      inp(t,rr,c,res[c]!=null?res[c]:"",1,res[c]!=null?[res[c]]:["","0"]);
+      if(c-1>=0)inp(t,rc,c-1,car[c-1]||"",1,car[c-1]?[car[c-1]]:["","0"]);
+    }
+    adds.forEach(o=>{const ids=[cid(rr,o.c)];
+      if(o.k)ids.push(cid(rc,o.c-1));
+      st.show(ids);st.push("Addieren: "+o.tx,[cid(p0r,o.c),cid(p1r,o.c),cid(rc,o.c),cid(rr,o.c)],ids)});
+    st.show(t.rows[rr].cells.map(x=>x.id));
+    st.push("Fertig! "+t.text+" = "+fmt(prod)+".",t.rows[rr].cells.map(x=>x.id));
+  }
+  t.result=prod;return t;
+}
+
+/* ---------- Geteilt ---------- */
+function makeDiv(nums){
+  const [D,d]=nums,q=D/d,Ds=String(D),Ld=Ds.length,dd=String(d),Ldd=dd.length,qs=String(q),Lq=qs.length;
+  const W=Ld+1+Ldd+1+Lq,qc0=Ld+Ldd+2,t=T("div",nums,W),st=stepper(t);
+  t.text=fmt(D)+" : "+d;
+  t.place=c=>c<Ld?Ld-1-c:(c>=qc0?Lq-1-(c-qc0):null);
+  t.hint="Ergebnisziffer hinter das = schreiben, malnehmen, abziehen, nächste Ziffer herunterholen. Du schreibst von links nach rechts, der Cursor springt von selbst weiter. Mit „Prüfen“ siehst du jederzeit, was schon stimmt.";
+  const top=addRow(t,{name:"Das Ergebnis"}).idx;
+  for(let i=0;i<Ld;i++)given(t,top,i,Ds[i]);given(t,top,Ld,":");
+  for(let i=0;i<Ldd;i++)given(t,top,Ld+1+i,dd[i]);given(t,top,Ld+1+Ldd,"=");
+  let k0=1;while(+Ds.slice(0,k0)<d)k0++;
+  let cur=+Ds.slice(0,k0),curLen=k0,curIds=[];for(let i=0;i<k0;i++)curIds.push(cid(top,i));
+  st.push(k0>1?"Die "+Ds.slice(0,k0-1)+" ist kleiner als "+d+". Darum nimmst du gleich die ersten "+k0+" Ziffern: "+cur+".":"Beginne mit der ersten Ziffer: "+cur+".",curIds);
+  for(let i=0;i<Lq;i++){
+    const e=k0-1+i,qi=+qs[i],p=qi*d,r=cur-p,last=i===Lq-1,rs=String(r),ps=String(p);
+    const qcell=inp(t,top,qc0+i,qs[i],i);
+    const rp=addRow(t,{name:"Malnehmen",label:"−"}).idx;
+    const rr=addRow(t,{name:"Abziehen"}).idx;
+    const s0=e-curLen+1,pm=rightMap(ps,e),rm=rightMap(rs,e);
+    for(let c=s0;c<=e;c++){const x=inp(t,rp,c,pm[c]!=null?pm[c]:"",i,pm[c]!=null?[pm[c]]:["","0"]);x.lb=true}
+    for(let c=s0;c<=e;c++){
+      let alt=rm[c]!=null?[rm[c]]:["","0"];
+      if(r===0&&c===e&&!last)alt=["0",""];
+      inp(t,rr,c,rm[c]!=null?rm[c]:"",i,alt);
+    }
+    let next=null;
+    if(!last){inp(t,rr,e+1,Ds[e+1],i);next=r*10+(+Ds[e+1]);}
+    // Musterlösung
+    let tx="Wie oft passt "+d+" in "+cur+"? ";
+    if(qi===0)tx+="Gar nicht, denn "+cur+" ist kleiner als "+d+". Schreibe 0 ins Ergebnis.";
+    else tx+=qi+" · "+d+" = "+p+" passt"+(qi<9?", "+(qi+1)+" · "+d+" = "+((qi+1)*d)+" wäre zu groß":"")+". Schreibe "+qi+" ins Ergebnis.";
+    st.show([qcell.id]);st.push(tx,curIds.concat([qcell.id]),[qcell.id]);
+    const pids=[],rids=[];for(let c=s0;c<=e;c++){if(pm[c]!=null)pids.push(cid(rp,c));if(rm[c]!=null)rids.push(cid(rr,c))}
+    st.show(pids.concat(rids));
+    st.push("Rechne "+qi+" · "+d+" = "+p+" und schreibe "+p+" darunter. Ziehe ab: "+cur+" − "+p+" = "+r+".",curIds.concat(pids,rids),pids.concat(rids));
+    if(!last){
+      const bid=cid(rr,e+1);st.show([bid]);
+      st.push("Hole die nächste Ziffer herunter: die "+Ds[e+1]+". Jetzt rechnest du mit "+next+" weiter.",[cid(top,e+1),bid],[bid]);
+      curIds=rids.concat([bid]);cur=next;curLen=rs.length+1;
+    }
+  }
+  const qids=[];for(let i=0;i<Lq;i++)qids.push(cid(top,qc0+i));
+  st.push("Es bleibt kein Rest, die Aufgabe geht auf. Ergebnis: "+fmt(D)+" : "+d+" = "+fmt(q)+". Probe: "+fmt(q)+" · "+d+" = "+fmt(D)+".",qids);
+  t.result=q;return t;
+}
+
+/* ---------- Zufallsaufgaben ---------- */
+function genAdd(){for(;;){const n=rnd(2,3),nums=[];for(let i=0;i<n;i++){const L=rnd(3,5);nums.push(rnd(Math.pow(10,L-1),Math.pow(10,L)-1))}
+  if(nums.reduce((a,b)=>a+b,0)<1e6)return nums}}
+function genSub(){for(;;){const La=rnd(4,6),a=rnd(Math.pow(10,La-1),Math.pow(10,La)-1),Lb=rnd(3,La),b=rnd(Math.pow(10,Lb-1),Math.pow(10,Lb)-1);
+  if(b>=a)continue;let c=0,carries=0;for(let p=0;p<La;p++){const s=(len(b)>p?dig(b,p):0)+c;c=dig(a,p)<s?1:0;carries+=c}
+  if(carries>=1)return[a,b]}}
+function genMul(){for(;;){if(Math.random()<.65){const a=rnd(100,9999),b=rnd(12,99);if(b%10&&b!==11&&a%10)return[a,b]}
+  else{const a=rnd(1000,99999),b=rnd(3,9);if(a%10)return[a,b]}}}
+const LEVELS={
+  1:{dMin:2,dMax:9,max:7000,zero:"no"},
+  2:{list:[11,12,13,14,15,16,17,18,19,20,22,25,30,35,40,50,60,70,80,90],max:30000,zero:"no"},
+  3:{list:[2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18,19,20,22,25,30,35,40,50,60,70,80,90],max:30000,zero:"maybe"}};
+function genDiv(level){
+  const L=LEVELS[level]||LEVELS[1],wantZero=L.zero==="maybe"&&Math.random()<.75;
+  for(let n=0;n<5000;n++){
+    const d=L.list?L.list[rnd(0,L.list.length-1)]:rnd(L.dMin,L.dMax);if(d===10)continue;
+    const qMax=Math.floor(L.max/d),qMin=wantZero?101:11;if(qMax<qMin)continue;
+    const q=rnd(qMin,qMax),D=q*d;
+    if(D>L.max||D<100)continue;
+    if(L.zero==="no"&&hasZero(q))continue;
+    if(wantZero&&!hasZero(q))continue;
+    return[D,d];
+  }
+  return level==2?[1932,12]:level==3?[6120,12]:[756,7];
+}
+function build(kind,nums){return kind==="add"?makeAdd(nums):kind==="sub"?makeSub(nums):kind==="mul"?makeMul(nums):makeDiv(nums)}
+/*LOGIC-END*/
+
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let kind=store.get("rh_kind","add");if(!["add","sub","mul","div","rev"].includes(kind))kind="add";
+let level=store.get("rh_level",1);
+let stats=store.get("rh_stats",{solved:0,streak:0});
+let review=store.get("rh_review",[]);if(!Array.isArray(review))review=[];
+let help=store.get("rh_help",false);
+let task=null,phase=0,hadError=false,done=false,els={},revPos=0,solStep=0,lastKey="";
+
+function saveAll(){store.set("rh_kind",kind);store.set("rh_level",level);store.set("rh_stats",stats);store.set("rh_review",review);store.set("rh_help",help)}
+function renderStats(){
+  $("#stats").innerHTML=`<span class="stat">✔ <b>${stats.solved}</b> gelöst</span><span class="stat">🔥 <b>${stats.streak}</b> ohne Fehler in Folge</span>`;
+  $("#revBadge").textContent=review.length;
+}
+function sameTask(a,b){return a.kind===b.kind&&a.nums.join()===b.nums.join()}
+function addReview(){if(!task)return;const e={kind:task.kind,nums:task.nums,level:task.level||null};if(!review.some(x=>sameTask(x,e))){review.push(e);saveAll();renderStats()}}
+function removeReview(){const i=review.findIndex(x=>sameTask(x,task));if(i>=0){review.splice(i,1);if(revPos>i)revPos--;saveAll();renderStats()}}
+
+function setTabColor(){
+  const k=kind==="rev"?"rev":kind;document.documentElement.style.setProperty("--tab",`var(--${k})`);
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.kind===kind?"true":"false"));
+  $("#levels").classList.toggle("hidden",kind!=="div");
+  markLevel();
+  $("#ownBtn").classList.toggle("hidden",kind==="rev");
+}
+
+function newTask(){
+  let t;$("#revInfo").classList.add("hidden");
+  if(kind==="rev"){
+    if(!review.length){task=null;showEmpty();return}
+    revPos=revPos%review.length;const e=review[revPos];t=build(e.kind,e.nums);t.level=e.level;
+    $("#revInfo").textContent=`Aufgabe ${revPos+1} von ${review.length} · ${{add:"Plus",sub:"Minus",mul:"Mal",div:"Geteilt"}[e.kind]}`+(e.level?` · Stufe ${e.level}`:"");
+    $("#revInfo").classList.remove("hidden");
+  }else{
+    for(let i=0;i<20;i++){
+      const nums=kind==="add"?genAdd():kind==="sub"?genSub():kind==="mul"?genMul():genDiv(level);
+      const key=kind+nums.join();if(key!==lastKey){lastKey=key;t=build(kind,nums);break}
+    }
+    if(kind==="div")t.level=level;
+  }
+  start(t);
+}
+function start(t){task=t;phase=0;hadError=false;done=false;closeSolution();renderTask()}
+function showEmpty(){
+  $("#taskText").textContent="–";$("#lvlTag").classList.add("hidden");$("#grid").innerHTML="";
+  $("#mainWrap").classList.add("hidden");$("#mainActions").classList.add("hidden");closeSolution();
+  setNote("good","<p><strong>Hier ist gerade nichts zu tun.</strong> Aufgaben, bei denen du dich verrechnet oder die Musterlösung angeschaut hast, landen hier zum Üben.</p>");
+}
+
+function placeLabels(t,fn){fn=fn||t.place;const out=[];for(let c=0;c<t.W;c++){const p=fn(c);out.push(p==null?"":PS[p]||"")}return out}
+
+function renderGrid(target,t,mode,step){
+  target.innerHTML="";target.style.setProperty("--w",t.W);
+  const map={};
+  /* Bei Mal gelten die Stellenwerte nur für die Rechnung unter dem Strich, nicht für die Faktoren */
+  const header=fn=>{target.appendChild(div("ph",""));placeLabels(t,fn).forEach(s=>target.appendChild(div("ph",s)))};
+  if(help)header(t.placeTop);
+  t.rows.forEach((r,ri)=>{
+    target.appendChild(div("lab"+(r.small?" small":""),r.label));
+    r.cells.forEach(x=>{
+      let el;
+      const cls="cell"+(r.small?" small":"")+(x.lb?" lb":"");
+      if(x.type==="in"&&mode==="play"){
+        el=document.createElement("input");el.className=cls;el.type="text";el.inputMode="numeric";el.autocomplete="off";el.maxLength=2;
+        el.id="c"+x.id;el.dataset.id=x.id;el.setAttribute("aria-label",(r.name||"Feld")+", Spalte "+(x.c+1));
+      }else{
+        el=div(cls,x.type==="given"?x.ch:"");
+        if(mode==="sol"&&x.type==="in"){const v=step.vals[x.id];if(v){el.textContent=v;el.classList.add("sol");if(step.fresh.includes(x.id))el.classList.add("new")}}
+        if(mode==="sol"&&step.hl.includes(x.id))el.classList.add("hl");
+      }
+      map[x.id]=el;target.appendChild(el);
+    });
+    if(help&&t.kind==="mul"&&ri===0)header();
+  });
+  return map;
+}
+function div(c,t){const e=document.createElement("div");e.className=c;e.textContent=t;return e}
+
+function renderTask(){
+  const t=task;$("#mainWrap").classList.remove("hidden");$("#mainActions").classList.remove("hidden");
+  $("#taskText").textContent=t.text;
+  const lt=$("#lvlTag");if(t.kind==="div"&&t.level){lt.textContent="Stufe "+t.level;lt.classList.remove("hidden")}else lt.classList.add("hidden");
+  $("#stamp").classList.add("hidden");
+  els=renderGrid($("#grid"),t,"play");
+  Object.values(els).forEach(el=>{if(el.tagName==="INPUT"){el.addEventListener("input",onInput);el.addEventListener("keydown",onKey);el.addEventListener("focus",()=>el.select())}});
+  applyState();
+  setNote("",`<p>${esc(t.hint)}</p>`);
+  focusFirst();
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function applyState(){
+  Object.values(task.cells).forEach(x=>{if(x.type!=="in")return;const el=els[x.id];el.disabled=done;
+    if(done){el.classList.remove("bad");if(el.value)el.classList.add("ok")}});
+}
+function focusFirst(){for(const id of task.seq){const el=els[id];if(el&&!el.value){el.focus({preventScroll:true});return}}}
+/* Springt zum nächsten (oder vorigen) Kästchen, in das etwas gehört */
+function moveOrder(el,dir){
+  const s=task.seq,i=s.indexOf(el.dataset.id);let n;
+  if(i>=0)n=s[i+dir];
+  else if(dir>0)n=s.find(id=>!els[id].value);
+  if(n==null)return null;const ne=els[n];ne.focus();return ne;
+}
+function onInput(e){
+  const el=e.target,v=el.value.replace(/\D/g,"").slice(-1);el.value=v;el.classList.remove("bad","ok");
+  if(v)moveOrder(el,1);
+}
+function onKey(e){
+  const el=e.target;
+  if(e.key==="Enter"){e.preventDefault();check();return}
+  if(e.key==="Backspace"&&!el.value){e.preventDefault();const p=moveOrder(el,-1);if(p){p.value="";p.classList.remove("bad","ok")}return}
+  const dirs={ArrowLeft:[0,-1],ArrowRight:[0,1],ArrowUp:[-1,0],ArrowDown:[1,0]};
+  if(dirs[e.key]){e.preventDefault();const [dr,dc]=dirs[e.key];const x=task.cells[el.dataset.id];
+    let r=x.r+dr,c=x.c+dc;
+    while(r>=0&&r<task.rows.length&&c>=0&&c<task.W){const y=task.rows[r].cells[c],ye=els[y.id];
+      if(y.type==="in"&&ye&&!ye.disabled){ye.focus();return}r+=dr;c+=dc}
+  }
+}
+
+function check(){
+  if(!task||done)return;
+  let ok=0,bad=0,miss=0;
+  Object.values(task.cells).forEach(x=>{if(x.type!=="in")return;const el=els[x.id],v=el.value;el.classList.remove("bad","ok");
+    if(v===""){if(!x.alt.includes(""))miss++;return}
+    if(x.alt.includes(v)){el.classList.add("ok");ok++}else{el.classList.add("bad");bad++}});
+  if(!ok&&!bad){setNote("bad","<p><strong>Noch leer.</strong> Trage zuerst deine Ziffern in die Kästchen ein.</p>");focusFirst();return}
+  if(bad){
+    if(!hadError){hadError=true;stats.streak=0;addReview();saveAll();renderStats()}
+    setNote("bad",`<p><strong>${ok} richtig, ${bad} falsch.</strong> Grün stimmt, rot noch nicht. Verbessere die roten Kästchen${miss?" und rechne einfach weiter":""}.</p>`);
+    return;
+  }
+  if(miss){setNote("good",`<p><strong>Bisher alles richtig!</strong> ${ok} ${ok===1?"Kästchen stimmt":"Kästchen stimmen"}. Rechne einfach weiter.</p>`);focusFirst();return}
+  done=true;applyState();stats.solved++;
+  if(!hadError){stats.streak++;if(kind==="rev")removeReview()}
+  saveAll();renderStats();
+  const s=$("#stamp");s.textContent=["Super!","Toll!","Klasse!","Prima!","Spitze!"][Math.floor(Math.random()*5)];s.classList.remove("hidden");
+  setNote("good",`<p><strong>Alles richtig!</strong> ${esc(task.text)} = ${fmt(task.result)}.${kind==="rev"&&!hadError?" Diese Aufgabe ist jetzt aus dem Fehler-Training raus.":""} Weiter mit <em>Neue Aufgabe</em>.</p>`);
+  $("#newBtn").focus();
+}
+function setNote(cls,html){const n=$("#note");n.className="note"+(cls?" "+cls:"");n.innerHTML=html}
+
+/* Musterlösung */
+function openSolution(){if(!task)return;hadError=true;stats.streak=0;addReview();saveAll();renderStats();solStep=0;$("#solution").classList.remove("hidden");showSolStep();$("#solution").scrollIntoView({behavior:"smooth",block:"start"})}
+function showSolStep(){const s=task.steps[solStep];renderGrid($("#solGrid"),task,"sol",s);$("#solText").textContent=s.text;
+  $("#solCount").textContent=`Schritt ${solStep+1} von ${task.steps.length}`;$("#solPrev").disabled=solStep===0;$("#solNext").disabled=solStep===task.steps.length-1}
+function closeSolution(){$("#solution").classList.add("hidden")}
+
+/* Eigene Aufgabe */
+const OWN={add:[["","1. Zahl"],["+","2. Zahl"],["+","3. Zahl (freiwillig)"]],sub:[["","Minuend"],["−","Subtrahend"]],mul:[["","1. Faktor"],["·","2. Faktor (1–99)"]],div:[["","Dividend"],[":","Divisor (2–99)"]]};
+function openOwn(){
+  $("#ownFields").innerHTML=OWN[kind].map((f,i)=>`<label class="f"><span>${f[0]}</span><input id="own${i}" inputmode="numeric" autocomplete="off" placeholder="${f[1]}" aria-label="${f[1]}"></label>`).join("");
+  $("#ownErr").textContent="";$("#overlay").classList.remove("hidden");$("#own0").focus();
+}
+function okOwn(){
+  const v=OWN[kind].map((_,i)=>$("#own"+i).value.replace(/\D/g,"")),n=v.map(x=>x===""?null:+x);
+  let err="";const [a,b,c]=n;
+  if(a==null||b==null)err="Bitte fülle die ersten beiden Felder aus.";
+  else if(kind==="add"){const nums=[a,b].concat(c!=null?[c]:[]);if(nums.some(x=>x<1))err="Die Zahlen müssen größer als 0 sein.";else if(nums.reduce((x,y)=>x+y,0)>=1e6)err="Das Ergebnis muss kleiner als 1 000 000 sein.";else return ownGo(nums)}
+  else if(kind==="sub"){if(a>=1e6)err="Die erste Zahl muss kleiner als 1 000 000 sein.";else if(b<1||b>=a)err="Die zweite Zahl muss kleiner als die erste sein.";else return ownGo([a,b])}
+  else if(kind==="mul"){if(a<2||a>99999)err="Der 1. Faktor muss zwischen 2 und 99 999 liegen.";else if(b<1||b>99)err="Der 2. Faktor muss zwischen 1 und 99 liegen.";else return ownGo([a,b])}
+  else{if(b<2||b>99)err="Der Divisor muss zwischen 2 und 99 liegen.";else if(a<b||a>999999)err="Der Dividend muss zwischen dem Divisor und 999 999 liegen.";else if(a%b)err=`${fmt(a)} : ${b} geht nicht ohne Rest auf (Rest ${a%b}). Bitte wähle eine Aufgabe ohne Rest.`;else return ownGo([a,b])}
+  $("#ownErr").textContent=err;
+}
+function ownGo(nums){$("#overlay").classList.add("hidden");const t=build(kind,nums);if(kind==="div")t.level=null;start(t)}
+
+/* Ereignisse */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{kind=b.dataset.kind;revPos=0;saveAll();setTabColor();newTask()}));
+$("#checkBtn").addEventListener("click",check);
+$("#solBtn").addEventListener("click",openSolution);
+$("#resetBtn").addEventListener("click",()=>{if(task)start(task)});
+$("#newBtn").addEventListener("click",()=>{if(kind==="rev")revPos++;newTask()});
+$("#ownBtn").addEventListener("click",openOwn);
+$("#ownCancel").addEventListener("click",()=>$("#overlay").classList.add("hidden"));
+$("#ownOk").addEventListener("click",okOwn);
+$("#overlay").addEventListener("keydown",e=>{if(e.key==="Enter")okOwn();if(e.key==="Escape")$("#overlay").classList.add("hidden")});
+$("#solPrev").addEventListener("click",()=>{if(solStep>0){solStep--;showSolStep()}});
+$("#solNext").addEventListener("click",()=>{if(solStep<task.steps.length-1){solStep++;showSolStep()}});
+$("#solClose").addEventListener("click",()=>{start(task);$(".sheet").scrollIntoView({behavior:"smooth"})});
+$("#helpChk").checked=help;
+$("#helpChk").addEventListener("change",e=>{help=e.target.checked;saveAll();if(!task)return;
+  const vals={};Object.keys(els).forEach(k=>{if(els[k].tagName==="INPUT")vals[k]={v:els[k].value,c:els[k].className}});
+  renderTaskKeep(vals);if(!$("#solution").classList.contains("hidden"))showSolStep()});
+function renderTaskKeep(vals){
+  els=renderGrid($("#grid"),task,"play");
+  Object.values(els).forEach(el=>{if(el.tagName==="INPUT"){const s=vals[el.dataset.id];if(s){el.value=s.v;el.className=s.c}
+    el.addEventListener("input",onInput);el.addEventListener("keydown",onKey);el.addEventListener("focus",()=>el.select())}});
+  applyState();
+}
+function markLevel(){document.querySelectorAll(".lvbtn").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.level===level?"true":"false"))}
+document.querySelectorAll(".lvbtn").forEach(b=>b.addEventListener("click",()=>{level=+b.dataset.level;saveAll();markLevel();newTask()}));
+
+/* QR-Code */
+const PAGE_URL=location.origin+location.pathname;
+function openQr(){
+  const box=$("#qrBox");
+  try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();
+    box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});
+    const svg=box.querySelector("svg");
+    svg.setAttribute("role","img");svg.setAttribute("aria-label","QR-Code zum Rechenheft");
+  }catch(e){box.innerHTML="<p>Der QR-Code konnte nicht geladen werden. Bitte die Seite neu laden.</p>"}
+  $("#qrUrl").textContent=PAGE_URL;$("#qrOverlay").classList.remove("hidden");$("#qrClose").focus();
+}
+const closeQr=()=>{$("#qrOverlay").classList.add("hidden");$("#qrBtn").focus()};
+$("#qrBtn").addEventListener("click",openQr);
+$("#qrClose").addEventListener("click",closeQr);
+$("#qrOverlay").addEventListener("click",e=>{if(e.target.id==="qrOverlay")closeQr()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#qrOverlay").classList.contains("hidden"))closeQr()});
+
+setTabColor();renderStats();newTask();
+})();
+</script>
+
+</body>
+</html>

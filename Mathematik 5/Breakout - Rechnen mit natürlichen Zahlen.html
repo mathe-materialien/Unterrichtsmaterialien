@@ -789,7 +789,7 @@ const zMark=()=>FIELDS.filter(f=>f.inp.id==='z-a'||f.inp.id==='z-b').forEach(mar
 bindInput($('#z-a'),zA,zMark);bindInput($('#z-b'),zB,zMark);
 
 /* ---------- Lehrkraft & Konfetti ---------- */
-const TCODE=300021;
+const TCODE=992792;
 function teacher(){const t=$('#teacher');t.innerHTML=`<button class="linkbtn" type="button" id="t-open">Für Lehrkräfte</button>`;
  $('#t-open').onclick=()=>{
   t.innerHTML=`<form id="t-form" style="display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap"><label for="t-code">Lehrkraft-Code:</label><input id="t-code" type="password" inputmode="numeric" autocomplete="off" maxlength="8" style="width:90px;padding:4px 8px;border-radius:8px;border:2px solid var(--line);background:var(--surface)"><button class="linkbtn" type="submit">Bestätigen</button> · <button class="linkbtn" type="button" id="t-x0">Abbrechen</button><span id="t-msg" class="msg bad" style="margin:0"></span></form>`;

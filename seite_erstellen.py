@@ -42,6 +42,16 @@ SYMBOL = {
 IM_BROWSER = {"Ansehen", "PDF", "Bild", "Video", "Audio"}
 
 
+def ist_training(e):
+    """HTML-Seiten (hochgeladen oder als claude.ai-Link) sind interaktive Übungen."""
+    if e["typ"] == "Ansehen":
+        return True
+    if e["typ"] == "Link":
+        url = e["url"].lower().split("?")[0].split("#")[0]
+        return "claude.ai/artifact/" in url or url.endswith((".html", ".htm"))
+    return False
+
+
 def ist_download(e):
     return e["typ"] != "Link" and e["typ"] not in IM_BROWSER
 
@@ -106,8 +116,8 @@ def ordner_lesen(ordner):
 
 def eintrag_html(e):
     symbol = "🔗" if e["typ"] == "Link" else SYMBOL.get(e["typ"], "📎")
-    if e["typ"] == "Link":
-        knopf, farbe, ziel = "Öffnen", "text-bg-success", 'target="_blank" rel="noopener"'
+    if ist_training(e):
+        knopf, farbe, ziel = "Trainieren", "text-bg-success", 'target="_blank" rel="noopener"'
     elif ist_download(e):
         knopf, farbe, ziel = f"⬇ {e['typ']}", "text-bg-warning", "download"
     else:

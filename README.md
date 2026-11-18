@@ -15,7 +15,8 @@
 | ein Ordner, z. B. `Mathematik 5` | ein Kasten mit Überschrift      |
 | ein Ordner im Ordner, z. B. `Bruchrechnung` | eine blaue Zwischenüberschrift im Kasten |
 | eine Datei, z. B. `Brüche kürzen.pdf` | ein Eintrag „Brüche kürzen“ mit **Ansehen** |
-| eine Zeile in `links.txt`       | ein Internet-Link mit **Öffnen** |
+| eine Zeile in `links.txt`       | ein Internet-Link mit **Ansehen** |
+| eine Übung (`.html`-Datei oder ein `claude.ai`-Link) | ein Eintrag mit grünem **Trainieren** |
 | eine GeoGebra-, Word-, PowerPoint- oder Excel-Datei | ein Eintrag unter **Downloads** mit **⬇ Herunterladen** |
 
 **Nach jeder Änderung 2 Minuten warten**, dann die Seite neu laden. Erst dann ist die Änderung zu sehen.

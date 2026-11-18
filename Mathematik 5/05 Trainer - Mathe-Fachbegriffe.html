@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mathe-Fachbegriffe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: ein Heft-Blatt auf Karopapier – oben Modus-Reiter und Themenfilter, darunter die Übungsfläche */
+:root{
+  --paper:#f7f9fb;
+  --grid:#d7e2ec;
+  --sheet:#ffffff;
+  --ink:#1b2733;
+  --muted:#5b6b7a;
+  --line:#c9d6e2;
+  --pen:#1f4fd1;          /* Füller-Blau */
+  --pen-soft:#e4ebff;
+  --mark:#ffe45c;         /* Textmarker */
+  --ok:#1d8a4e; --ok-soft:#dcf3e5;
+  --bad:#c33a2c; --bad-soft:#fbe3df;
+  --pink:#e0287f; --pink-soft:#fbe1ee;
+  --lila:#7a3fd0;
+  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12181f; --grid:#1d2731; --sheet:#18212b; --ink:#e6edf3; --muted:#9aabbb; --line:#2c3a48;
+  --pen:#8aa8ff; --pen-soft:#22305a; --mark:#e8cf3a; --ok:#58cf8d; --ok-soft:#173a28; --bad:#ff8a7a; --bad-soft:#45201b; --pink:#ff6fb5; --pink-soft:#3d1a2c;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12181f; --grid:#1d2731; --sheet:#18212b; --ink:#e6edf3; --muted:#9aabbb; --line:#2c3a48;
+  --pen:#8aa8ff; --pen-soft:#22305a; --mark:#e8cf3a; --ok:#58cf8d; --ok-soft:#173a28; --bad:#ff8a7a; --bad-soft:#45201b; --pink:#ff6fb5; --pink-soft:#3d1a2c;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:20px 20px;
+  color:var(--ink); font:16px/1.55 var(--f-body);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:24px 48px;
+}
+.wrap{max-width:780px;margin:0 auto;display:grid;gap:20px}
+header{display:grid;gap:6px}
+h1{font:800 clamp(2rem,6vw,3rem)/1.05 var(--f-display);margin:0;letter-spacing:-.02em;text-wrap:balance}
+h1 .hl{background:linear-gradient(transparent 55%,var(--mark) 55%,var(--mark) 90%,transparent 90%);padding:0 .1em}
+.sub{margin:0;color:var(--muted);max-width:60ch}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:18px;box-shadow:0 1px 0 var(--line)}
+.label{font:500 .72rem/1 var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:2px solid var(--line);margin:-4px 0 0}
+.tab{font:700 1rem var(--f-body);background:none;border:0;color:var(--muted);padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--pen);border-bottom-color:var(--pen)}
+.tab:hover{color:var(--ink)}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:700 .9rem var(--f-body);border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--pen);border-color:var(--pen);color:var(--sheet)}
+
+button:focus-visible,.opt:focus-visible{outline:3px solid var(--mark);outline-offset:2px}
+
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.progress{flex:1;min-width:120px;height:8px;background:var(--pen-soft);border-radius:4px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--pen);width:0;transition:width .3s}
+
+.btn{font:700 1rem var(--f-body);border-radius:6px;padding:10px 16px;cursor:pointer;border:2px solid var(--pen);background:var(--pen);color:var(--sheet)}
+.btn.ghost{background:transparent;color:var(--pen)}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* Karteikarten */
+.card{perspective:1200px;cursor:pointer;min-height:240px}
+.card-in{position:relative;min-height:240px;transition:transform .5s;transform-style:preserve-3d}
+.card.flip .card-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:2px solid var(--ink);border-radius:8px;padding:24px;display:grid;place-content:center;text-align:center;gap:10px;background:var(--sheet)}
+.face.back{transform:rotateY(180deg);background:var(--pen-soft);border-color:var(--pen)}
+.term{font:800 clamp(1.8rem,7vw,2.6rem)/1.1 var(--f-display);margin:0;text-wrap:balance}
+.def{font-size:1.15rem;margin:0;max-width:52ch}
+.ex{font:500 .95rem/1.4 var(--f-mono);color:var(--pen);margin:0}
+.hint{color:var(--muted);font-size:.9rem;margin:0}
+
+/* Quiz */
+.q{font:600 1.3rem/1.4 var(--f-body);margin:0;text-wrap:balance}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.opt{font:700 1.1rem var(--f-body);text-align:left;padding:14px 16px;border:2px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--pen)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.feedback{min-height:1.6em;margin:0;font-weight:700}
+.feedback.ok{color:var(--ok)} .feedback.no{color:var(--bad)}
+
+/* Zuordnen */
+.match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:10px 14px}
+.col{display:grid;gap:10px;align-content:start}
+.m{font:inherit;text-align:left;padding:12px 14px;border:2px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);cursor:pointer;min-width:0}
+.m.t{font-weight:700;font-family:var(--f-display);font-size:1.05rem}
+.m.sel{border-color:var(--pen);background:var(--pen-soft)}
+.m.done{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);cursor:default}
+.m.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (max-width:520px){.match{grid-template-columns:1fr}}
+
+.result{text-align:center;display:grid;gap:10px;justify-items:center;padding:12px 0}
+.big{font:800 3rem/1 var(--f-display);color:var(--pen);font-variant-numeric:tabular-nums}
+
+/* Liste */
+.list{display:grid;gap:0}
+.li{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:4px 16px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.li b{font-family:var(--f-display);font-size:1.05rem}
+.li span{min-width:0}
+.li code{font:500 .88rem var(--f-mono);color:var(--pen);display:block}
+@media (max-width:520px){.li{grid-template-columns:1fr}}
+
+.tblwrap{overflow-x:auto}
+.tbl{border-collapse:collapse;width:100%;min-width:620px}
+.tbl th{font:500 .72rem var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--line)}
+.tbl td{padding:12px 10px;border-bottom:1px dashed var(--line);vertical-align:top}
+.tbl td b{font-family:var(--f-display);font-size:1.1rem;display:block}
+.tbl td small{color:var(--muted);font-size:.85rem;line-height:1.35;display:block}
+.tbl .zz{font:800 2rem/1 var(--f-display);color:var(--pen);text-align:center;width:3rem}
+.tbl td.ex{white-space:nowrap}
+/* Übersetzen */
+.aufgabe{font:600 1.35rem/1.45 var(--f-body);margin:0;text-wrap:pretty;padding:16px 18px;border-left:4px solid var(--pen);background:var(--pen-soft);border-radius:0 6px 6px 0}
+.aufgabe mark{background:transparent;color:inherit}
+.aufgabe.markiert mark{background:linear-gradient(transparent 50%,var(--mark) 50%,var(--mark) 92%,transparent 92%);font-weight:800}
+.step{display:grid;gap:10px}
+.step[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.opts.terme .opt{font:500 1.15rem var(--f-mono);text-align:center}
+.eingabe{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.eingabe .gl{font:500 1.15rem var(--f-mono)}
+.eingabe input{font:700 1.2rem var(--f-mono);width:8ch;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);font-variant-numeric:tabular-nums}
+.eingabe input:focus-visible{outline:3px solid var(--mark);outline-offset:1px;border-color:var(--pen)}
+.eingabe input.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.eingabe input.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.weg{font:500 1rem/1.5 var(--f-mono);color:var(--pen);margin:0}
+.link{font:700 .9rem var(--f-body);background:none;border:0;color:var(--pen);text-decoration:underline;cursor:pointer;padding:4px 0;justify-self:start}
+/* Rechen-Automat */
+.automat{--h:96px;background:var(--lila);border-radius:18px 18px 10px 10px;padding:18px 16px 16px;display:grid;gap:14px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18)}
+.automat .schild{font:800 1.1rem/1 var(--f-display);color:var(--sheet);text-align:center;letter-spacing:.06em;text-transform:uppercase}
+.automat .schild span{color:var(--mark)}
+.walzen{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1fr);gap:8px;background:var(--ink);padding:8px;border-radius:10px}
+.walze{position:relative;height:var(--h);overflow:hidden;background:#fff;border-radius:6px}
+.walze::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(0,0,0,.28),transparent 30%,transparent 70%,rgba(0,0,0,.28))}
+.streifen{will-change:transform}
+.feld{height:var(--h);display:grid;place-content:center;text-align:center;color:#1b2733;font:800 clamp(1.7rem,7vw,3rem)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.feld.op{font:800 clamp(.95rem,4.2vw,1.5rem)/1.1 var(--f-display);padding:0 4px;overflow-wrap:anywhere}
+.walze.stopp{animation:stopp .25s}
+@keyframes stopp{50%{transform:translateY(4px)}}
+.hebel{font:800 1.25rem var(--f-display);letter-spacing:.04em;background:#fff;color:#4a1f8a;border:0;border-radius:999px;padding:14px 28px;cursor:pointer;justify-self:center;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.hebel:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.hebel:disabled{opacity:.6;cursor:default}
+.satz{font:600 1.15rem/1.45 var(--f-body);margin:0}
+.satz b{background:linear-gradient(transparent 50%,var(--mark) 50%,var(--mark) 92%,transparent 92%)}
+.ziel{display:grid;gap:8px}
+.fortschritt{display:grid;gap:6px;padding-top:4px}
+.zielbalken{display:grid;grid-template-columns:repeat(var(--n,10),minmax(0,1fr));gap:4px}
+.zielbalken i{height:16px;border-radius:4px;background:var(--pink-soft);transition:background .3s,transform .3s}
+.zielbalken i.ok{background:var(--pink);transform:scaleY(1.12)}
+.zielbalken i.no{background:repeating-linear-gradient(135deg,var(--pink-soft) 0 4px,transparent 4px 8px);box-shadow:inset 0 0 0 1.5px var(--pink-soft)}
+#aufg{display:grid;align-content:start;gap:10px}
+.automat .fortschritt{padding-top:2px}
+.automat .zielbalken i{background:rgba(255,255,255,.22)}
+.automat .zielbalken i.ok{background:#ff7cc0}
+.automat .fortschritt .label{color:#fff;opacity:.85;text-align:center}
+.feuerwerk{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+/* QR-Code */
+.brand{display:flex;align-items:center;gap:12px}
+.qrbtn{flex:none;width:36px;height:36px;display:grid;place-items:center;border:2px solid var(--ink);border-radius:8px;background:var(--sheet);color:var(--ink);padding:0;cursor:pointer}
+.qrbtn:hover{border-color:var(--pen);color:var(--pen)}
+.overlay{position:fixed;inset:0;background:rgba(15,20,35,.55);display:grid;place-items:center;padding:16px;z-index:40}
+.modal{background:var(--sheet);border:2px solid var(--ink);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;max-width:100%}
+.modal h2{font:800 1.5rem/1.1 var(--f-display);margin:0}
+.qrbox{background:#fff;padding:12px;border-radius:10px;line-height:0}
+.qrbox svg{display:block;width:min(calc(100vw - 100px),calc(100vh - 250px),460px);height:auto;min-width:160px}
+.qrbox svg rect[fill="white"],.qrbox svg rect[fill="#ffffff"]{fill:#fff}
+.qrurl{font:500 .85rem var(--f-mono);color:var(--muted);margin:0;max-width:min(calc(100vw - 100px),460px);overflow-wrap:anywhere;user-select:all}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="label">Klasse 5 · Grundrechenarten</span>
+    <div class="brand">
+      <button class="qrbtn" id="qrBtn" title="QR-Code zu dieser Seite zeigen" aria-label="QR-Code zu dieser Seite zeigen">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-6 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2z"/></svg>
+      </button>
+      <h1>Mathe-<span class="hl">Fachbegriffe</span></h1>
+    </div>
+    <p class="sub">Rechenarten, Verben und Ergebnisse: Lerne, wie die vier Grundrechenarten heißen. Wähle einen Bereich und einen Übungsmodus. Unter „Übersetzen“ wandelst du Texte in Rechenausdrücke um.</p>
+  </header>
+
+  <section class="sheet">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-mode="karten" aria-selected="true">Karteikarten</button>
+      <button class="tab" role="tab" data-mode="quiz" aria-selected="false">Quiz</button>
+      <button class="tab" role="tab" data-mode="zuordnen" aria-selected="false">Zuordnen</button>
+      <button class="tab" role="tab" data-mode="uebersetzen" aria-selected="false">Übersetzen</button>
+      <button class="tab" role="tab" data-mode="automat" aria-selected="false">Rechen-Automat</button>
+      <button class="tab" role="tab" data-mode="liste" aria-selected="false">Übersicht</button>
+    </div>
+    <div class="filters" id="filters"><span class="label">Bereich</span></div>
+    <div id="stage"></div>
+  </section>
+</div>
+
+<div class="overlay" id="qrOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Mathe-Fachbegriffe öffnen</h2>
+    <div class="qrbox" id="qrBox"></div>
+    <p class="qrurl" id="qrUrl"></p>
+    <button class="btn" id="qrClose">Schließen</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+<script>
+const BEGRIFFE = [
+  // [Art, Begriff, Erklärung, Beispiel, Rechenzeichen-Zeile]
+  ["Rechenarten","Addition","Die Rechenart, bei der man Zahlen zusammenzählt. Man nennt sie auch Plus-Rechnen.","3 + 4 = 7",0],
+  ["Rechenarten","Subtraktion","Die Rechenart, bei der man eine Zahl von einer anderen abzieht. Man nennt sie auch Minus-Rechnen.","9 − 5 = 4",1],
+  ["Rechenarten","Multiplikation","Die Rechenart, bei der man Zahlen malnimmt. Man nennt sie auch Mal-Rechnen.","6 · 7 = 42",2],
+  ["Rechenarten","Division","Die Rechenart, bei der man eine Zahl durch eine andere teilt. Man nennt sie auch Geteilt-Rechnen.","20 : 4 = 5",3],
+  ["Verben","addieren","Zahlen zusammenzählen (plus rechnen).","Addiere 3 und 4: 3 + 4 = 7",0],
+  ["Verben","subtrahieren","Eine Zahl von einer anderen abziehen (minus rechnen).","Subtrahiere 5 von 9: 9 − 5 = 4",1],
+  ["Verben","multiplizieren","Zahlen miteinander malnehmen (mal rechnen).","Multipliziere 6 mit 7: 6 · 7 = 42",2],
+  ["Verben","dividieren","Eine Zahl durch eine andere teilen (geteilt rechnen).","Dividiere 20 durch 4: 20 : 4 = 5",3],
+  ["Ergebnisse","Summe","Das Ergebnis einer Addition.","3 + 4 = 7 → 7 ist die Summe",0],
+  ["Ergebnisse","Differenz","Das Ergebnis einer Subtraktion.","9 − 5 = 4 → 4 ist die Differenz",1],
+  ["Ergebnisse","Produkt","Das Ergebnis einer Multiplikation.","6 · 7 = 42 → 42 ist das Produkt",2],
+  ["Ergebnisse","Quotient","Das Ergebnis einer Division.","20 : 4 = 5 → 5 ist der Quotient",3],
+].map(([thema,begriff,def,bsp,op])=>({thema,begriff,def,bsp,op}));
+const ZEICHEN=["+","−","·",":"];
+
+const THEMEN = ["Alle",...new Set(BEGRIFFE.map(b=>b.thema))];
+const store = {get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let thema = store.get("mfb-thema","Alle");
+if(!THEMEN.includes(thema)) thema="Alle";
+let modus = "karten";
+const stage = document.getElementById("stage");
+const shuffle = a => {a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const pool = () => thema==="Alle" ? BEGRIFFE : BEGRIFFE.filter(b=>b.thema===thema);
+const esc = s => s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// Filter-Chips
+const filters = document.getElementById("filters");
+THEMEN.forEach(t=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.textContent=t; b.setAttribute("aria-pressed",t===thema);
+  b.onclick=()=>{thema=t;store.set("mfb-thema",t);filters.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.textContent===t));render()};
+  filters.appendChild(b);
+});
+document.querySelectorAll(".tab").forEach(tab=>tab.onclick=()=>{
+  modus=tab.dataset.mode;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t===tab));
+  render();
+});
+
+function render(){
+  filters.hidden = ["uebersetzen","automat","liste"].includes(modus);
+  ({karten,quiz,zuordnen,uebersetzen,automat,liste})[modus]();
+}
+
+/* ---------- Fortschrittsbalken (pink, unten) ---------- */
+// zustand: Liste aus "" (offen), "ok" (richtig), "no" (falsch)
+function balken(zustand,text){
+  const ok=zustand.filter(z=>z==="ok").length;
+  return `<div class="fortschritt" id="fs"><div class="zielbalken" style="--n:${zustand.length}" role="progressbar" aria-label="Fortschritt" aria-valuemin="0" aria-valuemax="${zustand.length}" aria-valuenow="${ok}">${zustand.map(z=>`<i class="${z}"></i>`).join("")}</div>${text?`<span class="label">${text}</span>`:""}</div>`;
+}
+function balkenSetzen(zustand){
+  const fs=document.getElementById("fs"); if(!fs)return;
+  const zb=fs.querySelector(".zielbalken");
+  zb.setAttribute("aria-valuenow",zustand.filter(z=>z==="ok").length);
+  zb.querySelectorAll("i").forEach((el,i)=>el.className=zustand[i]||"");
+}
+
+/* ---------- Karteikarten ---------- */
+function karten(){
+  let deck=shuffle(pool()), i=0, gewusst=0, nochmal=[], zst=deck.map(()=>"");
+  function show(){
+    if(i>=deck.length){
+      stage.innerHTML=`<div class="result"><span class="label">Stapel geschafft</span><div class="big">${gewusst} / ${deck.length}</div><p class="hint">Begriffe gewusst</p>
+        <div class="row">${nochmal.length?`<button class="btn" id="rep">${nochmal.length} Begriffe wiederholen</button>`:""}<button class="btn ghost" id="neu">Neu mischen</button></div></div>${balken(zst)}`;
+      if(gewusst===deck.length)feuerwerk();
+      const rep=document.getElementById("rep"); if(rep) rep.onclick=()=>{deck=shuffle(nochmal);nochmal=[];i=0;gewusst=0;zst=deck.map(()=>"");show()};
+      document.getElementById("neu").onclick=karten; return;
+    }
+    const b=deck[i];
+    stage.innerHTML=`
+      <span class="label">Karte ${i+1} von ${deck.length}</span>
+      <div class="card" id="card" tabindex="0" role="button" aria-label="Karte umdrehen">
+        <div class="card-in">
+          <div class="face"><span class="label">${esc(b.thema)}</span><p class="term">${esc(b.begriff)}</p><p class="hint">Was bedeutet das? Tippe zum Umdrehen.</p></div>
+          <div class="face back"><span class="label">${esc(b.begriff)}</span><p class="def">${esc(b.def)}</p><p class="ex">${esc(b.bsp)}</p></div>
+        </div>
+      </div>
+      <div class="row"><button class="btn ghost" id="no" disabled>Noch nicht gewusst</button><button class="btn" id="yes" disabled>Gewusst</button></div>${balken(zst)}`;
+    const card=document.getElementById("card"), yes=document.getElementById("yes"), no=document.getElementById("no");
+    const flip=()=>{card.classList.toggle("flip");yes.disabled=no.disabled=false};
+    card.onclick=flip; card.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}};
+    yes.onclick=()=>{zst[i]="ok";gewusst++;i++;show()};
+    no.onclick=()=>{zst[i]="no";nochmal.push(b);i++;show()};
+  }
+  show();
+}
+
+/* ---------- Quiz ---------- */
+function quiz(){
+  const p=pool(), runden=Math.min(10,p.length);
+  let fragen=shuffle(p).slice(0,runden), i=0, punkte=0, zst=Array(runden).fill("");
+  function show(){
+    if(i>=runden){
+      const lob = punkte===runden?"Perfekt!":punkte>=runden*.7?"Sehr gut!":punkte>=runden*.4?"Gut gemacht – übe noch ein bisschen.":"Schau dir die Karteikarten noch einmal an.";
+      stage.innerHTML=`<div class="result"><span class="label">Ergebnis</span><div class="big">${punkte} / ${runden}</div><p>${lob}</p><button class="btn" id="neu">Neues Quiz</button></div>${balken(zst)}`;
+      if(punkte===runden)feuerwerk();
+      document.getElementById("neu").onclick=quiz; return;
+    }
+    const b=fragen[i];
+    const umgekehrt = Math.random()<.5; // Definition → Begriff oder Begriff → Definition
+    const gleiche = BEGRIFFE.filter(x=>x!==b && x.thema===b.thema);
+    const andere = shuffle(gleiche.length>=3?gleiche:BEGRIFFE.filter(x=>x!==b)).slice(0,3);
+    const opts = shuffle([b,...andere]);
+    stage.innerHTML=`
+      <span class="label">Frage ${i+1} von ${runden}</span>
+      ${umgekehrt
+        ? `<span class="label">Welche Erklärung passt zu …</span><p class="term">${esc(b.begriff)}</p>`
+        : `<span class="label">Welcher Fachbegriff ist gemeint?</span><p class="q">${esc(b.def)}</p>`}
+      <div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}" style="${umgekehrt?'font-weight:400;font-size:1rem':''}">${esc(umgekehrt?o.def:o.begriff)}</button>`).join("")}</div>
+      <p class="feedback" id="fb" aria-live="polite"></p>
+      <div class="row"><button class="btn" id="weiter" hidden>Weiter</button></div>${balken(zst)}`;
+    stage.querySelectorAll(".opt").forEach(btn=>btn.onclick=()=>{
+      const o=opts[+btn.dataset.k], fb=document.getElementById("fb");
+      stage.querySelectorAll(".opt").forEach(x=>{x.disabled=true; if(opts[+x.dataset.k]===b) x.classList.add("right")});
+      if(o===b){punkte++;zst[i]="ok";fb.className="feedback ok";fb.textContent="Richtig!"}
+      else{zst[i]="no";btn.classList.add("wrong");fb.className="feedback no";fb.textContent=`Leider falsch. Gesucht war: ${b.begriff}`}
+      balkenSetzen(zst);
+      const w=document.getElementById("weiter"); w.hidden=false; w.focus();
+      w.onclick=()=>{i++;show()};
+    });
+  }
+  show();
+}
+
+/* ---------- Zuordnen ---------- */
+function zuordnen(){
+  const set=shuffle(pool()).slice(0,6);
+  const links=shuffle(set), rechts=shuffle(set);
+  let sel=null, fehler=0, fertig=0;
+  const zst=set.map(()=>"");
+  stage.innerHTML=`
+    <div class="bar"><span class="label">Tippe einen Begriff und dann die passende Erklärung</span><span class="label" id="st">0 Fehler</span></div>
+    <div class="match">
+      <div class="col">${links.map((b,k)=>`<button class="m t" data-k="${k}">${esc(b.begriff)}</button>`).join("")}</div>
+      <div class="col">${rechts.map((b,k)=>`<button class="m d" data-k="${k}">${esc(b.def)}</button>`).join("")}</div>
+    </div>
+    <div class="row"><button class="btn ghost" id="neu">Neue Runde</button></div>${balken(zst)}`;
+  const st=document.getElementById("st");
+  document.getElementById("neu").onclick=zuordnen;
+  stage.querySelectorAll(".m.t").forEach(el=>el.onclick=()=>{
+    if(el.classList.contains("done"))return;
+    stage.querySelectorAll(".m.t").forEach(x=>x.classList.remove("sel"));
+    el.classList.add("sel"); sel=el;
+  });
+  stage.querySelectorAll(".m.d").forEach(el=>el.onclick=()=>{
+    if(el.classList.contains("done"))return;
+    if(!sel){st.textContent="Wähle zuerst links einen Begriff";return}
+    if(links[+sel.dataset.k]===rechts[+el.dataset.k]){
+      sel.classList.remove("sel");sel.classList.add("done");el.classList.add("done");sel.disabled=el.disabled=true;sel=null;zst[fertig]="ok";fertig++;balkenSetzen(zst);
+    }else{
+      fehler++;[sel,el].forEach(x=>{x.classList.remove("shake");void x.offsetWidth;x.classList.add("shake")});
+    }
+    st.textContent=`${fehler} Fehler`;
+    if(fertig===set.length){
+      const r=document.createElement("div");r.className="result";
+      r.innerHTML=`<div class="big">${fehler===0?"Fehlerfrei!":"Geschafft!"}</div><p class="hint">${fehler} ${fehler===1?"Fehler":"Fehler"} in dieser Runde</p>`;
+      stage.insertBefore(r,stage.querySelector(".row"));
+      if(fehler===0)feuerwerk();
+    }
+  });
+}
+
+/* ---------- Übersetzen ---------- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+// Jede Vorlage liefert: Text, richtiger Term, falsche Terme, Rechenweg, Ergebnis
+const VORLAGEN=[
+  ()=>{const a=R(60,99),b=R(11,a-10),c=R(11,49);return{t:`Berechne die Differenz von ${a} und ${b} und addiere dann ${c}.`,
+    term:`(${a} − ${b}) + ${c}`,falsch:[`(${b} − ${a}) + ${c}`,`(${a} + ${b}) − ${c}`,`${a} − (${b} + ${c})`],weg:`${a-b} + ${c}`,erg:a-b+c}},
+  ()=>{const a=R(11,49),b=R(11,49),c=R(11,49);return{t:`Addiere zu ${a} die Summe der Zahlen ${b} und ${c}.`,
+    term:`${a} + (${b} + ${c})`,falsch:[`(${b} + ${c}) − ${a}`,`${a} · (${b} + ${c})`,`${a} + (${b} − ${c})`],weg:`${a} + ${b+c}`,erg:a+b+c}},
+  ()=>{const a=R(20,70),b=R(20,70),c=R(5,a+b-5);return{t:`Subtrahiere von der Summe aus ${a} und ${b} die Zahl ${c}.`,
+    term:`(${a} + ${b}) − ${c}`,falsch:[`${c} − (${a} + ${b})`,`(${a} − ${b}) + ${c}`,`(${a} + ${b}) + ${c}`],weg:`${a+b} − ${c}`,erg:a+b-c}},
+  ()=>{const a=R(11,40),b=R(11,40),c=R(50,100),d=R(10,c-10);return{t:`Addiere zur Summe von ${a} und ${b} die Differenz von ${c} und ${d}.`,
+    term:`(${a} + ${b}) + (${c} − ${d})`,falsch:[`(${a} + ${b}) − (${c} − ${d})`,`(${a} − ${b}) + (${c} + ${d})`,`(${a} + ${b}) + (${d} − ${c})`],weg:`${a+b} + ${c-d}`,erg:a+b+c-d}},
+  ()=>{const a=R(3,15),b=R(2,15),c=R(2,9);return{t:`Multipliziere die Summe von ${a} und ${b} mit ${c}.`,
+    term:`(${a} + ${b}) · ${c}`,falsch:[`${a} + ${b} · ${c}`,`(${a} · ${b}) + ${c}`,`(${a} − ${b}) · ${c}`],weg:`${a+b} · ${c}`,erg:(a+b)*c}},
+  ()=>{const c=R(2,9),a=c*R(2,9),b=R(2,9);return{t:`Dividiere das Produkt von ${a} und ${b} durch ${c}.`,
+    term:`(${a} · ${b}) : ${c}`,falsch:[`${c} : (${a} · ${b})`,`(${a} + ${b}) : ${c}`,`(${a} · ${b}) · ${c}`],weg:`${a*b} : ${c}`,erg:a*b/c}},
+  ()=>{const b=R(2,9),c=R(2,9),a=b*c+R(5,60);return{t:`Subtrahiere von ${a} das Produkt aus ${b} und ${c}.`,
+    term:`${a} − (${b} · ${c})`,falsch:[`(${b} · ${c}) − ${a}`,`(${a} − ${b}) · ${c}`,`${a} − (${b} + ${c})`],weg:`${a} − ${b*c}`,erg:a-b*c}},
+  ()=>{const b=R(2,9),a=b*R(2,12),c=R(2,9);return{t:`Berechne den Quotienten aus ${a} und ${b} und multipliziere ihn mit ${c}.`,
+    term:`(${a} : ${b}) · ${c}`,falsch:[`(${a} · ${b}) : ${c}`,`${a} : (${b} · ${c})`,`(${b} : ${a}) · ${c}`],weg:`${a/b} · ${c}`,erg:a/b*c}},
+  ()=>{const a=R(3,12),b=R(3,12),c=R(2,a*b-1);return{t:`Bilde die Differenz aus dem Produkt von ${a} und ${b} und der Zahl ${c}.`,
+    term:`(${a} · ${b}) − ${c}`,falsch:[`${c} − (${a} · ${b})`,`${a} · (${b} − ${c})`,`(${a} + ${b}) − ${c}`],weg:`${a*b} − ${c}`,erg:a*b-c}},
+  ()=>{const b=R(2,9),a=b*R(2,10),c=R(2,9),d=R(2,9);return{t:`Addiere zum Quotienten von ${a} und ${b} das Produkt von ${c} und ${d}.`,
+    term:`(${a} : ${b}) + (${c} · ${d})`,falsch:[`(${a} · ${b}) + (${c} : ${d})`,`(${a} : ${b}) · (${c} + ${d})`,`(${a} − ${b}) + (${c} · ${d})`],weg:`${a/b} + ${c*d}`,erg:a/b+c*d}},
+  ()=>{const c=R(30,60),d=R(5,c-10),a=R(30,60),b=R(30,60);return{t:`Subtrahiere die Differenz von ${c} und ${d} von der Summe aus ${a} und ${b}.`,
+    term:`(${a} + ${b}) − (${c} − ${d})`,falsch:[`(${c} − ${d}) − (${a} + ${b})`,`(${a} + ${b}) + (${c} − ${d})`,`(${a} + ${b}) − (${d} − ${c})`],weg:`${a+b} − ${c-d}`,erg:a+b-(c-d)}},
+];
+const markiere=t=>esc(t).replace(/(Summe|Differenz|Produkts?|Quotienten?|[Aa]ddiere|[Ss]ubtrahiere|[Mm]ultipliziere|[Dd]ividiere)/g,"<mark>$1</mark>");
+
+function uebersetzen(){
+  const runden=8;
+  const aufgaben=shuffle(VORLAGEN).slice(0,runden).map(f=>f());
+  let i=0, punkte=0;
+  const zst=Array(runden*2).fill("");
+  function show(){
+    if(i>=runden){
+      const max=runden*2;
+      const lob=punkte===max?"Perfekt übersetzt!":punkte>=max*.7?"Sehr gut!":punkte>=max*.4?"Gut gemacht – übe noch ein bisschen.":"Schau dir die Übersicht noch einmal an.";
+      stage.innerHTML=`<div class="result"><span class="label">Ergebnis</span><div class="big">${punkte} / ${max}</div><p>${lob}</p><p class="hint">Pro Aufgabe gibt es einen Punkt für den Term und einen für das Ergebnis.</p><button class="btn" id="neu">Neue Aufgaben</button></div>${balken(zst)}`;
+      if(punkte===max)feuerwerk();
+      document.getElementById("neu").onclick=uebersetzen; return;
+    }
+    const a=aufgaben[i], opts=shuffle([a.term,...a.falsch]);
+    stage.innerHTML=`
+      <span class="label">Aufgabe ${i+1} von ${runden}</span>
+      <p class="aufgabe" id="txt">${markiere(a.t)}</p>
+      <button class="link" id="tipp">Tipp: Fachbegriffe markieren</button>
+      <div class="step" id="s1"><span class="label">Schritt 1 · Welcher Term passt zum Text?</span>
+        <div class="opts terme">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+        <p class="feedback" id="fb1" aria-live="polite"></p></div>
+      <div class="step" id="s2" aria-disabled="true"><span class="label">Schritt 2 · Rechne aus</span>
+        <form class="eingabe" id="f2"><span class="gl">${esc(a.term)} =</span><input id="erg" type="text" inputmode="numeric" autocomplete="off" aria-label="Ergebnis" disabled><button class="btn" id="pruef" disabled>Prüfen</button></form>
+        <p class="feedback" id="fb2" aria-live="polite"></p></div>
+      <div class="row"><button class="btn" id="weiter" hidden>Weiter</button></div>${balken(zst)}`;
+    const txt=document.getElementById("txt");
+    document.getElementById("tipp").onclick=e=>{txt.classList.toggle("markiert");e.target.textContent=txt.classList.contains("markiert")?"Markierung ausblenden":"Tipp: Fachbegriffe markieren"};
+    stage.querySelectorAll("#s1 .opt").forEach(btn=>btn.onclick=()=>{
+      const fb=document.getElementById("fb1");
+      stage.querySelectorAll("#s1 .opt").forEach(x=>{x.disabled=true;if(opts[+x.dataset.k]===a.term)x.classList.add("right")});
+      if(opts[+btn.dataset.k]===a.term){punkte++;zst[2*i]="ok";fb.className="feedback ok";fb.textContent="Richtig übersetzt!"}
+      else{zst[2*i]="no";btn.classList.add("wrong");fb.className="feedback no";fb.textContent="Nicht ganz. Der grün markierte Term passt zum Text."}
+      txt.classList.add("markiert");balkenSetzen(zst);
+      const s2=document.getElementById("s2"),inp=document.getElementById("erg");
+      s2.setAttribute("aria-disabled","false");inp.disabled=false;document.getElementById("pruef").disabled=false;inp.focus();
+    });
+    document.getElementById("f2").onsubmit=e=>{
+      e.preventDefault();
+      const inp=document.getElementById("erg"), fb=document.getElementById("fb2");
+      const wert=inp.value.trim().replace(/\s/g,"");
+      if(!/^-?\d+$/.test(wert)){fb.className="feedback no";fb.textContent="Gib eine ganze Zahl ein.";return}
+      inp.disabled=true;document.getElementById("pruef").disabled=true;
+      if(+wert===a.erg){punkte++;zst[2*i+1]="ok";inp.classList.add("right");fb.className="feedback ok";fb.textContent="Richtig gerechnet!"}
+      else{zst[2*i+1]="no";inp.classList.add("wrong");fb.className="feedback no";fb.textContent=`Leider falsch. Richtig ist ${a.erg}.`}
+      fb.insertAdjacentHTML("afterend",`<p class="weg">${esc(a.term)} = ${esc(a.weg)} = ${a.erg}</p>`);balkenSetzen(zst);
+      const w=document.getElementById("weiter");w.hidden=false;w.focus();w.onclick=()=>{i++;show()};
+    };
+  }
+  show();
+}
+
+/* ---------- Rechen-Automat ---------- */
+const OPS=[
+  {art:"Addition",z:"+",f:(a,b)=>a+b},
+  {art:"Subtraktion",z:"−",f:(a,b)=>a-b},
+  {art:"Multiplikation",z:"·",f:(a,b)=>a*b},
+  {art:"Division",z:":",f:(a,b)=>a/b},
+];
+// Erstes Rad: Fachbegriffe und Verben. "satz" liest das Rad als Aufgabe, "rad" legt die Zahlen-Reihenfolge auf den Rädern fest.
+const RAD=[
+  {w:"Berechne die Summe",op:0,satz:(a,b)=>`Berechne die Summe von ${a} und ${b}.`},
+  {w:"Berechne die Differenz",op:1,satz:(a,b)=>`Berechne die Differenz von ${a} und ${b}.`},
+  {w:"Berechne das Produkt",op:2,satz:(a,b)=>`Berechne das Produkt von ${a} und ${b}.`},
+  {w:"Berechne den Quotienten",op:3,satz:(a,b)=>`Berechne den Quotienten von ${a} und ${b}.`},
+  {w:"Addiere",op:0,satz:(a,b)=>`Addiere ${a} und ${b}.`},
+  {w:"Subtrahiere",op:1,satz:(a,b)=>`Subtrahiere ${b} von ${a}.`},
+  {w:"Multipliziere",op:2,satz:(a,b)=>`Multipliziere ${a} mit ${b}.`},
+  {w:"Dividiere",op:3,satz:(a,b)=>`Dividiere ${a} durch ${b}.`},
+];
+let automatStand={k:4,a:45,b:30,punkte:0,max:0};
+const ZIEL=10;
+
+function automat(){
+  const H=96, reduziert=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const st=automatStand;
+  const zahlFeld=n=>`<div class="feld">${n}</div>`;
+  const wortFeld=k=>`<div class="feld op">${RAD[k].w}</div>`;
+  const links=(k,a,b)=>RAD[k].tausch?[b,a]:[a,b];
+  const [z1,z2]=links(st.k,st.a,st.b);
+  stage.innerHTML=`
+    <div class="automat">
+      <div class="schild">Rechen-<span>Automat</span></div>
+      <div class="walzen" aria-live="polite" aria-label="Walzen">
+        <div class="walze" id="w1"><div class="streifen">${wortFeld(st.k)}</div></div>
+        <div class="walze" id="w0"><div class="streifen">${zahlFeld(z1)}</div></div>
+        <div class="walze" id="w2"><div class="streifen">${zahlFeld(z2)}</div></div>
+      </div>
+      <button class="hebel" id="dreh">Drehen!</button>
+      ${balken(ziel(),"Ziel: 10 richtige Lösungen")}
+    </div>
+    <div id="aufg"><p class="hint">Drücke auf „Drehen!“. Die Räder zeigen dir eine Rechenanweisung und zwei Zahlen.</p></div>`;
+
+  const dreh=document.getElementById("dreh");
+  function rolle(id,inhalte,dauer){
+    const w=document.getElementById(id), str=w.querySelector(".streifen");
+    str.style.transition="none"; str.style.transform="translateY(0)";
+    str.innerHTML=inhalte.join("");
+    void str.offsetHeight;
+    return new Promise(res=>{
+      const ende=()=>{w.classList.remove("stopp");void w.offsetWidth;w.classList.add("stopp");res()};
+      if(reduziert||!dauer){str.style.transform=`translateY(${-(inhalte.length-1)*H}px)`;ende();return}
+      str.style.transition=`transform ${dauer}ms cubic-bezier(.15,.75,.25,1)`;
+      str.style.transform=`translateY(${-(inhalte.length-1)*H}px)`;
+      str.addEventListener("transitionend",ende,{once:true});
+    });
+  }
+  dreh.onclick=async()=>{
+    dreh.disabled=true;
+    document.getElementById("aufg").innerHTML="";
+    if(st.punkte>=ZIEL){st.punkte=0;st.max=0;zaehler()}
+    // Erst den Begriff wählen, dann passende Zahlen: Ergebnis ganzzahlig, 0 bis 100
+    const k=R(0,RAD.length-1), f=OPS[RAD[k].op].f, paare=[];
+    for(let x=1;x<=100;x++)for(let y=1;y<=100;y++){const e=f(x,y);if(Number.isInteger(e)&&e>=0&&e<=100&&!(RAD[k].op===1&&x<=y))paare.push([x,y])}
+    const [a,b]=paare[R(0,paare.length-1)];
+    const [alt1,alt2]=links(st.k,st.a,st.b), [neu1,neu2]=links(k,a,b);
+    const zufall=(n,fn)=>Array.from({length:n},fn);
+    await Promise.all([
+      rolle("w1",[wortFeld(st.k),...zufall(14,()=>wortFeld(R(0,RAD.length-1))),wortFeld(k)],1400),
+      rolle("w0",[zahlFeld(alt1),...zufall(18,()=>zahlFeld(R(1,100))),zahlFeld(neu1)],1900),
+      rolle("w2",[zahlFeld(alt2),...zufall(22,()=>zahlFeld(R(1,100))),zahlFeld(neu2)],2400),
+    ]);
+    Object.assign(st,{k,a,b}); st.max++;
+    if(!document.getElementById("aufg"))return;
+    zaehler(); frage();
+  };
+
+  function frage(){
+    const {k,a,b}=st, r=RAD[k], o=OPS[r.op], erg=o.f(a,b);
+    const box=document.getElementById("aufg");
+    box.innerHTML=`
+      <div class="step"><p class="aufgabe">${markiere(r.satz(a,b))}</p>
+        <form class="eingabe" id="af2"><span class="gl">Ergebnis:</span><input id="aerg" type="text" inputmode="numeric" autocomplete="off" aria-label="Ergebnis"><button class="btn" id="aprf">Prüfen</button></form>
+        <p class="feedback" id="afb2" aria-live="polite"></p></div>`;
+    const inp=document.getElementById("aerg"); inp.focus();
+    document.getElementById("af2").onsubmit=e=>{
+      e.preventDefault();
+      const fb=document.getElementById("afb2"), w=inp.value.trim();
+      if(!/^\d+$/.test(w)){fb.className="feedback no";fb.textContent="Gib eine ganze Zahl ein.";return}
+      inp.disabled=true;document.getElementById("aprf").disabled=true;
+      if(+w===erg){st.punkte++;inp.classList.add("right");fb.className="feedback ok";fb.textContent="Richtig!"}
+      else{inp.classList.add("wrong");fb.className="feedback no";fb.textContent=`Leider falsch. Richtig ist ${erg}.`}
+      fb.insertAdjacentHTML("afterend",`<p class="weg">${a} ${o.z} ${b} = ${erg}</p>`);
+      zaehler(); dreh.disabled=false; dreh.focus();
+      if(+w===erg&&st.punkte===ZIEL){
+        feuerwerk();
+        box.insertAdjacentHTML("beforeend",`<div class="result"><div class="big">Super!</div><p>Du hast 10 Aufgaben richtig gelöst. Drehe weiter für eine neue Runde.</p></div>`);
+      }
+    };
+  }
+  function ziel(){return Array.from({length:ZIEL},(_,i)=>i<st.punkte?"ok":"")}
+  function zaehler(){balkenSetzen(ziel())}
+}
+
+function feuerwerk(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const c=document.createElement("canvas");c.className="feuerwerk";document.body.appendChild(c);
+  const x=c.getContext("2d"), dpr=Math.min(2,devicePixelRatio||1);
+  const groesse=()=>{c.width=innerWidth*dpr;c.height=innerHeight*dpr;x.setTransform(dpr,0,0,dpr,0,0)};groesse();
+  const farben=["#ffe45c","#ff6b5a","#5ad1ff","#7cf29a","#c48bff","#ffffff","#ff9f1c"];
+  const raketen=[], funken=[]; let t0=performance.now(), naechste=0;
+  function start(){raketen.push({x:innerWidth*(.15+Math.random()*.7),y:innerHeight,vy:-(innerHeight*.012+Math.random()*4),ziel:innerHeight*(.15+Math.random()*.35),f:farben[Math.floor(Math.random()*farben.length)]})}
+  function knall(r){const n=60+Math.floor(Math.random()*40);for(let i=0;i<n;i++){const w=Math.PI*2*i/n,v=2+Math.random()*4;funken.push({x:r.x,y:r.y,vx:Math.cos(w)*v,vy:Math.sin(w)*v,l:1,f:Math.random()<.2?"#ffffff":r.f})}}
+  function frame(t){
+    const dt=t-t0;
+    x.globalCompositeOperation="destination-out";x.fillStyle="rgba(0,0,0,.22)";x.fillRect(0,0,innerWidth,innerHeight);
+    x.globalCompositeOperation="lighter";
+    if(dt<3200&&t>naechste){start();naechste=t+220+Math.random()*260}
+    for(let i=raketen.length-1;i>=0;i--){const r=raketen[i];r.y+=r.vy;r.vy*=.985;x.fillStyle=r.f;x.fillRect(r.x-1.5,r.y,3,8);if(r.y<=r.ziel){knall(r);raketen.splice(i,1)}}
+    for(let i=funken.length-1;i>=0;i--){const p=funken[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=.985;p.vy*=.985;p.l-=.011;
+      if(p.l<=0){funken.splice(i,1);continue}x.globalAlpha=p.l;x.fillStyle=p.f;x.beginPath();x.arc(p.x,p.y,2.2,0,7);x.fill();x.globalAlpha=1}
+    if(dt<3200||raketen.length||funken.length)requestAnimationFrame(frame);else c.remove();
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Liste ---------- */
+function liste(){
+  const zeile=op=>BEGRIFFE.filter(b=>b.op===op);
+  const cell=b=>`<td><b>${esc(b.begriff)}</b><small>${esc(b.def)}</small></td>`;
+  stage.innerHTML=`<p class="hint">Jede Zeile gehört zusammen: Rechenart, Verb und Name des Ergebnisses.</p>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th></th><th>Rechenart</th><th>Verb</th><th>Ergebnis</th><th>Beispiel</th></tr></thead><tbody>
+  ${[0,1,2,3].map(op=>{const [r,v,e]=["Rechenarten","Verben","Ergebnisse"].map(t=>zeile(op).find(b=>b.thema===t));
+    return `<tr><td class="zz">${ZEICHEN[op]}</td>${cell(r)}${cell(v)}${cell(e)}<td class="ex">${esc(r.bsp)}</td></tr>`}).join("")}
+  </tbody></table></div>`;
+}
+
+/* ---------- QR-Code ---------- */
+const PAGE_URL=location.href.split("#")[0];
+const qrOverlay=document.getElementById("qrOverlay"), qrBtn=document.getElementById("qrBtn");
+function openQr(){
+  const box=document.getElementById("qrBox");
+  try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();
+    box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});
+    const svg=box.querySelector("svg");svg.setAttribute("role","img");svg.setAttribute("aria-label","QR-Code zu den Mathe-Fachbegriffen");
+  }catch(e){box.innerHTML="<p style='line-height:1.4;color:#1b2733'>Der QR-Code konnte nicht geladen werden. Bitte die Seite neu laden.</p>"}
+  document.getElementById("qrUrl").textContent=PAGE_URL;
+  qrOverlay.hidden=false;document.getElementById("qrClose").focus();
+}
+const closeQr=()=>{qrOverlay.hidden=true;qrBtn.focus()};
+qrBtn.onclick=openQr;
+document.getElementById("qrClose").onclick=closeQr;
+qrOverlay.onclick=e=>{if(e.target===qrOverlay)closeQr()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!qrOverlay.hidden)closeQr()});
+
+render();
+</script>
+
+</body>
+</html>

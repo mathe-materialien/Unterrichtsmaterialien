@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trainer – Körper und Flächen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+/* Heftseite mit Reitern: Basiswissen, Benennen, Fläche oder Körper?, Umgebung, Ecken & Kanten – Pastellformen wie im Themenblatt */
+:root{
+  color-scheme:light;
+  --desk:#eef2ea; --paper:#fffefa; --text:#25303f; --muted:#5d6878; --line:#d8e0d2;
+  --title:#5c9e2e; --head:#e07b14; --tile:#ffffff; --stroke:#2b3440;
+  --flaeche:#fdf1e4; --koerper:#e8eef8;
+  --ok:#1d8248; --ok-soft:#dcf3e5; --bad:#cf2f2a; --bad-soft:#fbe3df;
+  --pink:#e0287f; --pink-soft:#fbe1ee; --tab:var(--head);
+  --hand:"Patrick Hand","Comic Sans MS","Segoe Print",cursive;
+  --ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --desk:#141a14; --paper:#1d241d; --text:#e8eee6; --muted:#a6b2a4; --line:#344034;
+  --title:#8fd15a; --head:#ffa04a; --tile:#eef1ea; --stroke:#2b3440;
+  --flaeche:#2e271f; --koerper:#1f2836;
+  --ok:#5bd393; --ok-soft:#173a28; --bad:#ff7a70; --bad-soft:#45201b;
+  --pink:#ff6fb5; --pink-soft:#3d1a2c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#141a14; --paper:#1d241d; --text:#e8eee6; --muted:#a6b2a4; --line:#344034;
+  --title:#8fd15a; --head:#ffa04a; --tile:#eef1ea; --stroke:#2b3440;
+  --flaeche:#2e271f; --koerper:#1f2836;
+  --ok:#5bd393; --ok-soft:#173a28; --bad:#ff7a70; --bad-soft:#45201b;
+  --pink:#ff6fb5; --pink-soft:#3d1a2c; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--desk);color:var(--text);font:16px/1.5 var(--ui);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+button,input{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--head);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;display:grid;gap:18px}
+
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kicker{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;width:100%}
+h1{font:700 clamp(2rem,6.5vw,2.9rem)/1.05 var(--ui);margin:0;color:var(--title);letter-spacing:-.01em;text-wrap:balance}
+.qrbtn{flex:none;width:38px;height:38px;display:grid;place-items:center;border:2px solid var(--text);border-radius:8px;background:var(--paper);color:var(--text);padding:0;box-shadow:2px 2px 0 var(--text)}
+.qrbtn:active{transform:translate(2px,2px);box-shadow:none}
+.intro{margin:0;color:var(--muted);max-width:62ch}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:700;font-size:15px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--head);border-color:var(--head);color:#fff}
+
+.sheet{background:var(--paper);border:2px dashed var(--line);border-radius:14px;padding:20px;display:grid;gap:16px;min-width:0}
+h2{font:700 1.3rem/1.2 var(--ui);color:var(--head);margin:0}
+.hint{color:var(--muted);font-size:.92rem;margin:0}
+
+/* Formen */
+.shape{display:block;width:100%;height:auto}
+.shape .f1{stroke:var(--stroke);stroke-width:2;stroke-linejoin:round}
+.shape .hid{fill:none;stroke:var(--stroke);stroke-width:1.6;stroke-dasharray:4 3}
+.gruppe{border-radius:12px;padding:14px;display:grid;gap:10px}
+.gruppe.fl{background:var(--flaeche)} .gruppe.kp{background:var(--koerper)}
+.galerie{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.karte{border:2px solid transparent;background:var(--tile);border-radius:10px;padding:8px 8px 6px;display:grid;gap:2px;justify-items:center;text-align:center;color:#25303f}
+.karte:hover,.karte[aria-expanded="true"]{border-color:var(--head)}
+.karte .shape{max-width:92px}
+.karte b{font-size:.95rem}
+.info{background:var(--tile);color:#25303f;border-left:4px solid var(--head);border-radius:0 10px 10px 0;padding:10px 14px;display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;align-items:center}
+.info p{margin:0}
+.info b{font-size:1.1rem}
+
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-variant-numeric:tabular-nums}
+th{background:#f6d9bf;color:#25303f;text-align:left;font-size:.85rem;padding:7px 10px}
+th.n{text-align:center}
+td{padding:7px 10px;border-bottom:1px solid var(--line)}
+td.n{text-align:center;font-weight:700}
+.begriffe{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.begriffe ul{margin:0;padding-left:18px}
+@media (max-width:560px){.begriffe,.info{grid-template-columns:1fr}.info .shape,.begriffe svg{max-width:120px}}
+
+/* Übungen */
+.frage{display:grid;gap:12px;justify-items:center;text-align:center}
+.bild{background:var(--tile);border-radius:14px;padding:12px;width:min(260px,70vw)}
+.objekt{font-size:4.2rem;line-height:1}
+.fragetext{font:600 1.25rem/1.4 var(--ui);margin:0;text-wrap:balance;max-width:40ch}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;width:100%}
+.opts.zwei{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:13px 14px;font-weight:700;font-size:1.05rem;color:var(--text)}
+.opts.zwei .opt{font-size:1.3rem;padding:18px}
+.opt:hover:not(:disabled){border-color:var(--head)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.feedback{min-height:1.5em;margin:0;font-weight:700}
+.feedback.ok{color:var(--ok)} .feedback.no{color:var(--bad)}
+.erkl{margin:0;color:var(--muted);max-width:52ch}
+.eingabe{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.eingabe input{width:5ch;font:700 1.6rem var(--ui);text-align:center;padding:8px;border:2px solid var(--line);border-radius:10px;background:var(--paper);font-variant-numeric:tabular-nums}
+.eingabe input.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.eingabe input.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.btn{border:2px solid var(--text);background:var(--paper);border-radius:10px;padding:10px 18px;font-weight:700;box-shadow:2px 2px 0 var(--text)}
+.btn.main{background:var(--head);border-color:var(--head);color:#fff}
+.btn:active{transform:translate(2px,2px);box-shadow:none}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.result{display:grid;gap:8px;justify-items:center;text-align:center;padding:10px 0}
+.big{font:400 3.4rem/1 var(--hand);color:var(--head);font-variant-numeric:tabular-nums}
+.label{font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+
+/* Fortschritt (pink) */
+.fortschritt{display:grid;gap:6px}
+.zielbalken{display:grid;grid-template-columns:repeat(var(--n,10),minmax(0,1fr));gap:4px}
+.zielbalken i{height:16px;border-radius:4px;background:var(--pink-soft);transition:background .3s,transform .3s}
+.zielbalken i.ok{background:var(--pink);transform:scaleY(1.12)}
+.zielbalken i.no{background:repeating-linear-gradient(135deg,var(--pink-soft) 0 4px,transparent 4px 8px);box-shadow:inset 0 0 0 1.5px var(--pink-soft)}
+
+/* QR */
+.overlay{position:fixed;inset:0;background:rgba(15,20,25,.55);display:grid;place-items:center;padding:16px;z-index:40}
+.modal{background:var(--paper);border:2px solid var(--text);border-radius:14px;box-shadow:5px 5px 0 var(--text);padding:20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;max-width:100%}
+.modal h2{font-size:1.5rem}
+.qrbox{background:#fff;padding:12px;border-radius:10px;line-height:0}
+.qrbox svg{display:block;width:min(calc(100vw - 100px),calc(100vh - 250px),460px);height:auto;min-width:160px}
+.qrurl{font-size:13px;color:var(--muted);margin:0;max-width:min(calc(100vw - 100px),460px);overflow-wrap:anywhere;user-select:all}
+.feuerwerk{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="kicker">Mathematik 5 · Thema 3</span>
+    <button class="qrbtn" id="qrBtn" title="QR-Code zu dieser Seite zeigen" aria-label="QR-Code zu dieser Seite zeigen">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-6 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2z"/></svg>
+    </button>
+    <h1>Körper und Flächen</h1>
+    <p class="intro">In unserer Umgebung kommen bestimmte geometrische Formen immer wieder vor. Lerne ihre Namen und übe, sie zu erkennen.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Übung">
+    <button class="tab" role="tab" data-mode="wissen">Basiswissen</button>
+    <button class="tab" role="tab" data-mode="benennen">Benennen</button>
+    <button class="tab" role="tab" data-mode="art">Fläche oder Körper?</button>
+    <button class="tab" role="tab" data-mode="umgebung">In der Umgebung</button>
+    <button class="tab" role="tab" data-mode="zaehlen">Ecken &amp; Kanten</button>
+  </nav>
+
+  <section class="sheet" id="stage" aria-live="polite"></section>
+</div>
+
+<div class="overlay" id="qrOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Körper und Flächen öffnen</h2>
+    <div class="qrbox" id="qrBox"></div>
+    <p class="qrurl" id="qrUrl"></p>
+    <button class="btn main" id="qrClose">Schließen</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ---------- Zeichnungen (Pastell wie im Themenblatt) ---------- */
+const P=(pts,fill)=>`<polygon class="f1" points="${pts}" fill="${fill}"/>`;
+const SVG={
+  quadrat:  P("27,12 73,12 73,58 27,58","#cfe9d6"),
+  rechteck: P("8,18 92,18 92,58 8,58","#cfe4f6"),
+  parallelogramm: P("6,58 28,18 94,18 72,58","#fbd9b0"),
+  raute:    P("50,4 74,36 50,68 26,36","#dfeec0"),
+  trapez:   P("8,58 30,16 70,16 92,58","#a9c8ef"),
+  drachen:  P("8,36 38,12 92,36 38,60","#f8c6dc"),
+  dreieck:  P("50,6 88,62 12,62","#ddd0f0"),
+  kreis:    `<circle class="f1" cx="50" cy="36" r="29" fill="#f6b29d"/>`,
+  quader:   P("8,32 64,32 64,64 8,64","#d4eedd")+P("8,32 26,18 82,18 64,32","#e7f6ec")+P("64,32 82,18 82,50 64,64","#b9dfc6"),
+  wuerfel:  P("22,28 58,28 58,64 22,64","#cfe4f6")+P("22,28 38,16 74,16 58,28","#e4f0fb")+P("58,28 74,16 74,52 58,64","#a9c8ef"),
+  pyramide: P("14,62 64,62 50,6","#d9c4ea")+P("64,62 86,50 50,6","#bea2dc")+`<path class="hid" d="M14,62 L36,50 L86,50 M36,50 L50,6"/>`,
+  prisma:   P("8,64 40,64 24,30","#f6c08f")+P("24,30 54,14 76,44 40,64","#f3a55f")+`<path class="hid" d="M8,64 L44,44 L76,44 M44,44 L54,14"/>`,
+  zylinder: `<path class="f1" fill="#d4ecc6" d="M22,14 L22,58 A28,8 0 0 0 78,58 L78,14 Z"/><ellipse class="f1" cx="50" cy="14" rx="28" ry="8" fill="#e8f6df"/><path class="hid" d="M22,58 A28,8 0 0 1 78,58"/>`,
+  kegel:    `<path class="f1" fill="#f7e48a" d="M20,60 L50,4 L80,60 A30,9 0 0 1 20,60 Z"/><path class="hid" d="M20,60 A30,9 0 0 1 80,60"/>`,
+  kugel:    `<defs><radialGradient id="kg" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#9ccbe8"/></radialGradient></defs><circle class="f1" cx="50" cy="36" r="30" fill="url(#kg)"/><path class="hid" d="M20,36 A30,8 0 0 1 80,36"/><path fill="none" stroke="#2b3440" stroke-width="1.6" d="M20,36 A30,8 0 0 0 80,36"/>`,
+};
+const zeichne=(id,lbl)=>`<svg class="shape" viewBox="0 0 100 72" role="img" aria-label="${lbl||""}">${SVG[id]}</svg>`;
+
+/* ---------- Grundformen ---------- */
+const FORMEN=[
+  {id:"quadrat",name:"Quadrat",art:"Fläche",info:"4 gleich lange Seiten und 4 rechte Winkel."},
+  {id:"rechteck",name:"Rechteck",art:"Fläche",info:"4 rechte Winkel. Gegenüberliegende Seiten sind gleich lang."},
+  {id:"parallelogramm",name:"Parallelogramm",art:"Fläche",info:"Gegenüberliegende Seiten sind parallel und gleich lang."},
+  {id:"raute",name:"Raute",art:"Fläche",info:"4 gleich lange Seiten. Gegenüberliegende Seiten sind parallel."},
+  {id:"trapez",name:"Trapez",art:"Fläche",info:"Zwei gegenüberliegende Seiten sind parallel."},
+  {id:"drachen",name:"Drachen",art:"Fläche",info:"Je zwei benachbarte Seiten sind gleich lang. Eine Diagonale ist Symmetrieachse."},
+  {id:"dreieck",name:"Dreieck",art:"Fläche",info:"3 Ecken und 3 Seiten."},
+  {id:"kreis",name:"Kreis",art:"Fläche",info:"Jeder Punkt der Kreislinie ist gleich weit vom Mittelpunkt entfernt. Keine Ecken."},
+  {id:"quader",name:"Quader",art:"Körper",info:"Begrenzt von 6 Rechtecken. Gegenüberliegende Flächen sind gleich groß.",e:8,k:12,f:6,aus:"6 Rechtecke"},
+  {id:"wuerfel",name:"Würfel",art:"Körper",info:"Begrenzt von 6 gleich großen Quadraten. Alle Kanten sind gleich lang.",e:8,k:12,f:6,aus:"6 Quadrate"},
+  {id:"pyramide",name:"Pyramide",art:"Körper",info:"Hier mit einem Quadrat als Grundfläche und 4 Dreiecken, die oben in der Spitze zusammenlaufen.",e:5,k:8,f:5,aus:"1 Quadrat und 4 Dreiecke"},
+  {id:"prisma",name:"Dreiecksprisma",art:"Körper",info:"2 gleich große Dreiecke liegen sich gegenüber, dazwischen 3 Rechtecke.",e:6,k:9,f:5,aus:"2 Dreiecke und 3 Rechtecke"},
+  {id:"zylinder",name:"Zylinder",art:"Körper",info:"Oben und unten ein Kreis, dazwischen eine gekrümmte Fläche."},
+  {id:"kegel",name:"Kegel",art:"Körper",info:"Unten ein Kreis, darüber eine gekrümmte Fläche, die in einer Spitze endet."},
+  {id:"kugel",name:"Kugel",art:"Körper",info:"Nur eine gekrümmte Fläche. Keine Ecken und keine Kanten."},
+];
+const F=Object.fromEntries(FORMEN.map(f=>[f.id,f]));
+const ECKIG=FORMEN.filter(f=>f.e);
+
+const UMGEBUNG=[
+  ["🎲","ein Spielwürfel","wuerfel"],["🧊","ein Eiswürfel","wuerfel"],
+  ["📦","ein Paket","quader"],["📘","ein Buch","quader"],["🍫","eine Tafel Schokolade","quader"],
+  ["🥫","eine Konservendose","zylinder"],["🕯️","eine Kerze","zylinder"],["🧻","eine Rolle Klopapier","zylinder"],
+  ["🍦","eine Eiswaffel","kegel"],["🎉","ein Partyhut","kegel"],
+  ["⚽","ein Fußball","kugel"],["🏀","ein Basketball","kugel"],["🌍","ein Globus","kugel"],
+  ["⛺","ein Zelt","prisma"],["🏜️","die Pyramiden in Ägypten","pyramide"],
+  ["⚠️","ein Warnschild (Form des Schildes)","dreieck"],["🕐","das Zifferblatt einer Uhr","kreis"],
+  ["🪟","eine Fensterscheibe","rechteck"],["🃏","eine Spielkarte","rechteck"],
+  ["♦️","das Zeichen „Karo“ auf Spielkarten","raute"],["🪁","ein Flugdrachen","drachen"],
+];
+
+/* ---------- Hilfen ---------- */
+const $=id=>document.getElementById(id);
+const stage=$("stage");
+const R=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=R(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+function balken(z,text){const ok=z.filter(x=>x==="ok").length;
+  return `<div class="fortschritt" id="fs"><div class="zielbalken" style="--n:${z.length}" role="progressbar" aria-label="Fortschritt" aria-valuemin="0" aria-valuemax="${z.length}" aria-valuenow="${ok}">${z.map(x=>`<i class="${x}"></i>`).join("")}</div>${text?`<span class="label">${text}</span>`:""}</div>`}
+function balkenSetzen(z){const zb=document.querySelector("#fs .zielbalken");if(!zb)return;
+  zb.setAttribute("aria-valuenow",z.filter(x=>x==="ok").length);zb.querySelectorAll("i").forEach((el,i)=>el.className=z[i]||"")}
+const artikel={Quadrat:"das",Rechteck:"das",Parallelogramm:"das",Raute:"die",Trapez:"das",Drachen:"der",Dreieck:"das",Kreis:"der",
+  Quader:"der",Würfel:"der",Pyramide:"die",Dreiecksprisma:"das",Zylinder:"der",Kegel:"der",Kugel:"die"};
+const mit=n=>`${artikel[n]} ${n}`;
+
+/* ---------- Reiter ---------- */
+let modus="wissen";
+try{const m=localStorage.getItem("kf-modus");if(m)modus=m}catch(e){}
+const MODI={wissen,benennen,art,umgebung,zaehlen};
+if(!MODI[modus])modus="wissen";
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{modus=t.dataset.mode;try{localStorage.setItem("kf-modus",modus)}catch(e){}render()});
+function render(){document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.mode===modus));MODI[modus]()}
+
+/* ---------- Basiswissen ---------- */
+function wissen(){
+  const karte=f=>`<button class="karte" data-id="${f.id}" aria-expanded="false">${zeichne(f.id)}<b>${f.name}</b></button>`;
+  stage.innerHTML=`
+    <p class="hint">Tippe auf eine Form, um mehr über sie zu erfahren. In der Wirklichkeit kommen diese Formen meistens nicht in ihrer idealen Grundform vor.</p>
+    <h2>Flächen (ebene Figuren)</h2>
+    <div class="gruppe fl"><div class="galerie">${FORMEN.filter(f=>f.art==="Fläche").map(karte).join("")}</div><div id="infoF"></div></div>
+    <h2>Körper</h2>
+    <div class="gruppe kp"><div class="galerie">${FORMEN.filter(f=>f.art==="Körper").map(karte).join("")}</div><div id="infoK"></div></div>
+    <h2>Ecken, Kanten und Flächen</h2>
+    <div class="begriffe">
+      <svg viewBox="0 0 170 138" role="img" aria-label="Würfel mit markierter Ecke, Kante und Fläche">
+        <polygon points="20,45 90,45 90,115 20,115" fill="#fbe7a6" stroke="#2b3440" stroke-width="2"/>
+        <polygon points="20,45 50,20 120,20 90,45" fill="#fdf2cc" stroke="#2b3440" stroke-width="2"/>
+        <polygon points="90,45 120,20 120,90 90,115" fill="#f3d27a" stroke="#2b3440" stroke-width="2"/>
+        <line x1="90" y1="45" x2="90" y2="115" stroke="#2f6fd0" stroke-width="5"/>
+        <circle cx="120" cy="20" r="5.5" fill="#e0303a"/>
+        <text x="52" y="86" text-anchor="middle" font-size="13" font-family="Lexend,sans-serif" fill="#25303f">Fläche</text>
+        <text x="90" y="132" text-anchor="middle" font-size="12" font-family="Lexend,sans-serif" fill="#2f6fd0" font-weight="700">Kante</text>
+        <text x="128" y="16" font-size="12" font-family="Lexend,sans-serif" fill="#e0303a" font-weight="700">Ecke</text>
+      </svg>
+      <p style="margin:0">Ebene Figuren liegen flach auf dem Papier. Körper sind räumlich: Sie werden von <b>Flächen</b> begrenzt. Wo zwei Flächen zusammenstoßen, entsteht eine <b>Kante</b>. Wo mehrere Kanten zusammentreffen, entsteht eine <b>Ecke</b>.</p>
+    </div>
+    <div class="tblwrap"><table>
+      <thead><tr><th>Körper</th><th>Welche Flächen?</th><th class="n">Ecken</th><th class="n">Kanten</th><th class="n">Flächen</th></tr></thead>
+      <tbody>${ECKIG.map(f=>`<tr><td><b>${f.name}</b></td><td>${f.aus}</td><td class="n">${f.e}</td><td class="n">${f.k}</td><td class="n">${f.f}</td></tr>`).join("")}</tbody>
+    </table></div>`;
+  stage.querySelectorAll(".karte").forEach(b=>b.onclick=()=>{
+    const f=F[b.dataset.id], ziel=$(f.art==="Fläche"?"infoF":"infoK"), war=b.getAttribute("aria-expanded")==="true";
+    b.closest(".galerie").querySelectorAll(".karte").forEach(x=>x.setAttribute("aria-expanded","false"));
+    if(war){ziel.innerHTML="";return}
+    b.setAttribute("aria-expanded","true");
+    ziel.innerHTML=`<div class="info">${zeichne(f.id,f.name)}<div><b>${f.name}</b><p>${f.info}</p>${f.e?`<p>${f.e} Ecken · ${f.k} Kanten · ${f.f} Flächen</p>`:""}</div></div>`;
+  });
+}
+
+/* ---------- Allgemeiner Quiz-Ablauf ---------- */
+// fragen: [{kopf:HTML, fragetext, optionen:[...], richtig, erkl, zwei?}] oder {eingabe:true, loesung:Zahl}
+function quiz(fragen,neu){
+  const z=fragen.map(()=>""); let i=0;
+  function show(){
+    if(i>=fragen.length){
+      const ok=z.filter(x=>x==="ok").length, alle=ok===fragen.length;
+      stage.innerHTML=`<div class="result"><span class="label">Ergebnis</span><div class="big">${ok} / ${fragen.length}</div>
+        <p>${alle?"Alles richtig – super!":ok>=fragen.length*.7?"Sehr gut!":"Schau dir das Basiswissen noch einmal an und probiere es dann wieder."}</p>
+        <button class="btn main" id="neu">Neue Runde</button></div>${balken(z)}`;
+      $("neu").onclick=neu; if(alle)feuerwerk(); return;
+    }
+    const q=fragen[i];
+    stage.innerHTML=`<span class="label">Frage ${i+1} von ${fragen.length}</span>
+      <div class="frage">${q.kopf}<p class="fragetext">${q.fragetext}</p>
+        ${q.eingabe
+          ? `<form class="eingabe" id="ein"><input id="zahl" inputmode="numeric" autocomplete="off" aria-label="Antwort"><button class="btn main">Prüfen</button></form>`
+          : `<div class="opts${q.zwei?" zwei":""}">${q.optionen.map((o,k)=>`<button class="opt" data-k="${k}">${o}</button>`).join("")}</div>`}
+        <p class="feedback" id="fb"></p><p class="erkl" id="erkl"></p>
+        <button class="btn main" id="weiter" hidden>Weiter</button></div>
+      ${balken(z)}`;
+    const fertig=(richtig,loesungText)=>{
+      z[i]=richtig?"ok":"no";balkenSetzen(z);
+      const fb=$("fb");fb.className="feedback "+(richtig?"ok":"no");
+      fb.textContent=richtig?["Richtig!","Genau!","Super!","Stimmt!"][R(4)]:`Leider falsch. Richtig ist: ${loesungText}`;
+      if(q.erkl)$("erkl").textContent=q.erkl;
+      const w=$("weiter");w.hidden=false;w.focus();w.onclick=()=>{i++;show()};
+    };
+    if(q.eingabe){
+      const inp=$("zahl");inp.focus();
+      $("ein").onsubmit=e=>{e.preventDefault();const v=inp.value.trim();
+        if(!/^\d+$/.test(v)){$("fb").className="feedback no";$("fb").textContent="Gib eine Zahl ein.";return}
+        inp.disabled=true;e.target.querySelector("button").disabled=true;
+        const ok=+v===q.loesung;inp.classList.add(ok?"right":"wrong");fertig(ok,String(q.loesung))};
+    }else{
+      stage.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+        const k=+b.dataset.k;
+        stage.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(+x.dataset.k===q.richtig)x.classList.add("right")});
+        if(k!==q.richtig)b.classList.add("wrong");
+        fertig(k===q.richtig,q.optionen[q.richtig]);
+      });
+    }
+  }
+  show();
+}
+const bild=id=>`<div class="bild">${zeichne(id,"Zeichnung einer Grundform")}</div>`;
+function namensOptionen(id){
+  const f=F[id], gleiche=shuffle(FORMEN.filter(x=>x.art===f.art&&x.id!==id)).slice(0,3);
+  const opts=shuffle([f,...gleiche]);
+  return {optionen:opts.map(x=>x.name),richtig:opts.indexOf(f)};
+}
+
+/* ---------- Benennen ---------- */
+function benennen(){
+  quiz(shuffle(FORMEN).slice(0,10).map(f=>({kopf:bild(f.id),fragetext:"Wie heißt diese Form?",...namensOptionen(f.id),erkl:f.info})),benennen);
+}
+
+/* ---------- Fläche oder Körper ---------- */
+function art(){
+  quiz(shuffle(FORMEN).slice(0,12).map(f=>({kopf:bild(f.id),fragetext:"Ist das eine Fläche oder ein Körper?",
+    optionen:["Fläche","Körper"],richtig:f.art==="Fläche"?0:1,zwei:true,
+    erkl:f.art==="Fläche"?`${mit(f.name)} liegt flach auf dem Papier.`:`${mit(f.name)} ist räumlich.`})),art);
+}
+
+/* ---------- In der Umgebung ---------- */
+function umgebung(){
+  quiz(shuffle(UMGEBUNG).slice(0,10).map(([emo,txt,id])=>{const f=F[id];
+    return {kopf:`<div class="objekt" aria-hidden="true">${emo}</div>`,
+      fragetext:`Welche Grundform hat ${txt}?`,...namensOptionen(id),
+      erkl:`Das ist ${f.art==="Körper"?"ein Körper":"eine Fläche"}: ${f.name}.`}}),umgebung);
+}
+
+/* ---------- Ecken & Kanten ---------- */
+function zaehlen(){
+  const typen=[
+    f=>({eingabe:true,fragetext:`Wie viele Ecken hat ${mit(f.name)}?`,loesung:f.e}),
+    f=>({eingabe:true,fragetext:`Wie viele Kanten hat ${mit(f.name)}?`,loesung:f.k}),
+    f=>({eingabe:true,fragetext:`Von wie vielen Flächen wird ${mit(f.name)} begrenzt?`,loesung:f.f}),
+    f=>({eingabe:true,fragetext:`Du baust ein Kantenmodell: Wie viele Knetkugeln brauchst du für ${artikel[f.name]==="die"?"die":artikel[f.name]==="das"?"das":"den"} ${f.name}?`,loesung:f.e,erkl:"Jede Knetkugel ist eine Ecke."}),
+    f=>({eingabe:true,fragetext:`Du baust ein Kantenmodell: Wie viele Stäbe brauchst du für ${artikel[f.name]==="die"?"die":artikel[f.name]==="das"?"das":"den"} ${f.name}?`,loesung:f.k,erkl:"Jeder Stab ist eine Kante."}),
+    f=>{const opts=shuffle(ECKIG.map(x=>x.aus));return {fragetext:`Aus welchen Flächen besteht ${mit(f.name)}?`,optionen:opts,richtig:opts.indexOf(f.aus)}},
+  ];
+  const fragen=[];
+  for(let n=0;n<10;n++){const f=ECKIG[R(ECKIG.length)],q=typen[R(typen.length)](f);
+    q.kopf=bild(f.id);if(!q.erkl)q.erkl=`${f.name}: ${f.e} Ecken, ${f.k} Kanten, ${f.f} Flächen (${f.aus}).`;else q.erkl+=` ${f.name}: ${f.e} Ecken, ${f.k} Kanten.`;
+    fragen.push(q)}
+  quiz(fragen,zaehlen);
+}
+
+/* ---------- Feuerwerk ---------- */
+function feuerwerk(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const c=document.createElement("canvas");c.className="feuerwerk";document.body.appendChild(c);
+  const x=c.getContext("2d"),dpr=Math.min(2,devicePixelRatio||1);
+  c.width=innerWidth*dpr;c.height=innerHeight*dpr;x.setTransform(dpr,0,0,dpr,0,0);
+  const farben=["#ffe45c","#ff6b5a","#5ad1ff","#7cf29a","#c48bff","#ffffff","#ff6fb5"];
+  const raketen=[],funken=[];const t0=performance.now();let naechste=0;
+  const start=()=>raketen.push({x:innerWidth*(.15+Math.random()*.7),y:innerHeight,vy:-(innerHeight*.012+Math.random()*4),ziel:innerHeight*(.15+Math.random()*.35),f:farben[R(farben.length)]});
+  const knall=r=>{const n=60+R(40);for(let i=0;i<n;i++){const w=Math.PI*2*i/n,v=2+Math.random()*4;funken.push({x:r.x,y:r.y,vx:Math.cos(w)*v,vy:Math.sin(w)*v,l:1,f:Math.random()<.2?"#fff":r.f})}};
+  function frame(t){const dt=t-t0;
+    x.globalCompositeOperation="destination-out";x.fillStyle="rgba(0,0,0,.22)";x.fillRect(0,0,innerWidth,innerHeight);x.globalCompositeOperation="lighter";
+    if(dt<3200&&t>naechste){start();naechste=t+220+Math.random()*260}
+    for(let i=raketen.length-1;i>=0;i--){const r=raketen[i];r.y+=r.vy;r.vy*=.985;x.fillStyle=r.f;x.fillRect(r.x-1.5,r.y,3,8);if(r.y<=r.ziel){knall(r);raketen.splice(i,1)}}
+    for(let i=funken.length-1;i>=0;i--){const p=funken[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=.985;p.vy*=.985;p.l-=.011;
+      if(p.l<=0){funken.splice(i,1);continue}x.globalAlpha=p.l;x.fillStyle=p.f;x.beginPath();x.arc(p.x,p.y,2.2,0,7);x.fill();x.globalAlpha=1}
+    if(dt<3200||raketen.length||funken.length)requestAnimationFrame(frame);else c.remove()}
+  requestAnimationFrame(frame);
+}
+
+/* ---------- QR-Code (zeigt immer die Adresse, unter der die Seite gerade geöffnet ist) ---------- */
+const PAGE_URL=location.href.split("#")[0];
+const qrOverlay=$("qrOverlay");
+$("qrBtn").onclick=()=>{
+  const box=$("qrBox");
+  try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});
+    box.querySelector("svg").setAttribute("role","img");box.querySelector("svg").setAttribute("aria-label","QR-Code zu dieser Seite")}
+  catch(e){box.innerHTML="<p style='line-height:1.4;color:#25303f'>Der QR-Code konnte nicht geladen werden. Bitte die Seite neu laden.</p>"}
+  $("qrUrl").textContent=PAGE_URL;qrOverlay.hidden=false;$("qrClose").focus();
+};
+const closeQr=()=>{qrOverlay.hidden=true;$("qrBtn").focus()};
+$("qrClose").onclick=closeQr;
+qrOverlay.onclick=e=>{if(e.target===qrOverlay)closeQr()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!qrOverlay.hidden)closeQr()});
+
+render();
+</script>
+</body>
+</html>

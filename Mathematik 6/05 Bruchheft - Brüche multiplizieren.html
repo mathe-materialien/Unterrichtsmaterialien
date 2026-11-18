@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bruchheft – Brüche multiplizieren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdfcf7; --desk:#e9eef3; --karo:#cfdcec; --text:#25303f; --muted:#5b6677; --ink:#1c3fa0;
+  --red:#cf2f2a; --green:#1d8248; --hl:#fff09a; --focus:#e6eeff; --vb:#bcd6f2;
+  --nat:#e0592a; --mul:#2f7fc4; --dfn:#c2417e; --dnf:#5f8a1c; --div:#8352bf; --mix:#1f8a6e; --rev:#a8791a; --tab:var(--nat);
+  --hand:"Patrick Hand","Comic Sans MS","Segoe Print",cursive;
+  --ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+    --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a; --vb:#2c4a70;
+    --nat:#ff7a4d; --mul:#5aa9ec; --dfn:#f07aae; --dnf:#a3c94a; --div:#ab85e8; --mix:#3cc79f; --rev:#e0ae45;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+  --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a; --vb:#2c4a70;
+  --nat:#ff7a4d; --mul:#5aa9ec; --dfn:#f07aae; --dnf:#a3c94a; --div:#ab85e8; --mix:#3cc79f; --rev:#e0ae45;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--desk);color:var(--text);font-family:var(--ui);font-size:16px;line-height:1.5}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tab);outline-offset:2px}
+.hidden{display:none!important}
+main{max-width:820px;margin:0 auto;padding:18px 14px 48px}
+
+/* Heft-Umschlag */
+.cover{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.label{background:var(--paper);border:2px solid var(--text);border-radius:6px;padding:8px 18px 6px;transform:rotate(-1.2deg);box-shadow:3px 3px 0 var(--text)}
+.label h1{font-family:var(--hand);font-weight:400;font-size:44px;line-height:1;margin:0;color:var(--ink)}
+.label p{margin:0;font-size:13px;color:var(--muted)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.coverright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.levels{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:700}
+.levels button{border:2px solid var(--text);background:var(--paper);border-radius:999px;min-width:34px;padding:2px 10px;font-weight:700;box-shadow:2px 2px 0 var(--text)}
+.levels button[aria-pressed="true"]{background:var(--tab);border-color:var(--tab);color:#fff}
+.togs{display:inline-flex;gap:4px;flex-wrap:wrap;max-width:230px}
+.tog{font-size:12px;line-height:1.3;border:2px dashed var(--karo);border-radius:999px;background:var(--paper);padding:3px 9px;color:var(--muted);text-align:left}
+.tog[aria-pressed="true"]{border:2px solid var(--ink);color:var(--ink);font-weight:700}
+.line.togon .frac,.line.togon .mixin,.line.togon>.fin,.line.togon>.opx{opacity:.3}
+.line.errline{box-shadow:0 0 0 2px var(--red)}
+.togrow{display:flex;max-width:min(560px,calc(100vw - 110px));margin:-4px 0 6px 2.4em}
+.stat{background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;border:1px solid var(--karo)}
+.stat b{font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.stat .s{font-family:var(--hand);font-size:18px;line-height:0}
+
+/* Register-Reiter */
+.tabs{display:flex;gap:6px;margin:22px 0 0 10px;position:relative;z-index:1;flex-wrap:wrap;align-items:flex-end}
+.tab{border:none;border-radius:12px 12px 0 0;padding:10px 13px 12px;font-weight:700;font-size:15px;white-space:nowrap;color:#fff;opacity:.55;transform:translateY(6px);transition:transform .15s,opacity .15s}
+.tab[data-kind="nat"]{background:var(--nat)} .tab[data-kind="mul"]{background:var(--mul)} .tab[data-kind="dfn"]{background:var(--dfn)} .tab[data-kind="dnf"]{background:var(--dnf)} .tab[data-kind="div"]{background:var(--div)} .tab[data-kind="mix"]{background:var(--mix)} .tab[data-kind="rev"]{background:var(--rev)}
+.tab[aria-selected="true"]{opacity:1;transform:none}
+.tab .sym{font-family:var(--hand);font-size:26px;line-height:0;margin:0 3px;vertical-align:-2px}
+.tab .badge{display:inline-block;min-width:22px;padding:0 6px;margin-left:6px;border-radius:999px;background:rgba(255,255,255,.3);font-size:13px;text-align:center}
+.tab .sm{display:none}
+.fi{display:inline-flex;flex-direction:column;align-items:center;gap:2px;vertical-align:middle;margin:0 1px}
+.fi i{display:block;width:.62em;height:.62em;border:2px solid currentColor;border-radius:2px}
+.fi b{display:block;width:.95em;height:2px;background:currentColor;border-radius:1px}
+.ni{display:inline-block;width:.72em;height:.95em;border:2px solid currentColor;border-radius:2px;vertical-align:middle;margin:0 1px}
+.ico{display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
+.ico .o{font-family:var(--hand);font-size:1.6em;line-height:0}
+.stat .ico{font-size:12px;gap:3px;margin-right:4px}
+
+/* Heftseite */
+.sheet{position:relative;background:var(--paper);border-radius:4px 14px 14px 14px;border-top:6px solid var(--tab);padding:18px 16px 20px;box-shadow:0 2px 0 var(--karo),0 10px 30px rgba(20,30,50,.08);
+  background-image:linear-gradient(var(--karo) 1px,transparent 1px),linear-gradient(90deg,var(--karo) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px}
+.sheet::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:2px;background:color-mix(in srgb,var(--red) 45%,transparent);pointer-events:none}
+.inner{position:relative;padding-left:40px}
+.revinfo{font-size:14px;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:6px;width:fit-content;margin-bottom:6px}
+.phases{list-style:none;display:flex;gap:6px;padding:0;margin:0 0 4px;flex-wrap:wrap}
+.phases li{background:var(--paper);border:1.5px solid var(--karo);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--muted)}
+.phases li.now{border-color:var(--tab);color:var(--text);font-weight:700;box-shadow:inset 0 0 0 1px var(--tab)}
+.phases li.done{color:var(--green);border-color:var(--green)}
+
+/* Rechnung untereinander */
+.linewrap{position:relative;overflow-x:auto;margin:12px 0 8px;padding:6px 2px 10px}
+.lines{display:flex;flex-direction:column;gap:8px;width:max-content;min-width:100%}
+.line{display:flex;align-items:center;gap:10px;background:var(--paper);padding:6px 12px;border-radius:10px;width:fit-content;transition:opacity .2s}
+.line.task{padding-top:8px;padding-bottom:8px}
+.line.task .small{font-size:14px;color:var(--muted);margin-right:4px;font-family:var(--ui)}
+.line.wait{opacity:.45}
+.line.hl{background:var(--hl)}
+.line.skipped .frac,.line.skipped .fin,.line.skipped .opx{opacity:.35}
+.line.claimed>:not(.eqs):not(.claim):not(.tagx){display:none}
+.line.claimed{min-height:60px}
+.den{display:inline-flex;align-items:center;gap:4px}
+.den .dot{font-size:24px}
+.claim{font-size:14px;white-space:normal!important;font-weight:700;color:var(--green);border:2px solid var(--green);border-radius:999px;padding:2px 10px;transform:rotate(-2deg);white-space:nowrap;background:var(--paper)}
+.sol .claim{color:var(--ink);border-color:var(--ink)}
+.eqs,.opx{font-family:var(--hand);font-size:29px;line-height:1;min-width:.6em;text-align:center}
+.frac{display:inline-flex;flex-direction:column;align-items:center;gap:3px}
+.frac .bar{align-self:stretch;height:3px;background:var(--text);border-radius:2px;min-width:1.4em}
+.sn{font-family:var(--hand);font-size:24px;line-height:1.15;min-width:1em;text-align:center;padding:0 .15em}
+.sw{font-family:var(--hand);font-size:35px;line-height:1;padding-right:.08em}
+.mixin{display:inline-flex;align-items:center;gap:6px}
+.fin{--len:2;width:calc(var(--len) * .58em + .8em);height:1.5em;font-family:var(--hand);font-size:24px;line-height:1;text-align:center;color:var(--ink);-webkit-text-fill-color:var(--ink);background:color-mix(in srgb,var(--paper) 88%,transparent);border:2px solid var(--karo);border-radius:8px;padding:0;caret-color:var(--ink);appearance:none;-moz-appearance:textfield}
+.fin.w{font-size:32px}
+.fin:focus{outline:none;border-color:var(--ink);background:var(--focus)}
+.fin:disabled{opacity:1;cursor:default}
+.line.wait .fin{background:color-mix(in srgb,var(--karo) 30%,transparent)}
+.fin.ok{border-color:var(--green);color:var(--green);-webkit-text-fill-color:var(--green)}
+.fin.bad{border-color:var(--red);color:var(--red);-webkit-text-fill-color:var(--red);background:color-mix(in srgb,var(--red) 11%,transparent);box-shadow:0 0 0 1px var(--red)}
+.line.done .fin.ok{border-color:color-mix(in srgb,var(--green) 40%,transparent)}
+.tagx{font-size:12px;color:var(--muted);border:1.5px solid var(--karo);border-radius:999px;padding:1px 9px;margin-left:6px;white-space:nowrap;background:var(--paper)}
+.line.now .tagx{border-color:var(--tab);color:var(--text)}
+.sol .sn{color:var(--ink)} .sol .sw{color:var(--ink)}
+.sol .line.task .sn,.sol .line.task .sw,.sol .given .sn,.sol .given .sw,.sol .sn.given{color:var(--text)}
+.new{animation:ink .45s ease}
+@keyframes ink{from{transform:scale(1.3);opacity:0}to{transform:none;opacity:1}}
+
+.stamp{position:absolute;right:5%;top:28%;transform:rotate(-14deg);border:4px double var(--red);color:var(--red);font-family:var(--hand);font-size:40px;padding:0 16px;border-radius:10px;background:color-mix(in srgb,var(--paper) 80%,transparent);pointer-events:none;animation:stamp .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes stamp{from{transform:rotate(-14deg) scale(2.2);opacity:0}to{transform:rotate(-14deg) scale(1);opacity:1}}
+
+/* Brüche im Text */
+.ifr{display:inline-flex;flex-direction:column;vertical-align:middle;font-family:var(--hand);font-size:1.2em;line-height:1;text-align:center;margin:0 .1em}
+.ifr>span{padding:0 .18em}
+.ifr>span:first-child{border-bottom:2px solid currentColor;padding-bottom:1px}
+
+/* Rückmeldung */
+.note{background:var(--paper);border:2px solid var(--karo);border-radius:12px;padding:12px 14px;margin:8px 0 14px;max-width:62ch}
+.note p{margin:0}
+.note ul{margin:6px 0 0;padding-left:20px}
+.note li{margin:5px 0}
+.note.good{border-color:var(--green)}
+.note.good>p>strong:first-child{color:var(--green)}
+.note.bad{border-color:var(--red)}
+.note.bad>p>strong:first-child{color:var(--red)}
+.note strong{font-weight:700}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.stepbox{width:min(62ch,calc(100vw - 96px));margin:2px 0 8px;scroll-margin-bottom:16px}
+.stepbox .note{margin:0 0 10px;max-width:none}
+.lineact{display:inline-flex;gap:6px;align-items:center;margin-left:auto;padding-left:10px}
+.line.hasok{align-self:stretch;width:auto}
+.lineact .btn{padding:5px 12px;font-size:14px;box-shadow:2px 2px 0 var(--text)}
+.lineact .btn.main{min-width:54px}
+.lineact.below{display:flex;flex-wrap:wrap;justify-content:flex-end;margin:-2px 0 6px;padding-left:0;width:0;min-width:100%}
+.actions.more{margin-top:14px;padding-top:12px;border-top:2px dashed var(--karo)}
+.btn{border:2px solid var(--text);background:var(--paper);border-radius:10px;padding:9px 14px;font-weight:500;font-size:15px;box-shadow:2px 2px 0 var(--text);transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.btn.main{background:var(--tab);border-color:var(--tab);color:#fff;font-weight:700;box-shadow:2px 2px 0 var(--text)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* Musterlösung */
+.solution{margin-top:18px}
+.solution h2{font-family:var(--hand);font-weight:400;font-size:32px;margin:0;color:var(--ink);background:var(--paper);width:fit-content;padding:0 8px;border-radius:6px}
+.soltext{background:var(--paper);border-left:4px solid var(--tab);padding:10px 14px;border-radius:0 10px 10px 0;min-height:64px;max-width:62ch;font-size:16px;line-height:1.75}
+.vis{background:var(--paper);border-radius:10px;padding:8px;margin-top:8px;max-width:520px}
+.vis svg{display:block;width:100%;height:auto}
+.vis .vf{fill:var(--tab)} .vis .vf2{fill:color-mix(in srgb,var(--tab) 50%,var(--paper))} .vis .ve{fill:var(--paper)}
+.vis .va{fill:var(--hl)} .vis .vb{fill:var(--vb)}
+.vis rect{stroke:var(--text);stroke-width:.8}
+.vis .vu{fill:none;stroke-width:2.5}
+.vis .vl{font-family:var(--hand);font-size:27px;fill:var(--text)} .vis .vs{font-size:24px}
+.solnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.solnav .count{font-size:14px;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:6px}
+
+/* Eigene Aufgabe */
+.overlay{position:fixed;inset:0;background:rgba(15,20,35,.5);display:grid;place-items:center;padding:16px;z-index:20}
+.modal{background:var(--paper);border:2px solid var(--text);border-radius:14px;box-shadow:5px 5px 0 var(--text);padding:20px;max-width:460px;width:100%;max-height:100%;overflow:auto}
+.modal h2{font-family:var(--hand);font-weight:400;font-size:32px;margin:0 0 4px;color:var(--ink)}
+.modal .hint{margin:0 0 12px;font-size:14px;color:var(--muted)}
+.ownrow{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.ownnum{display:flex;align-items:center;gap:6px}
+.ownnum input{font-family:var(--hand);text-align:center;border:2px solid var(--karo);border-radius:8px;background:var(--paper);color:var(--ink);padding:0}
+.ownnum input:focus{outline:none;border-color:var(--ink);background:var(--focus)}
+.ownnum .g{width:2.1em;height:1.5em;font-size:34px}
+.ownnum .z,.ownnum .n{width:2.6em;height:1.45em;font-size:24px}
+.opsel{display:flex;flex-direction:column;gap:6px}
+.opsel button{width:46px;height:40px;border:2px solid var(--text);border-radius:10px;background:var(--paper);font-family:var(--hand);font-size:30px;line-height:1}
+.opfix{font-family:var(--hand);font-size:40px;line-height:1;padding:0 4px}
+.opsel button[aria-pressed="true"]{background:var(--tab);border-color:var(--tab);color:#fff}
+.modal .err{color:var(--red);min-height:22px;font-size:14px;margin:10px 0 4px}
+.modal .actions{justify-content:flex-end;margin-top:8px}
+
+.brand{display:flex;align-items:flex-start;gap:12px}
+.cover .coverright{margin-left:auto;flex:1 1 280px}
+.cover .stats{justify-content:flex-end}
+.qrbtn{flex:none;width:30px;height:30px;display:grid;place-items:center;border:2px solid var(--text);border-radius:7px;background:var(--paper);color:var(--text);box-shadow:2px 2px 0 var(--text);padding:0;transition:transform .06s,box-shadow .06s}
+.qrbtn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.modal.qrmodal{max-width:none;width:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.modal.qrmodal h2{margin:0}
+.qrbox{background:#ffffff;padding:12px;border-radius:10px;border:2px solid var(--karo);line-height:0}
+.qrbox svg{display:block;width:min(calc(100vw - 100px),calc(100vh - 250px),460px);height:auto;min-width:160px}
+.qrurl{font-size:13px;color:var(--muted);margin:0;max-width:min(calc(100vw - 100px),calc(100vh - 250px),460px);overflow-wrap:anywhere;user-select:all}
+.modal.qrmodal .actions{margin:0}
+@media (max-width:560px){
+  .inner{padding-left:24px}
+  .sheet{padding-left:10px;padding-right:10px}
+  .sheet::before{left:26px}
+  .label h1{font-size:36px}
+  .fin{font-size:21px} .fin.w{font-size:27px}
+  .eqs,.opx{font-size:24px} .sn{font-size:21px} .sw{font-size:30px}
+  .line{gap:7px;padding:5px 8px}
+  .tagx{display:none}
+}
+@media (max-width:700px){
+  .tabs{margin-left:4px;gap:4px}
+  .tab{padding:8px 9px 10px;font-size:14px}
+  .tab .sym{font-size:22px;margin:0 3px 0 0}
+  .tab .badge{margin-left:4px;min-width:18px;padding:0 4px}
+  .tab .lg{display:none} .tab .sm{display:inline}
+}
+@media (max-width:440px){.tab{padding:7px 7px 9px;font-size:13px}.tabs{gap:3px;margin-left:0}.tab .ico{gap:2px}.tab:not([data-kind="mix"]):not([data-kind="rev"]){padding-left:5px;padding-right:5px}.tab .ico .o{font-size:1.4em}}
+@media (max-width:370px){.tab{padding:6px 5px 8px;font-size:12px}.tabs{gap:2px}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header class="cover">
+    <div class="brand">
+    <button class="qrbtn" id="qrBtn" type="button" title="QR-Code zu dieser Seite zeigen" aria-label="QR-Code zu dieser Seite zeigen">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-6 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2z"/></svg>
+    </button>
+    <div class="label"><h1>Bruchheft</h1><p>Brüche multiplizieren</p></div>
+    </div>
+    <div class="coverright">
+      <div class="levels hidden" id="levels" role="group" aria-label="Level">
+        <span>Level</span>
+        <button type="button" data-level="1" title="Zahlen bis 60, mit Hilfen">1</button>
+        <button type="button" data-level="2" title="Zahlen bis 100, ohne Hilfen">2</button>
+        <button type="button" data-level="3" title="Zahlen bis 100, nur am Ende prüfen">3</button>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Aufgabenart">
+    <button class="tab" role="tab" data-kind="nat" title="Bruch mal natürliche Zahl" aria-label="Bruch mal natürliche Zahl"><span class="lg"><span class="ico" aria-hidden="true"><span class="fi"><i></i><b></b><i></i></span><span class="o">·</span><span class="ni"></span></span>&nbsp; Bruch · Zahl</span><span class="sm"><span class="ico" aria-hidden="true"><span class="fi"><i></i><b></b><i></i></span><span class="o">·</span><span class="ni"></span></span></span></button>
+    <button class="tab" role="tab" data-kind="mul" title="Bruch mal Bruch" aria-label="Bruch mal Bruch"><span class="lg"><span class="ico" aria-hidden="true"><span class="fi"><i></i><b></b><i></i></span><span class="o">·</span><span class="fi"><i></i><b></b><i></i></span></span>&nbsp; Bruch · Bruch</span><span class="sm"><span class="ico" aria-hidden="true"><span class="fi"><i></i><b></b><i></i></span><span class="o">·</span><span class="fi"><i></i><b></b><i></i></span></span></span></button>
+    <button class="tab" role="tab" data-kind="mix" title="Alles" aria-label="Alles">🎲 Alles</button>
+    <button class="tab" role="tab" data-kind="rev" title="Fehler-Training" aria-label="Fehler-Training">🔁<span class="lg"> Fehler-Training</span><span class="badge" id="revBadge">0</span></button>
+  </nav>
+
+  <section class="sheet">
+    <div class="inner">
+      <div class="revinfo hidden" id="revInfo"></div>
+      <ol class="phases" id="phases"></ol>
+      <div class="linewrap" id="work"><div class="lines" id="lines"></div><div class="stamp hidden" id="stamp"></div></div>
+      <div class="stepbox" id="stepbox">
+        <div class="note" id="note" aria-live="polite"></div>
+        <div class="actions">
+          <button class="btn main" id="checkBtn">✓ Prüfen</button>
+          <button class="btn hidden" id="noBtn">🚫 Kann nicht gekürzt werden</button>
+          <button class="btn hidden" id="skipBtn">⏭ Überspringen</button>
+          <button class="btn main hidden" id="nextBtn">Neue Aufgabe ▶</button>
+        </div>
+      </div>
+      <div class="actions more">
+        <button class="btn" id="solBtn">👀 Musterlösung</button>
+        <button class="btn" id="resetBtn">↺ Nochmal von vorn</button>
+        <button class="btn" id="newBtn">Neue Aufgabe</button>
+        <button class="btn" id="ownBtn">✏️ Eigene Aufgabe</button>
+      </div>
+
+      <div class="solution hidden" id="solution">
+        <h2>Musterlösung</h2>
+        <div class="linewrap sol"><div class="lines" id="solLines"></div></div>
+        <div class="soltext" id="solText" aria-live="polite"></div>
+        <div class="vis hidden" id="solVis"></div>
+        <div class="solnav">
+          <button class="btn" id="solPrev">◀ Zurück</button>
+          <button class="btn main" id="solNext">Weiter ▶</button>
+          <span class="count" id="solCount"></span>
+          <button class="btn" id="solClose">Selbst nochmal probieren</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay hidden" id="qrOverlay">
+  <div class="modal qrmodal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Bruchheft öffnen</h2>
+    <div class="qrbox" id="qrBox"></div>
+    <p class="qrurl" id="qrUrl"></p>
+    <div class="actions" style="justify-content:center"><button class="btn main" id="qrClose">Schließen</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ownTitle">
+    <h2 id="ownTitle">Eigene Aufgabe</h2>
+    <p class="hint">Tippe die Aufgabe aus deinem Buch ab. Für eine natürliche Zahl füllst du nur das große Feld aus, für einen Bruch nur Zähler und Nenner, für eine gemischte Zahl alle drei.</p>
+    <div class="ownrow">
+      <div class="ownnum"><input class="g" id="oAg" inputmode="numeric" maxlength="2" aria-label="erste Zahl: Ganze"><span class="frac"><input class="z" id="oAz" inputmode="numeric" maxlength="3" aria-label="erste Zahl: Zähler"><span class="bar"></span><input class="n" id="oAn" inputmode="numeric" maxlength="3" aria-label="erste Zahl: Nenner"></span></div>
+      <div class="opsel fixed" aria-hidden="true"><span class="opfix">·</span></div>
+      <div class="ownnum"><input class="g" id="oBg" inputmode="numeric" maxlength="2" aria-label="zweite Zahl: Ganze"><span class="frac"><input class="z" id="oBz" inputmode="numeric" maxlength="3" aria-label="zweite Zahl: Zähler"><span class="bar"></span><input class="n" id="oBn" inputmode="numeric" maxlength="3" aria-label="zweite Zahl: Nenner"></span></div>
+    </div>
+    <div class="err" id="ownErr"></div>
+    <div class="actions"><button class="btn" id="ownCancel">Abbrechen</button><button class="btn main" id="ownOk">Rechnen</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const L=(function(){
+"use strict";
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){const t=a%b;a=b;b=t}return a};
+const red=f=>{const g=gcd(f[0],f[1])||1;return[f[0]/g,f[1]/g]};
+const imp=o=>o.t==="int"?[o.v,1]:o.t==="frac"?[o.z,o.n]:[o.w*o.n+o.z,o.n];
+const eq=(a,b)=>a[0]*b[1]===a[1]*b[0];
+const rec=f=>[f[1],f[0]];
+const mulF=(a,b)=>[a[0]*b[0],a[1]*b[1]];
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+/* ---------- Darstellung ---------- */
+const fr=(z,n)=>'<span class="ifr"><span>'+z+'</span><span>'+n+'</span></span>';
+const frA=f=>f[1]===1?String(f[0]):fr(f[0],f[1]);
+const opH=o=>o.t==="int"?String(o.v):o.t==="frac"?fr(o.z,o.n):o.w+"\u2009"+fr(o.z,o.n);
+const opT=o=>o.t==="int"?String(o.v):o.t==="frac"?o.z+"/"+o.n:o.w+" "+o.z+"/"+o.n;
+const sym=op=>op==="div"?":":"·";
+const taskH=t=>opH(t.A)+" "+sym(t.op)+" "+opH(t.B);
+const taskT=t=>opT(t.A)+" "+sym(t.op)+" "+opT(t.B);
+const resH=f=>{if(f[1]===1)return String(f[0]);if(f[0]>f[1])return fr(f[0],f[1])+" = "+Math.floor(f[0]/f[1])+"\u2009"+fr(f[0]%f[1],f[1]);return fr(f[0],f[1])};
+const teln=n=>({2:"Halbe",3:"Drittel",4:"Viertel",5:"Fünftel",6:"Sechstel",7:"Siebtel",8:"Achtel",9:"Neuntel",10:"Zehntel",11:"Elftel",12:"Zwölftel",20:"Zwanzigstel"}[n]||n+"-tel");
+
+/* ---------- Aufgaben ---------- */
+function kindOf(t){if(t.op==="div")return t.B.t==="int"?"dfn":t.A.t==="int"?"dnf":"div";return(t.A.t==="int"||t.B.t==="int")?"nat":"mul"}
+function result(t){let a=imp(t.A),b=imp(t.B);if(t.op==="div")b=rec(b);return red(mulF(a,b))}
+function preF(t){const A=imp(t.A),B=imp(t.B);return t.op==="div"?[A,rec(B)]:[A,B]}
+function canPre(F){return gcd(F[0][0],F[1][1])>1||gcd(F[1][0],F[0][1])>1||gcd(F[0][0],F[0][1])>1||gcd(F[1][0],F[1][1])>1}
+/* Vorkürzen schrittweise: erst über Kreuz, dann im selben Bruch */
+function preCancel(F){
+  const f=[F[0].slice(),F[1].slice()],log=[];
+  [[0,1],[1,0],[0,0],[1,1]].forEach(([i,j])=>{const g=gcd(f[i][0],f[j][1]);if(g>1){log.push({z:f[i][0],n:f[j][1],g,cross:i!==j});f[i][0]/=g;f[j][1]/=g}});
+  return{F:f,log};
+}
+function plan(t){
+  const s=[];
+  if(t.A.t==="mix"||t.B.t==="mix")s.push("U");
+  if(t.op==="div")s.push(t.B.t==="int"?"N":"K");
+  if(numForm(t))s.push("Z");
+  s.push("V","M","R","G");
+  return s;
+}
+const STEPNAME={U:"Umwandeln",K:"Kehrwert",N:"Zahl in den Nenner",Z:"Zahl in den Zähler",V:"Vorkürzen",M:"Ausrechnen",R:"Kürzen",G:"Ganze oder gemischte Zahl"};
+function numForm(t){return(t.op==="mul"&&(t.A.t==="int"||t.B.t==="int"))||(t.op==="div"&&t.A.t==="int")}
+const OPTIONAL={V:true};
+const isImp=R=>R[0]>R[1]&&R[1]!==1;
+function canonical(t){
+  const v={},A=imp(t.A),B=imp(t.B);let F=[A,B];
+  if(t.A.t==="mix"||t.B.t==="mix")v.U={A:t.A.t==="mix"?A:null,B:t.B.t==="mix"?B:null};
+  v._no={};
+  if(t.op==="div"){F=[A,rec(B)];if(t.B.t==="int")v.N={z:A[0],n:[A[1],t.B.v]};else v.K={A:F[0],B:F[1]}}
+  if(numForm(t)){const ii=F[0][1]===1&&!(F[1][1]===1&&t.op==="mul"&&t.B.t==="int")?0:1,fi=1-ii;v.Z={z:[F[fi][0],F[ii][0]],n:F[fi][1]*F[ii][1]};F=[[F[fi][0],v.Z.n],[F[ii][0],1]]}
+  if(canPre(F))F=preCancel(F).F;else v._no.V=true;
+  v.V={A:F[0],B:F[1]};
+  const M=mulF(F[0],F[1]);v.M=M;const R=red(M);v.R=R;if(gcd(M[0],M[1])===1)v._no.R=true;
+  if(isImp(R))v.G=[Math.floor(R[0]/R[1]),R[0]%R[1],R[1]];else if(R[1]===1)v.G=[R[0],null,null];else{v.G=null;v._no.G=true}
+  return v;
+}
+function initCtx(t){return{F:[imp(t.A),imp(t.B)]}}
+
+/* Zufallsaufgaben */
+const properFrac=(nMin,nMax)=>{for(;;){const n=rnd(nMin,nMax),z=rnd(1,n-1);if(gcd(z,n)===1)return{t:"frac",z,n}}};
+let MAXN=100;
+const SIZE=()=>pick([12,30,60,100].filter(x=>x<=MAXN));
+function setMax(m){MAXN=m}
+function fits(t){const F=preF(t),M=[F[0][0]*F[1][0],F[0][1]*F[1][1]];if(M[0]>9999||M[1]>9999)return false;const R=red(M);return R[0]<=999&&R[1]<=999&&!(R[0]===R[1])}
+function genBy(make,fallback){
+  for(let i=0;i<600;i++){const t=make();if(!fits(t))continue;const want=Math.random()<.85;if(want===canPre(preF(t)))return t}
+  return fallback;
+}
+function genNat(){return genBy(()=>{const f=properFrac(2,SIZE()),v=rnd(2,SIZE());return Math.random()<.25?{op:"mul",A:{t:"int",v},B:f}:{op:"mul",A:f,B:{t:"int",v}}},{op:"mul",A:{t:"frac",z:3,n:4},B:{t:"int",v:6}})}
+function genMul(){return genBy(()=>({op:"mul",A:properFrac(2,SIZE()),B:properFrac(2,SIZE())}),{op:"mul",A:{t:"frac",z:2,n:3},B:{t:"frac",z:9,n:10}})}
+function genDiv(){return genBy(()=>({op:"div",A:properFrac(2,SIZE()),B:properFrac(2,SIZE())}),{op:"div",A:{t:"frac",z:3,n:4},B:{t:"frac",z:3,n:8}})}
+function genDfn(){return genBy(()=>({op:"div",A:properFrac(2,SIZE()),B:{t:"int",v:rnd(2,SIZE())}}),{op:"div",A:{t:"frac",z:6,n:7},B:{t:"int",v:3}})}
+function genDnf(){return genBy(()=>({op:"div",A:{t:"int",v:rnd(2,SIZE())},B:properFrac(2,SIZE())}),{op:"div",A:{t:"int",v:4},B:{t:"frac",z:2,n:3}})}
+function mixify(t0){
+  for(let i=0;i<50;i++){const t=JSON.parse(JSON.stringify(t0)),n=rnd(2,12),m={t:"mix",w:rnd(1,9),z:rnd(1,n-1),n};
+    if(t.A.t==="frac"&&(t.B.t!=="frac"||Math.random()<.5))t.A=m;else if(t.B.t==="frac")t.B=m;else return t0;
+    if(fits(t))return t}
+  return t0;
+}
+function gen(kind,pool){
+  if(kind==="nat")return genNat();if(kind==="mul")return genMul();if(kind==="div")return genDiv();if(kind==="dfn")return genDfn();if(kind==="dnf")return genDnf();
+  const k=pick(pool||["nat","mul","dfn","dnf","div"]);let t=gen(k);if(Math.random()<.3)t=mixify(t);return t;
+}
+
+/* ---------- Eigene Aufgabe ---------- */
+function parseOwn(a,op,b){ /* a,b: {g,z,n} als Strings */
+  const one=(o,nm)=>{
+    const g=o.g.trim(),z=o.z.trim(),n=o.n.trim();
+    if(!g&&!z&&!n)return{err:"Bei der "+nm+" Zahl fehlt noch etwas."};
+    if([g,z,n].some(s=>s&&!/^\d+$/.test(s)))return{err:"Bitte nur Ziffern eingeben."};
+    if((z&&!n)||(!z&&n))return{err:"Bei der "+nm+" Zahl brauchst du Zähler und Nenner."};
+    const G=g?+g:null,Z=z?+z:null,N=n?+n:null;
+    if(N===0)return{err:"Der Nenner darf nicht 0 sein."};
+    if(Z===0)return{err:"Der Zähler darf nicht 0 sein."};
+    if(Z===null){if(G===0)return{err:"Die "+nm+" Zahl darf nicht 0 sein."};return{o:{t:"int",v:G}}}
+    if(G===null||G===0)return{o:{t:"frac",z:Z,n:N}};
+    if(Z>=N)return{err:"Bei einer gemischten Zahl muss der Bruch kleiner als 1 sein."};
+    return{o:{t:"mix",w:G,z:Z,n:N}};
+  };
+  const A=one(a,"ersten");if(A.err)return A;const B=one(b,"zweiten");if(B.err)return B;
+  if(A.o.t==="int"&&B.o.t==="int")return{err:"Mindestens eine der beiden Zahlen muss ein Bruch sein."};
+  const t={op,A:A.o,B:B.o};
+  const c=canonical(t),big=[imp(t.A),imp(t.B),c.M].some(f=>f[0]>9999||f[1]>9999);
+  if(big)return{err:"Die Zahlen sind zu groß für dieses Heft. Nimm kleinere Zahlen."};
+  return{task:t};
+}
+
+/* ---------- Prüfen ---------- */
+function out(){return{ok:true,marks:{},msgs:[],info:""}}
+function mk(o,st,...ids){ids.forEach(i=>{o.marks[i]=st;if(st==="bad")o.ok=false})}
+const S=a=>"<strong>"+a+"</strong>";
+
+function checkU(t,ctx,v){
+  const o=out();
+  ["A","B"].forEach(k=>{
+    const op=t[k];if(op.t!=="mix")return;
+    const id="U."+k,e=imp(op),x=v[k].z,y=v[k].n,nm=opH(op);
+    if(x==null&&y==null){mk(o,"bad",id+".z",id+".n");o.msgs.push(S(nm)+": Schreib die gemischte Zahl als Bruch.");return}
+    if(x==null){mk(o,"bad",id+".z");o.msgs.push(S(nm)+": Der Zähler fehlt noch.");return}
+    if(y==null){mk(o,"bad",id+".n");o.msgs.push(S(nm)+": Der Nenner fehlt noch.");return}
+    if(eq([x,y],e)){mk(o,"ok",id+".z",id+".n");return}
+    if(y!==op.n){mk(o,"bad",id+".n");o.msgs.push(S(nm)+": Beim Umwandeln bleibt der Nenner gleich.")}else mk(o,"ok",id+".n");
+    if(x!==e[0]){mk(o,"bad",id+".z");
+      let m;
+      if(x===op.w+op.z)m="Du hast nur "+op.w+" + "+op.z+" gerechnet. Denk daran: Jedes Ganze besteht aus "+op.n+" "+(op.n===2?"Halben":teln(op.n)+"n")+".";
+      else if(x===op.w*op.n)m="Du hast die Ganzen richtig umgerechnet, aber vergessen, den Zähler "+op.z+" dazuzuzählen.";
+      else if(x===op.w*op.z+op.n)m="Achtung, Reihenfolge: Erst Ganze mal Nenner, dann den Zähler dazuzählen.";
+      else m="Der Zähler stimmt nicht. Rechne: Ganze mal Nenner, dann plus Zähler.";
+      o.msgs.push(S(nm)+": "+m);
+    }else mk(o,"ok",id+".z");
+  });
+  if(o.ok)o.ctx={F:["A","B"].map(k=>t[k].t==="mix"?[v[k].z,v[k].n]:imp(t[k]))};
+  return o;
+}
+
+function checkK(t,ctx,v){
+  const o=out(),FA=ctx.F[0],FB=ctx.F[1],eB=rec(FB);
+  const side=(k,e)=>{const x=v[k].z,y=v[k].n,id="K."+k,which=k==="A"?"ersten":"zweiten";
+    if(x==null&&y==null){mk(o,"bad",id+".z",id+".n");o.msgs.push("Beim "+which+" Bruch fehlt noch etwas.");return null}
+    if(x==null){mk(o,"bad",id+".z");o.msgs.push("Beim "+which+" Bruch fehlt der Zähler.");return null}
+    if(y==null&&e[1]!==1&&!(k==="B"&&eq([x,1],FB))){mk(o,"bad",id+".n");o.msgs.push("Beim "+which+" Bruch fehlt der Nenner.");return null}
+    return[x,y==null?1:y];
+  };
+  const a=side("A",FA),b=side("B",eB);if(!a||!b){if(a)mk(o,"ok","K.A.z","K.A.n");if(b)mk(o,"ok","K.B.z","K.B.n");return o}
+  const okA=eq(a,FA),okB=eq(b,eB);
+  if(okA&&okB){mk(o,"ok","K.A.z","K.A.n","K.B.z","K.B.n");o.ctx={F:[a,b]};return o}
+  if(eq(a,eB)&&eq(b,FA)){mk(o,"ok","K.A.z","K.A.n","K.B.z","K.B.n");o.ctx={F:[a,b]};o.info="Du hast die Reihenfolge vertauscht. Das darfst du, beim Malnehmen ist die Reihenfolge egal.";return o}
+  const revA=!okA&&eq(a,rec(FA)),sameB=!okB&&eq(b,FB);
+  const markSide=(k,e,got)=>{const zb=got[0]!==e[0],nb=got[1]!==e[1];if(!zb&&!nb){mk(o,"bad","K."+k+".z","K."+k+".n");return}mk(o,zb?"bad":"ok","K."+k+".z");mk(o,nb?"bad":"ok","K."+k+".n")};
+  if(okA)mk(o,"ok","K.A.z","K.A.n");else markSide("A",FA,a);
+  if(okB)mk(o,"ok","K.B.z","K.B.n");else markSide("B",eB,b);
+  const aInt=t.A.t==="int",bInt=t.B.t==="int",nA=aInt?"Erste Zahl":"Erster Bruch",zweit=bInt?"die Zahl "+t.B.v+", durch die du teilst":"den zweiten Bruch, also den, durch den du teilst";
+  if(revA&&sameB){o.msgs.push("Du hast den Kehrwert von der "+S("ersten")+" Zahl gebildet. "+(aInt?"Die Zahl "+t.A.v+" vorne bleibt so, wie sie ist.":"Der erste Bruch bleibt so, wie er ist.")+" Umdrehen musst du "+zweit+".");return o}
+  if(revA)o.msgs.push(S(nA)+": "+(aInt?"Die schreibst":"Den schreibst")+" du unverändert ab. Nur "+(bInt?"die Zahl hinter dem Geteiltzeichen":"der zweite Bruch")+" wird umgedreht.");
+  else if(!okA)o.msgs.push(S(nA)+": "+(aInt?"Die ist":"Der ist")+" nicht richtig abgeschrieben. Schau noch einmal in die Aufgabe.");
+  if(sameB){
+    if(t.B.t==="int")o.msgs.push(S("Zahl "+t.B.v)+": Auch von der Zahl "+t.B.v+" brauchst du den Kehrwert. Stell dir "+t.B.v+" als Bruch mit dem Nenner 1 vor und vertausche dann Zähler und Nenner.");
+    else o.msgs.push(S(t.A.t==="int"?"Bruch":"Zweiter Bruch")+": Du hast Zähler und Nenner noch nicht vertauscht. Durch einen Bruch teilen heißt: mit seinem Kehrwert malnehmen.");
+  }else if(!okB)o.msgs.push(S(t.B.t==="int"?"Zahl "+t.B.v:t.A.t==="int"?"Bruch":"Zweiter Bruch")+": Der Kehrwert stimmt nicht. Zähler und Nenner tauschen einfach die Plätze, sonst ändert sich nichts.");
+  return o;
+}
+
+function checkM(t,ctx,v){
+  const o=out(),[F0,F1]=ctx.F,Z=F0[0]*F1[0],N=F0[1]*F1[1],x=v.z,y=v.n;
+  if(x==null&&y==null){mk(o,"bad","M.z","M.n");o.msgs.push("Schreib hier das Ergebnis vom Malnehmen als Bruch hin.");return o}
+  if(x==null){mk(o,"bad","M.z");o.msgs.push(S("Zähler")+" fehlt noch.")}
+  if(y==null){mk(o,"bad","M.n");o.msgs.push(S("Nenner")+" fehlt noch. Auch wenn im Nenner eine 1 steht, schreib sie hin.")}
+  if(x==null||y==null){if(x!=null)mk(o,x===Z?"ok":"bad","M.z");if(y!=null)mk(o,y===N?"ok":"bad","M.n");if(o.marks["M.z"]==="bad"&&x!=null)o.msgs.push(S("Zähler")+": Rechne "+F0[0]+" · "+F1[0]+" noch einmal.");if(o.marks["M.n"]==="bad"&&y!=null)o.msgs.push(S("Nenner")+": Rechne "+F0[1]+" · "+F1[1]+" noch einmal.");return o}
+  if(y===0){mk(o,"bad","M.n");o.msgs.push("Im Nenner darf keine 0 stehen.");return o}
+  if(eq([x,y],[Z,N])){mk(o,"ok","M.z","M.n");o.ctx={F:ctx.F,M:[x,y]};
+    if(x<Z)o.info="Du hast schon vorher gekürzt, sehr geschickt!";return o}
+  const dnf=kindOf(t)==="dnf",nat=(t.op==="mul"&&(t.A.t==="int"||t.B.t==="int"))||(dnf&&ctx.F.some(f=>f[1]===1));
+  if(nat){
+    const vi=dnf?(ctx.F[0][1]===1?0:1):t.A.t==="int"?0:1,n=ctx.F[vi][0],f=ctx.F[1-vi],BEI=dnf?"Beim Malnehmen mit einer natürlichen Zahl":"Bei „Bruch mal natürliche Zahl“";
+    if(x===f[0]*n&&y===f[1]*n){mk(o,"ok","M.z");mk(o,"bad","M.n");o.msgs.push("Du hast Zähler "+S("und")+" Nenner mit "+n+" malgenommen. Das ist Erweitern, dabei bleibt der Wert gleich! "+BEI+" nimmst du nur den Zähler mal, der Nenner bleibt.");return o}
+    if(x===f[0]&&y===f[1]*n){mk(o,"bad","M.z","M.n");o.msgs.push("Du hast den Nenner malgenommen statt den Zähler. "+BEI+" nimmst du den Zähler mit "+n+" mal, der Nenner bleibt gleich.");return o}
+    if(y===f[1]*n){mk(o,"bad","M.n");o.msgs.push(S("Nenner")+": Den nimmst du nicht mal "+n+". "+BEI+" bleibt der Nenner gleich.")}
+    if(x===f[0]+n){mk(o,"bad","M.z");o.msgs.push(S("Zähler")+": Du hast "+n+" dazugezählt. Du sollst aber malnehmen.")}
+  }
+  if(ctx.form==="num"&&x===F0[0]&&y===F0[1]*F1[0]&&y!==N){mk(o,"bad","M.z","M.n");o.msgs.push("Die Zahl "+F1[0]+" gehört in den Zähler, nicht in den Nenner.");return o}
+  if(kindOf(t)==="dfn"&&x===F0[0]*F1[1]&&y===F0[1]*F1[0]&&x!==Z){mk(o,"bad","M.z","M.n");o.msgs.push("Die Zahl "+F1[1]+" gehört in den Nenner, nicht in den Zähler.");return o}
+  if(!nat&&x===F0[0]*F1[1]&&y===F0[1]*F1[0]){mk(o,"bad","M.z","M.n");o.msgs.push("Du hast über Kreuz malgenommen. Richtig ist: Zähler mal Zähler und Nenner mal Nenner.");return o}
+  if(x===F0[0]+F1[0]&&y===F0[1]+F1[1]&&!(x===Z)){mk(o,"bad","M.z","M.n");o.msgs.push("Du hast Zähler plus Zähler und Nenner plus Nenner gerechnet. Beim Malnehmen gilt: Zähler mal Zähler, Nenner mal Nenner.");return o}
+  if(!nat&&F0[1]===F1[1]&&y===F0[1]&&y!==N&&!o.marks["M.n"]){mk(o,"bad","M.n");o.msgs.push(S("Nenner")+": Den hast du einfach übernommen, so wie beim Plusrechnen mit gleichen Nennern. Beim Malnehmen werden auch die Nenner malgenommen.")}
+  if(!o.marks["M.z"]){if(x===Z)mk(o,"ok","M.z");else{mk(o,"bad","M.z");o.msgs.push(x===F0[0]+F1[0]?S("Zähler")+": Hier hast du plus gerechnet statt mal.":S("Zähler")+": Rechne "+F0[0]+" · "+F1[0]+" noch einmal.")}}
+  if(!o.marks["M.n"]){if(y===N)mk(o,"ok","M.n");else{mk(o,"bad","M.n");o.msgs.push(y===F0[1]+F1[1]?S("Nenner")+": Hier hast du plus gerechnet statt mal.":S("Nenner")+": Rechne "+F0[1]+" · "+F1[1]+" noch einmal.")}}
+  if((x<Z&&Z%x===0)||(y<N&&N%y===0))o.msgs.push("Falls du vorher gekürzt hast: Du musst immer einen Zähler und einen Nenner durch dieselbe Zahl teilen.");
+  return o;
+}
+
+function checkR(t,ctx,v){
+  const o=out(),M=ctx.M,T=red(M),x=v.z,y=v.n;
+  if(x==null){mk(o,"bad","R.z");if(y==null)mk(o,"bad","R.n");o.msgs.push("Schreib den gekürzten Bruch hin. Wenn man nicht kürzen kann, schreibst du den Bruch einfach noch einmal ab.");return o}
+  if(y==null){
+    if(T[1]===1&&x===T[0]){mk(o,"ok","R.z");o.ctx={F:ctx.F,M,R:[x,1],Rint:true};o.info="Das Ergebnis ist sogar eine ganze Zahl.";return o}
+    if(T[1]===1){mk(o,"bad","R.z");o.msgs.push("Die Zahl stimmt nicht. Teile Zähler und Nenner durch dieselbe Zahl.");return o}
+    mk(o,"bad","R.n");o.msgs.push(S("Nenner")+" fehlt noch.");return o;
+  }
+  if(y===0){mk(o,"bad","R.n");o.msgs.push("Im Nenner darf keine 0 stehen.");return o}
+  if(eq([x,y],M)){
+    if(x>M[0]){mk(o,"bad","R.z","R.n");o.msgs.push("Der Wert stimmt, aber du hast erweitert statt gekürzt. Beim Kürzen werden Zähler und Nenner kleiner.");return o}
+    if(gcd(x,y)===1){mk(o,"ok","R.z","R.n");o.ctx={F:ctx.F,M,R:[x,y]};
+      if(y===1)o.info="Im Nenner steht 1. Im nächsten Schritt machst du daraus eine ganze Zahl.";
+      else if(x===M[0])o.info="Genau, dieser Bruch lässt sich nicht kürzen.";
+      return o}
+    mk(o,"bad","R.z","R.n");o.msgs.push("Der Wert stimmt, aber du kannst noch weiter kürzen: "+x+" und "+y+" haben noch einen gemeinsamen Teiler.");return o;
+  }
+  if(y===M[1]&&x!==M[0]&&M[0]%x===0){mk(o,"bad","R.z");mk(o,"ok","R.n");o.msgs.push("Du hast nur den Zähler geteilt. Beim Kürzen teilst du Zähler "+S("und")+" Nenner durch dieselbe Zahl.");return o}
+  if(x===M[0]&&y!==M[1]&&M[1]%y===0){mk(o,"ok","R.z");mk(o,"bad","R.n");o.msgs.push("Du hast nur den Nenner geteilt. Beim Kürzen teilst du Zähler "+S("und")+" Nenner durch dieselbe Zahl.");return o}
+  if(M[0]%x===0&&M[1]%y===0&&x<=M[0]&&y<=M[1]){
+    mk(o,x===T[0]?"ok":"bad","R.z");mk(o,y===T[1]?"ok":"bad","R.n");if(o.ok)mk(o,"bad","R.z","R.n");
+    o.msgs.push("Du hast den Zähler durch "+(M[0]/x)+" und den Nenner durch "+(M[1]/y)+" geteilt. Beim Kürzen musst du beide durch "+S("dieselbe")+" Zahl teilen.");return o}
+  mk(o,x===T[0]?"ok":"bad","R.z");mk(o,y===T[1]?"ok":"bad","R.n");if(o.ok)mk(o,"bad","R.z","R.n");
+  o.msgs.push("Beim Kürzen hat sich der Wert des Bruchs verändert. Teile Zähler und Nenner durch dieselbe Zahl.");
+  return o;
+}
+
+function checkG(t,ctx,v){
+  const o=out(),R=ctx.R,W=Math.floor(R[0]/R[1]),Rm=R[0]%R[1],q=R[1],w=v.w,x=v.z,y=v.n;
+  if(w==null&&x==null&&y==null){o.ok=false;o.noPenalty=true;o.msgs.push(R[1]===1?"Im Nenner steht 1. Schreib das Ergebnis als ganze Zahl ins große Feld.":"Schreib die gemischte Zahl hin oder tippe auf einen der Knöpfe darunter.");return o}
+  if(!isImp(R)){
+    if(R[1]===1){
+      if(w===R[0]&&x==null&&y==null){mk(o,"ok","G.w");return o}
+      if(w===R[0]){mk(o,"ok","G.w");if(x!=null)mk(o,"bad","G.z");if(y!=null)mk(o,"bad","G.n");o.msgs.push("Die ganze Zahl stimmt. Einen Bruchteil gibt es hier nicht, lass die kleinen Felder leer.");return o}
+      [["G.w",w],["G.z",x],["G.n",y]].forEach(([id,val])=>{if(val!=null)mk(o,"bad",id)});if(w==null)mk(o,"bad","G.w");
+      o.msgs.push("Im Nenner steht 1. Ein Bruch mit dem Nenner 1 ist eine ganze Zahl. Welche?");return o;
+    }
+    [["G.w",w],["G.z",x],["G.n",y]].forEach(([id,val])=>{if(val!=null)mk(o,"bad",id)});
+    o.msgs.push("Dein Ergebnis ist kleiner als 1. Daraus kann man keine gemischte Zahl machen.");return o;
+  }
+  if(w==null){mk(o,"bad","G.w");o.msgs.push(S("Ganze Zahl")+" fehlt noch.")}
+  if(x==null||y==null){if(x==null)mk(o,"bad","G.z");if(y==null)mk(o,"bad","G.n");o.msgs.push(S("Bruchteil")+": Da fehlt noch "+(x==null&&y==null?"Zähler und Nenner":x==null?"der Zähler":"der Nenner")+".")}
+  if(!o.ok){if(w!=null)mk(o,w===W?"ok":"bad","G.w");if(x!=null)mk(o,x===Rm?"ok":"bad","G.z");if(y!=null)mk(o,y===q?"ok":"bad","G.n");return o}
+  if(y===0){mk(o,"bad","G.n");o.msgs.push("Im Nenner darf keine 0 stehen.");return o}
+  if(w===W&&x===Rm&&y===q){mk(o,"ok","G.w","G.z","G.n");return o}
+  if(eq([w*y+x,y],R)){
+    if(x>=y){mk(o,"bad","G.w","G.z");mk(o,"ok","G.n");o.msgs.push("Der Wert stimmt, aber im Bruchteil steckt noch mindestens ein Ganzes. Der Zähler muss kleiner sein als der Nenner.");return o}
+    mk(o,"ok","G.w");mk(o,"bad","G.z","G.n");o.msgs.push("Der Wert stimmt, aber den Bruchteil kannst du noch kürzen.");return o;
+  }
+  if(w!==W){mk(o,"bad","G.w");o.msgs.push(S("Ganze Zahl")+": Die stimmt nicht. Überlege: Wie oft passt "+q+" in "+R[0]+"?")}else mk(o,"ok","G.w");
+  if(y!==q){mk(o,"bad","G.n");o.msgs.push(S("Nenner")+": Beim Umwandeln bleibt der Nenner gleich.")}else mk(o,"ok","G.n");
+  if(x!==Rm){mk(o,"bad","G.z");o.msgs.push(S("Zähler")+": Er ist der Rest, der beim Teilen übrig bleibt.")}else mk(o,"ok","G.z");
+  return o;
+}
+function checkN(t,ctx,v){
+  const o=out(),a=ctx.F[0][0],b=ctx.F[0][1],n=t.B.v,z=v.z,d1=v.n1,d2=v.n2;
+  if(z==null){mk(o,"bad","N.z");o.msgs.push(S("Zähler")+" fehlt noch.")}
+  if(d1==null&&d2==null){mk(o,"bad","N.n1","N.n2");o.msgs.push("Im "+S("Nenner")+" fehlt noch etwas.")}
+  if(!o.ok)return o;
+  const D=[d1,d2].filter(x=>x!=null),prod=D.reduce((p,x)=>p*x,1);
+  if(z===0||D.includes(0)){["N.z","N.n1","N.n2"].forEach((id,i)=>{if([z,d1,d2][i]===0)mk(o,"bad",id)});o.msgs.push("Eine 0 darf hier nicht stehen.");return o}
+  const setF=()=>{o.ctx={F:[[z,D[0]],[1,D.length>1?D[1]:1]],form:"den"}};
+  if(z===a&&D.length===2&&((d1===b&&d2===n)||(d1===n&&d2===b))){mk(o,"ok","N.z","N.n1","N.n2");setF();return o}
+  if(z*b*n===a*prod){mk(o,"ok","N.z");if(d1!=null)mk(o,"ok","N.n1");if(d2!=null)mk(o,"ok","N.n2");setF();
+    if(D.length===1&&z===a)o.info="Du hast den Nenner gleich ausgerechnet. Das ist richtig, nur kannst du so nicht mehr so leicht vorkürzen.";
+    else if(z*n===a)o.info="Du hast den Zähler gleich durch "+n+" geteilt. Das klappt hier, weil "+a+" durch "+n+" teilbar ist.";
+    else o.info="Der Wert stimmt, du hast schon gekürzt.";
+    return o}
+  let zBad=false;
+  if(z===a*n){zBad=true;o.msgs.push(S("Zähler")+": Du hast ihn mit "+n+" malgenommen. Beim Teilen durch "+n+" wird der Bruch aber kleiner: Die Zahl "+n+" kommt in den "+S("Nenner")+".")}
+  else if(z!==a){zBad=true;o.msgs.push(S("Zähler")+": Den schreibst du unverändert ab.")}
+  mk(o,zBad?"bad":"ok","N.z");
+  const dOk=(D.length===2&&((d1===b&&d2===n)||(d1===n&&d2===b)))||(D.length===1&&D[0]===b*n);
+  if(dOk){if(d1!=null)mk(o,"ok","N.n1");if(d2!=null)mk(o,"ok","N.n2")}
+  else if(D.length===1&&D[0]===b){mk(o,"ok",d1!=null?"N.n1":"N.n2");mk(o,"bad",d1!=null?"N.n2":"N.n1");if(!zBad||z!==a*n)o.msgs.push(S("Nenner")+": Da fehlt noch die Zahl, durch die du teilst. Schreib sie mit einem Malpunkt dazu.")}
+  else{["N.n1","N.n2"].forEach((id,i)=>{const x=[d1,d2][i];mk(o,(x===b||x===n)&&D.length===2&&d1!==d2?"ok":"bad",id)});
+    if(D.length===2&&d1===d2&&(d1===b||d1===n))mk(o,"bad","N.n1","N.n2");
+    if(!o.ok&&["N.n1","N.n2"].some(id=>o.marks[id]==="bad"))o.msgs.push(S("Nenner")+": Da gehören der alte Nenner und die Zahl, durch die du teilst, hinein. Dazwischen steht ein Malpunkt.")}
+  if(o.ok){mk(o,"bad","N.n1","N.n2");o.msgs.push(S("Nenner")+": Da gehören der alte Nenner und die Zahl, durch die du teilst, hinein.")}
+  return o;
+}
+function checkZ(t,ctx,v){
+  const o=out(),F=ctx.F,ii=F[0][1]===1&&!(F[1][1]===1&&t.op==="mul"&&t.B.t==="int")?0:1,k=F[ii][0],f=F[1-ii],D=F[0][1]*F[1][1],z1=v.z1,z2=v.z2,n=v.n;
+  if(z1==null&&z2==null){mk(o,"bad","Z.z1","Z.z2");o.msgs.push("Im "+S("Zähler")+" fehlt noch etwas.")}
+  if(n==null){mk(o,"bad","Z.n");o.msgs.push(S("Nenner")+" fehlt noch.")}
+  if(!o.ok)return o;
+  const Zs=[z1,z2].filter(x=>x!=null),P=Zs.reduce((p,x)=>p*x,1);
+  if(n===0||Zs.includes(0)){["Z.z1","Z.z2","Z.n"].forEach((id,i)=>{if([z1,z2,n][i]===0)mk(o,"bad",id)});o.msgs.push("Eine 0 darf hier nicht stehen.");return o}
+  const setF=()=>{o.ctx={F:[[Zs[0],n],[Zs.length>1?Zs[1]:1,1]],form:"num"}};
+  if(n===D&&Zs.length===2&&((z1===f[0]&&z2===k)||(z1===k&&z2===f[0]))){mk(o,"ok","Z.z1","Z.z2","Z.n");setF();return o}
+  if(P*D===f[0]*k*n){mk(o,"ok","Z.n");if(z1!=null)mk(o,"ok","Z.z1");if(z2!=null)mk(o,"ok","Z.z2");setF();
+    o.info=Zs.length===1&&n===D?"Du hast den Zähler gleich ausgerechnet. Das ist richtig, nur kannst du so nicht mehr so leicht vorkürzen.":"Der Wert stimmt, du hast schon gekürzt.";return o}
+  if(n===D*k&&Zs.length===1&&Zs[0]===f[0]){mk(o,"ok",z1!=null?"Z.z1":"Z.z2");mk(o,"bad","Z.n");o.msgs.push("Die Zahl "+k+" gehört in den "+S("Zähler")+", nicht in den Nenner. Beim Malnehmen mit "+k+" wird der Bruch größer, also wird der Zähler malgenommen.");return o}
+  if(n!==D){mk(o,"bad","Z.n");o.msgs.push(S("Nenner")+(n===D*k?": Die Zahl "+k+" gehört nicht in den Nenner, sondern in den Zähler.":": Den schreibst du unverändert ab."))}else mk(o,"ok","Z.n");
+  const zOk=(Zs.length===2&&((z1===f[0]&&z2===k)||(z1===k&&z2===f[0])))||(Zs.length===1&&Zs[0]===f[0]*k);
+  if(zOk){if(z1!=null)mk(o,"ok","Z.z1");if(z2!=null)mk(o,"ok","Z.z2")}
+  else if(Zs.length===1&&(Zs[0]===f[0]||Zs[0]===k)){mk(o,"ok",z1!=null?"Z.z1":"Z.z2");mk(o,"bad",z1!=null?"Z.z2":"Z.z1");if(n===D)o.msgs.push(S("Zähler")+": Da fehlt noch "+(Zs[0]===f[0]?"die Zahl "+k:"der alte Zähler")+". Schreib sie mit einem Malpunkt dazu.")}
+  else{["Z.z1","Z.z2"].forEach((id,i)=>{const x=[z1,z2][i];mk(o,Zs.length===2&&z1!==z2&&(x===f[0]||x===k)?"ok":"bad",id)});
+    if(Zs.length===2&&z1===z2)mk(o,"bad","Z.z1","Z.z2");
+    if(["Z.z1","Z.z2"].some(id=>o.marks[id]==="bad"))o.msgs.push(S("Zähler")+": Da gehören der alte Zähler und die Zahl "+k+" hinein, mit einem Malpunkt dazwischen.")}
+  if(o.ok){mk(o,"bad","Z.z1","Z.z2");o.msgs.push(S("Zähler")+": Da gehören der alte Zähler und die Zahl "+k+" hinein.")}
+  return o;
+}
+function claim(step,t,ctx,kind){
+  const o=out(),den=ctx.form==="den";
+  if(step==="V"){
+    if(kind==="skip"){o.ctx=Object.assign({},ctx);o.skipped=true;o.info="Du hast nicht vorgekürzt, das ist in Ordnung.";return o}
+    if(!canPre(ctx.F)){o.ctx=Object.assign({},ctx);o.claimed="kann nicht gekürzt werden";o.info="Stimmt, hier lässt sich nichts vorkürzen.";return o}
+    o.ok=false;o.msgs.push("Doch, hier kannst du vorkürzen! "+(den?"Der Zähler und eine Zahl im Nenner haben":"Ein Zähler und ein Nenner haben")+" einen gemeinsamen Teiler."+(den?"":" Schau genau hin, auch über Kreuz."));return o;
+  }
+  if(step==="R"){
+    const M=ctx.M;
+    if(gcd(M[0],M[1])===1){o.ctx=Object.assign({},ctx,{R:M.slice()});o.claimed="kann nicht gekürzt werden";o.info=M[1]===1?"Stimmt. Im Nenner steht 1, im nächsten Schritt machst du daraus eine ganze Zahl.":"Stimmt, "+fr(M[0],M[1])+" lässt sich nicht kürzen.";return o}
+    o.ok=false;o.msgs.push("Doch! "+M[0]+" und "+M[1]+" haben noch einen gemeinsamen Teiler. Probier es noch einmal.");return o;
+  }
+  if(step==="G"){
+    const R=ctx.R,im=isImp(R);
+    if(ctx.Rint&&kind==="nomix"){o.ctx=Object.assign({},ctx);o.claimed="ist schon eine ganze Zahl";o.info="Du hast das Ergebnis schon als ganze Zahl geschrieben.";return o}
+    if(R[1]===1){o.ok=false;o.msgs.push("Im Nenner steht 1. So darf das Ergebnis nicht stehen bleiben: Ein Bruch mit dem Nenner 1 ist eine ganze Zahl. Schreib sie ins große Feld.");return o}
+    if(kind==="nomix"){
+      if(!im){o.ctx=Object.assign({},ctx);o.claimed="kann nicht umgewandelt werden";o.info=R[1]===1?"Stimmt, das Ergebnis ist schon eine ganze Zahl.":"Stimmt, der Zähler ist kleiner als der Nenner. Das Ergebnis ist kleiner als 1, da steckt kein Ganzes drin.";return o}
+      o.ok=false;o.msgs.push("Doch! Der Zähler ist größer als der Nenner, da steckt mindestens ein Ganzes drin. Du kannst eine gemischte Zahl daraus machen oder den Bruch so stehen lassen.");return o;
+    }
+    if(im){o.ctx=Object.assign({},ctx);o.skipped=true;o.claimed="bleibt ein unechter Bruch";o.info="Du lässt das Ergebnis als unechten Bruch stehen. Das ist auch richtig!";return o}
+    o.ok=false;o.msgs.push(R[1]===1?"Dein Ergebnis ist eine ganze Zahl, kein unechter Bruch.":"Dein Ergebnis ist gar kein unechter Bruch: Der Zähler ist kleiner als der Nenner.");return o;
+  }
+  o.ok=false;return o;
+}
+function checkV(t,ctx,v){
+  const o=out(),F=ctx.F,ks=["A","B"],got=[],nm=["ersten","zweiten"];
+  ks.forEach((k,i)=>{const x=v[k].z===undefined?F[i][0]:v[k].z,y=v[k].n===undefined?F[i][1]:v[k].n,id="V."+k;
+    if(x==null){mk(o,"bad",id+".z");o.msgs.push("Beim "+nm[i]+(F[i][1]===1?" Faktor":" Bruch")+" fehlt der Zähler.")}
+    if(y==null&&F[i][1]!==1){mk(o,"bad",id+".n");o.msgs.push("Beim "+nm[i]+" Bruch fehlt der Nenner.")}
+    got.push([x,y==null?1:y]);
+  });
+  if(!o.ok)return o;
+  if(got.some(g=>g[0]===0||g[1]===0)){ks.forEach((k,i)=>{if(got[i][0]===0)mk(o,"bad","V."+k+".z");if(got[i][1]===0)mk(o,"bad","V."+k+".n")});o.msgs.push("Eine 0 darf hier nicht stehen. Beim Kürzen bleibt immer mindestens 1 übrig.");return o}
+  const fac=[],fields=[];
+  ks.forEach((k,i)=>{[0,1].forEach(p=>{const orig=F[i][p],nw=got[i][p],id="V."+k+(p?".n":".z");fields.push({id,orig,nw,p,i,f:orig/nw})})});
+  const bigger=fields.filter(x=>x.nw>x.orig),nodiv=fields.filter(x=>x.nw<=x.orig&&x.orig%x.nw!==0);
+  if(bigger.length){bigger.forEach(x=>mk(o,"bad",x.id));o.msgs.push("Beim Kürzen werden die Zahlen kleiner, nicht größer.")}
+  if(nodiv.length){nodiv.forEach(x=>mk(o,"bad",x.id));o.msgs.push(nodiv.map(x=>x.nw).join(" und ")+(nodiv.length>1?" passen":" passt")+" nicht zum Kürzen: Du musst durch eine Zahl teilen, die genau aufgeht.")}
+  if(!o.ok){fields.forEach(x=>{if(!o.marks[x.id])mk(o,x.nw===x.orig?"ok":"ok",x.id)});return o}
+  const val=g=>g[0][0]*g[1][0]*F[0][1]*F[1][1]===F[0][0]*F[1][0]*g[0][1]*g[1][1];
+  if(val(got)){
+    fields.forEach(x=>mk(o,"ok",x.id));o.ctx={F:got,form:ctx.form};
+    if(fields.every(x=>x.f===1))o.info="Du hast nichts vorgekürzt. Das ist in Ordnung.";
+    else if(canPre(got))o.info="Stark gekürzt! Es ginge sogar noch weiter, das kannst du aber auch später machen.";
+    else o.info="Sauber vorgekürzt, jetzt werden die Zahlen beim Malnehmen kleiner.";
+    return o;
+  }
+  const ch=fields.filter(x=>x.f>1),zs=ch.filter(x=>x.p===0),ns=ch.filter(x=>x.p===1);
+  ch.forEach(x=>mk(o,"bad",x.id));fields.forEach(x=>{if(!o.marks[x.id])mk(o,"ok",x.id)});
+  if(zs.length===2&&!ns.length&&zs[0].f===zs[1].f)o.msgs.push("Du hast zwei "+S("Zähler")+" miteinander gekürzt. Das geht nicht! Kürzen darfst du immer nur einen Zähler mit einem Nenner.");
+  else if(ns.length===2&&!zs.length&&ns[0].f===ns[1].f)o.msgs.push("Du hast zwei "+S("Nenner")+" miteinander gekürzt. Das geht nicht! Kürzen darfst du immer nur einen Zähler mit einem Nenner.");
+  else if(ch.length>1&&!ns.length)o.msgs.push("Du hast nur "+S("Zähler")+" geteilt. Zu jedem Zähler, den du kürzt, gehört ein Nenner, den du durch dieselbe Zahl teilst.");
+  else if(ch.length>1&&!zs.length)o.msgs.push("Du hast nur "+S("Nenner")+" geteilt. Zu jedem Nenner, den du kürzt, gehört ein Zähler, den du durch dieselbe Zahl teilst.");
+  else if(ch.length===1)o.msgs.push("Du hast nur "+(ch[0].p?"einen Nenner":"einen Zähler")+" geteilt. Beim Kürzen teilst du immer einen Zähler "+S("und")+" einen Nenner durch dieselbe Zahl.");
+  else o.msgs.push("Beim Kürzen hat sich der Wert verändert. Teile immer einen Zähler und einen Nenner durch "+S("dieselbe")+" Zahl. Über Kreuz ist erlaubt.");
+  return o;
+}
+const CHECK={U:checkU,K:checkK,N:checkN,Z:checkZ,V:checkV,M:checkM,R:checkR,G:checkG};
+function check(step,t,ctx,v){const r=CHECK[step](t,ctx,v);if(r.ok&&!r.ctx)r.ctx=Object.assign({},ctx);return r}
+
+/* ---------- Veranschaulichung (SVG) ---------- */
+function strips(rows,opt){ /* rows: {f:[z,n],label,groups} */
+  opt=opt||{};
+  const units=Math.max(1,...rows.map(r=>Math.max(1,Math.ceil(r.f[0]/r.f[1]))));
+  const maxN=Math.max(...rows.map(r=>r.f[1]));
+  if(units>4||maxN>40||units*maxN>80)return"";
+  const LW=opt.labelW||112,W=480,uw=(W-LW-10)/units,h=38,gap=20;let s="",y=10;
+  rows.forEach(r=>{
+    const [z,n]=r.f,u=Math.max(1,Math.ceil(z/n)),pw=uw/n;
+    s+='<text x="'+(LW-12)+'" y="'+(y+h/2+9)+'" text-anchor="end" class="vl">'+r.label+'</text>';
+    for(let i=0;i<u*n;i++){const on=i<z,g=r.groups?Math.floor(i/r.groups)%2:0;
+      s+='<rect x="'+(LW+Math.floor(i/n)*uw+(i%n)*pw).toFixed(1)+'" y="'+y+'" width="'+pw.toFixed(1)+'" height="'+h+'" class="'+(on?(g?"vf2":"vf"):"ve")+'"/>'}
+    for(let k=0;k<u;k++)s+='<rect x="'+(LW+k*uw).toFixed(1)+'" y="'+y+'" width="'+uw.toFixed(1)+'" height="'+h+'" class="vu"/>';
+    y+=h+gap;
+  });
+  return'<svg viewBox="0 0 '+W+' '+(y-gap+14)+'" role="img" aria-label="Bruchstreifen">'+s+'</svg>';
+}
+function area(a,b){ /* a/b von c/d */
+  const [p1,q1]=a,[p2,q2]=b;if(p1>q1||p2>q2||q1>12||q2>12)return"";
+  const S0=220,cw=S0/q1,ch=S0/q2,x0=10,y0=10;let s="";
+  for(let i=0;i<q1;i++)for(let j=0;j<q2;j++){const A=i<p1,B=j<p2;s+='<rect x="'+(x0+i*cw).toFixed(1)+'" y="'+(y0+j*ch).toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+ch.toFixed(1)+'" class="'+(A&&B?"vf":A?"va":B?"vb":"ve")+'"/>'}
+  s+='<rect x="'+x0+'" y="'+y0+'" width="'+S0+'" height="'+S0+'" class="vu"/>';
+  s+='<rect x="'+(x0+S0+24)+'" y="'+(y0+40)+'" width="18" height="18" class="va"/><text x="'+(x0+S0+50)+'" y="'+(y0+55)+'" class="vl vs">'+p1+'/'+q1+' (senkrecht)</text>';
+  s+='<rect x="'+(x0+S0+24)+'" y="'+(y0+80)+'" width="18" height="18" class="vb"/><text x="'+(x0+S0+50)+'" y="'+(y0+95)+'" class="vl vs">'+p2+'/'+q2+' (waagerecht)</text>';
+  s+='<rect x="'+(x0+S0+24)+'" y="'+(y0+120)+'" width="18" height="18" class="vf"/><text x="'+(x0+S0+50)+'" y="'+(y0+135)+'" class="vl vs">beides: '+(p1*p2)+'/'+(q1*q2)+'</text>';
+  return'<svg viewBox="0 0 500 '+(S0+20)+'" role="img" aria-label="Flächenmodell">'+s+'</svg>';
+}
+
+/* ---------- Musterlösung ---------- */
+function solution(t){
+  const P=plan(t),c=canonical(t),A=imp(t.A),B=imp(t.B),steps=[],vals={};
+  const kind=kindOf(t);
+  let intro="So rechnest du "+taskH(t)+". ";
+  intro+=kind==="div"?"Beim Teilen durch einen Bruch nimmst du mit dem Kehrwert mal. ":kind==="dfn"?"Hier teilst du einen Bruch durch eine natürliche Zahl. Dafür nimmst du den Nenner mit der Zahl mal. ":kind==="dnf"?"Hier teilst du eine natürliche Zahl durch einen Bruch. Auch dabei nimmst du mit dem Kehrwert mal. ":kind==="nat"?"Hier nimmst du einen Bruch mit einer natürlichen Zahl mal. ":"Zwei Brüche nimmst du mal, indem du Zähler mal Zähler und Nenner mal Nenner rechnest. ";
+  intro+="Wir schreiben alles untereinander, so wie im Heft.";
+  steps.push({text:intro,vals:{},hl:null,vis:""});
+  P.forEach(k=>{
+    vals[k]=c[k];if(c._no[k])vals._no=Object.assign({},vals._no,{[k]:true});let text="",vis="";
+    if(k==="Z"){const Z=c.Z,kk=Z.z[1];
+      text=(t.op==="div"?"Jetzt nimmst du die Zahl "+kk+" mit dem Bruch mal. ":"")+"Eine natürliche Zahl nimmst du mit einem Bruch mal, indem du sie mit dem "+S("Zähler")+" malnimmst. Du schreibst die "+kk+" mit einem Malpunkt in den Zähler: "+fr(Z.z[0]+" · "+kk,Z.n)+". Der Nenner bleibt, wie er ist.";
+      const P=preF(t),ii=P[0][1]===1&&!(t.op==="mul"&&t.B.t==="int")?0:1,f0=P[1-ii];if(kk<=6)vis=strips([{f:[f0[0]*kk,f0[1]],label:kk+" · "+f0[0]+"/"+f0[1],groups:f0[0]}]);
+      if(vis)text+=" Im Bild siehst du "+kk+"-mal "+fr(f0[0],f0[1])+" hintereinander.";
+    }
+    if(k==="N"){const n=t.B.v;
+      text="Durch eine natürliche Zahl teilst du, indem du den "+S("Nenner")+" mit der Zahl malnimmst. Stell dir vor, du zerlegst jedes Stück in "+n+" gleiche Teile: Die Stücke werden "+n+"-mal so klein. Der Zähler bleibt, wie er ist. Du schreibst die "+n+" mit einem Malpunkt in den Nenner: "+fr(A[0],A[1]+" · "+n)+".";
+      vis=strips([{f:A,label:A[0]+"/"+A[1]},{f:[A[0],A[1]*n],label:A[0]+"/"+(A[1]*n)}]);
+    }
+    if(k==="U"){
+      const parts=[];["A","B"].forEach(x=>{const o=t[x];if(o.t!=="mix")return;const e=imp(o);
+        parts.push(opH(o)+": Ein Ganzes sind "+o.n+" "+teln(o.n)+". "+o.w+(o.w===1?" Ganzes sind ":" Ganze sind also ")+o.w+" · "+o.n+" = "+o.w*o.n+" "+teln(o.n)+". Dazu kommt noch der Zähler "+o.z+": "+o.w*o.n+" + "+o.z+" = "+e[0]+". Also ist "+opH(o)+" = "+fr(e[0],e[1])+".");
+        if(!vis)vis=strips([{f:e,label:o.w+" "+o.z+"/"+o.n}]);});
+      text="Gemischte Zahlen schreibst du zuerst als unechten Bruch. "+parts.join(" ")+" Der Nenner bleibt dabei gleich.";
+    }
+    if(k==="K"){
+      text="Durch eine Zahl teilst du, indem du mit ihrem "+S("Kehrwert")+" malnimmst. Den Kehrwert bekommst du, wenn du Zähler und Nenner vertauschst. ";
+      if(t.B.t==="int")text+=t.B.v+" ist dasselbe wie "+fr(t.B.v,1)+", der Kehrwert ist also "+fr(1,t.B.v)+". ";
+      else text+="Aus "+fr(B[0],B[1])+" wird "+fr(B[1],B[0])+". ";
+      text+=(t.A.t==="int"?"Die Zahl "+t.A.v+" vorne schreibst du einfach ab, ohne Nenner,":"Der erste Bruch bleibt, wie er ist,")+" und aus „:“ wird „·“.";
+      if(t.B.t==="int")text+=" Stell dir das so vor: Durch "+t.B.v+" teilen heißt, in "+t.B.v+" gleiche Teile zerlegen. Jeder Teil ist also "+fr(1,t.B.v)+" vom Ganzen.";
+      const va=strips([{f:A,label:A[1]===1?String(A[0]):A[0]+"/"+A[1]},{f:B,label:B[0]+"/"+B[1]}]);
+      if(va&&t.B.t!=="int"){vis=va;text+=" Im Bild siehst du, worum es geht: Wie oft passt der untere Streifen in den oberen?"}
+    }
+    if(k==="V"){
+      const F0=c.Z?[[c.Z.z[0],c.Z.n],[c.Z.z[1],1]]:preF(t),pc=preCancel(F0),den=t.op==="div"&&t.B.t==="int",num=!!c.Z;
+      const was=den?"den Nenner ausrechnest":num?"den Zähler ausrechnest":"malnimmst";
+      if(c._no.V)text="Bevor du "+was+", schaust du, ob du schon kürzen kannst. Hier geht das nicht: "+(den?"Der Zähler hat mit keiner Zahl im Nenner":num?"Keine Zahl im Zähler hat mit dem Nenner":"Kein Zähler hat mit einem Nenner")+" einen gemeinsamen Teiler. Du tippst auf „Kann nicht gekürzt werden“.";
+      else text="Bevor du "+was+", darfst du schon kürzen. Dabei teilst du "+(den?"den Zähler und eine Zahl im Nenner":num?"eine Zahl im Zähler und den Nenner":"immer einen Zähler und einen Nenner")+" durch dieselbe Zahl"+(den||num?". ":", auch über Kreuz. ")+pc.log.map(e=>e.z+" und "+e.n+" kann man durch "+e.g+" teilen"+(e.cross&&!den&&!num?" (über Kreuz)":"")+": Aus "+e.z+" wird "+e.z/e.g+", aus "+e.n+" wird "+e.n/e.g+".").join(" ")+" Diesen Schritt musst du nicht machen, er macht die Zahlen aber kleiner.";
+    }
+    if(k==="M"){
+      const F=[c.V.A,c.V.B];
+      if(c.Z){text="Jetzt rechnest du den Zähler aus: "+F[0][0]+" · "+F[1][0]+" = "+c.M[0]+". Der Nenner "+c.M[1]+" bleibt.";}
+      else if(kind==="dfn"){text="Jetzt rechnest du den Nenner aus: "+F[0][1]+" · "+F[1][1]+" = "+c.M[1]+". Der Zähler "+c.M[0]+" bleibt.";}
+      else if(kind==="nat"||kind==="dnf"){
+        const vi=kind==="dnf"?0:t.A.t==="int"?0:1,n=F[vi][0],f=F[1-vi];
+        text=(kind==="dnf"?"Jetzt nimmst du den Bruch mit der natürlichen Zahl mal. Dabei nimmst du nur den ":"Bei „Bruch mal natürliche Zahl“ nimmst du nur den ")+S("Zähler")+" mit der Zahl mal: "+f[0]+" · "+n+" = "+c.M[0]+". Der Nenner "+f[1]+" bleibt gleich. Du hast also "+n+"-mal "+fr(f[0],f[1])+", das sind zusammen "+c.M[0]+" "+teln(f[1])+".";
+        if(n>1)vis=strips([{f:c.M,label:n+" · "+f[0]+"/"+f[1],groups:f[0]}]);
+      }else{
+        text="Zähler mal Zähler: "+F[0][0]+" · "+F[1][0]+" = "+c.M[0]+". Nenner mal Nenner: "+F[0][1]+" · "+F[1][1]+" = "+c.M[1]+".";
+        if(kind==="mul"){const P=preF(t),va=area(P[0],P[1]);if(va){vis=va;const pz=P[0][0]*P[1][0],pn=P[0][1]*P[1][1];
+          text+=" Im Bild "+(!c._no.V?"siehst du, was Malnehmen bedeutet: ":"")+"ist das Ganze in "+P[0][1]+" · "+P[1][1]+" = "+pn+" Kästchen geteilt. "+pz+" davon sind doppelt gefärbt"+(!c._no.V?". Das sind "+fr(pz,pn)+", und das ist gekürzt genau "+fr(c.M[0],c.M[1])+".":", das ist das Ergebnis.")}}
+
+      }
+    }
+    if(k==="R"){
+      const g=gcd(c.M[0],c.M[1]);
+      if(g>1){text="Jetzt wird gekürzt. "+c.M[0]+" und "+c.M[1]+" kann man beide durch "+g+" teilen, und "+g+" ist die größte Zahl, die das schafft. "+c.M[0]+" : "+g+" = "+c.R[0]+" und "+c.M[1]+" : "+g+" = "+c.R[1]+".";
+        if(c.R[1]===1)text+=" Im Nenner steht jetzt 1.";
+        else text+=" Der Wert bleibt beim Kürzen gleich, nur die Teile werden größer.";
+        vis=strips([{f:c.M,label:c.M[0]+"/"+c.M[1]},{f:c.R,label:c.R[0]+"/"+c.R[1]}]);
+      }else text=(!c._no.V?"Weil wir schon vorgekürzt haben, ist hier nichts mehr zu kürzen. ":c.M[0]+" und "+c.M[1]+" haben keinen gemeinsamen Teiler außer 1, der Bruch lässt sich nicht kürzen. ")+"Du tippst auf „Kann nicht gekürzt werden“.";
+    }
+    if(k==="G"&&c.G&&c.G[1]===null){
+      text="Im Nenner steht 1. Ein Bruch mit dem Nenner 1 ist eine ganze Zahl, denn "+fr(c.R[0],1)+" heißt "+c.R[0]+" : 1 = "+c.R[0]+". So darf das Ergebnis nicht stehen bleiben: Du schreibst nur die "+c.R[0]+" ins große Feld.";
+    }
+    if(k==="G"&&!c.G){
+      text="Der Zähler ist kleiner als der Nenner, das Ergebnis ist also kleiner als 1. Daraus kann man keine gemischte Zahl machen. Du tippst auf „Kann nicht umgewandelt werden“.";
+    }
+    if(k==="G"&&c.G&&c.G[1]!==null){
+      const [W,Rm,q]=c.G;
+      text=fr(c.R[0],c.R[1])+" ist ein unechter Bruch, denn der Zähler ist größer als der Nenner. "+q+" passt "+(W===1?"einmal":W+"-mal")+" in "+c.R[0]+" ("+W+" · "+q+" = "+W*q+"), dann bleibt "+Rm+" übrig. Also ist "+fr(c.R[0],c.R[1])+" = "+W+"\u2009"+fr(Rm,q)+". Du darfst das Ergebnis aber auch als unechten Bruch stehen lassen, dafür gibt es den Knopf „Als unechten Bruch lassen“. Beide Schreibweisen sind richtig.";
+      vis=strips([{f:c.R,label:W+" "+Rm+"/"+q}]);
+    }
+    steps.push({text,vals:JSON.parse(JSON.stringify(vals)),hl:k,vis});
+  });
+  steps.push({text:"Fertig! "+taskH(t)+" = "+resH(c.R),vals:JSON.parse(JSON.stringify(vals)),hl:null,vis:""});
+  return steps;
+}
+
+return{setMax,numForm,claim,isImp,OPTIONAL,preF,canPre,gcd,red,imp,eq,rec,plan,canonical,initCtx,check,result,kindOf,gen,parseOwn,solution,STEPNAME,fr,frA,opH,taskH,taskT,resH,sym,strips,area};
+})();
+
+
+</script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const KN={nat:"Bruch mal natürliche Zahl",mul:"Bruch mal Bruch",dfn:"Bruch durch Zahl",dnf:"Zahl durch Bruch",div:"Bruch durch Bruch"};
+const FI='<span class="fi"><i></i><b></b><i></i></span>',NI='<span class="ni"></span>',IC=(a,o,b)=>'<span class="ico" aria-hidden="true">'+a+'<span class="o">'+o+'</span>'+b+'</span>';
+const KS0={nat:IC(FI,"·",NI),mul:IC(FI,"·",FI),dfn:IC(FI,":",NI),dnf:IC(NI,":",FI),div:IC(FI,":",FI)},POOL=["nat", "mul"],KS={};POOL.forEach(k=>KS[k]=KS0[k]);
+
+const LEVELS=true,KEYP="bmal";
+const S={level:LEVELS?Math.min(3,Math.max(1,+store.get(KEYP+"-level",1)||1)):1,tab:"nat",task:null,kind:"nat",plan:[],cur:0,ctx:null,firstTry:true,wrongSaved:false,done:false,own:false,
+  stats:Object.assign({nat:[0,0],mul:[0,0],dfn:[0,0],dnf:[0,0],div:[0,0]},store.get("bmal-stats",{})),review:false,revIdx:0,sol:null,solStep:0,ownOp:"mul"};
+
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function note(type,html){const n=$("#note");n.className="note "+(type==="info"?"":type);n.innerHTML=html}
+function hideNote(){$("#note").classList.add("hidden")}
+function hint(type,html){if(S.level>=2){hideNote();return}note(type,html)}
+function setColor(k){document.documentElement.style.setProperty("--tab","var(--"+k+")")}
+
+/* ---------- Zeilen bauen ---------- */
+function staticFrac(z,n){const f=el("span","frac");f.appendChild(el("span","sn",z));f.appendChild(el("span","bar"));f.appendChild(el("span","sn",n));return f}
+function staticOp(o){
+  if(o.t==="int")return el("span","sn",o.v);
+  if(o.t==="frac")return staticFrac(o.z,o.n);
+  const w=el("span","mixin");w.appendChild(el("span","sw",o.w));w.appendChild(staticFrac(o.z,o.n));return w;
+}
+function inp(id,label,cls){const i=el("input","fin"+(cls?" "+cls:""));i.inputMode="numeric";i.autocomplete="off";i.maxLength=4;i.dataset.f=id;i.setAttribute("aria-label",label);i.spellcheck=false;return i}
+function inFrac(id,name){const f=el("span","frac");f.appendChild(inp(id+".z",name+": Zähler"));f.appendChild(el("span","bar"));f.appendChild(inp(id+".n",name+": Nenner"));return f}
+function valFrac(f,asInt){if(asInt&&f[1]===1)return el("span","sn",f[0]);return staticFrac(f[0],f[1])}
+
+function combFrac(top,dens){const f=el("span","frac");if(Array.isArray(top)){const u=el("span","den");top.forEach((x,i)=>{if(i)u.appendChild(el("span","opx dot","·"));u.appendChild(x)});top=u}f.appendChild(top);f.appendChild(el("span","bar"));const d=el("span","den");dens.forEach((x,i)=>{if(i)d.appendChild(el("span","opx dot","·"));d.appendChild(x)});f.appendChild(d);return f}
+function denLineStatic(z,dens){return combFrac(el("span","sn",z),dens.map(x=>el("span","sn",x)))}
+function isDen(){return S.task&&S.task.op==="div"&&S.task.B.t==="int"}
+function isNum(){return S.task&&L.numForm(S.task)}
+function spec(step,t){
+  const sy=L.sym(t.op);
+  if(step==="U")return[t.A.t==="mix"?{in:"U.A",name:"erste Zahl als Bruch"}:{st:t.A},{op:sy},t.B.t==="mix"?{in:"U.B",name:"zweite Zahl als Bruch"}:{st:t.B}];
+  if(step==="K")return[t.A.t==="int"?{one:"K.A.z",name:"natürliche Zahl"}:{in:"K.A",name:"erster Bruch"},{op:"·"},{in:"K.B",name:"Kehrwert"}];
+  if(step==="V")return[{in:"V.A",name:"erster Faktor vorgekürzt"},{op:"·"},{in:"V.B",name:"zweiter Faktor vorgekürzt"}];
+  if(step==="G")return[{mix:"G"}];
+  return[{in:step,name:step==="M"?"Ergebnis vom Malnehmen":"gekürzter Bruch"}];
+}
+function taskLine(t,withLabel){
+  const d=el("div","line task");if(withLabel)d.appendChild(el("span","small","Aufgabe"));
+  d.appendChild(staticOp(t.A));d.appendChild(el("span","opx",L.sym(t.op)));d.appendChild(staticOp(t.B));d.appendChild(el("span","opx","="));return d;
+}
+function tagText(step){return L.STEPNAME[step]+(L.OPTIONAL[step]?" (freiwillig)":"")}
+function buildLine(step,t,vals){ /* vals: nur für Musterlösung */
+  const d=el("div","line");d.dataset.step=step;d.appendChild(el("span","eqs","="));
+  const den=t.op==="div"&&t.B.t==="int";
+  const addChip=()=>{if(vals&&vals._no&&vals._no[step])d.appendChild(el("span","claim",step==="G"?"kann nicht umgewandelt werden":"kann nicht gekürzt werden"))};
+  if(vals&&vals._no&&vals._no[step]){addChip();d.appendChild(el("span","tagx",tagText(step)));return d}
+  if(step==="N"){
+    if(vals)d.appendChild(denLineStatic(vals.N.z,vals.N.n));
+    else d.appendChild(combFrac(inp("N.z","Zähler"),[inp("N.n1","Nenner, erste Zahl"),inp("N.n2","Nenner, zweite Zahl")]));
+    d.appendChild(el("span","tagx",tagText(step)));return d;
+  }
+  if(step==="Z"){
+    if(vals)d.appendChild(combFrac(vals.Z.z.map(x=>el("span","sn",x)),[el("span","sn",vals.Z.n)]));
+    else d.appendChild(combFrac([inp("Z.z1","Zähler, erste Zahl"),inp("Z.z2","Zähler, zweite Zahl")],[inp("Z.n","Nenner")]));
+    d.appendChild(el("span","tagx",tagText(step)));return d;
+  }
+  if(step==="V"&&L.numForm(t)){
+    if(vals)d.appendChild(combFrac([el("span","sn",vals.V.A[0]),el("span","sn",vals.V.B[0])],[el("span","sn",vals.V.A[1])]));
+    else d.appendChild(combFrac([inp("V.A.z","Zähler, erste Zahl vorgekürzt"),inp("V.B.z","Zähler, zweite Zahl vorgekürzt")],[inp("V.A.n","Nenner vorgekürzt")]));
+    addChip();d.appendChild(el("span","tagx",tagText(step)));return d;
+  }
+  if(step==="V"&&den){
+    if(vals)d.appendChild(denLineStatic(vals.V.A[0],vals.V.B[1]===1&&vals.V.A[1]*1===vals.V.A[1]&&false?[vals.V.A[1]]:[vals.V.A[1],vals.V.B[1]]));
+    else d.appendChild(combFrac(inp("V.A.z","Zähler vorgekürzt"),[inp("V.A.n","Nenner, erste Zahl vorgekürzt"),inp("V.B.n","Nenner, zweite Zahl vorgekürzt")]));
+    addChip();d.appendChild(el("span","tagx",tagText(step)));return d;
+  }
+  spec(step,t).forEach(p=>{
+    if(p.op){d.appendChild(el("span","opx",p.op));return}
+    if(p.st){const g=staticOp(p.st);g.classList.add("given");d.appendChild(g);return}
+    if(p.one){if(vals){const k=p.one.split(".");d.appendChild(el("span","sn",vals[k[0]][k[1]][0]));return}d.appendChild(inp(p.one,p.name));return}
+    if(p.mix){
+      if(vals){const v=vals.G,w=el("span","mixin");w.appendChild(el("span","sw",v[0]));if(v[1]!==null)w.appendChild(staticFrac(v[1],v[2]));d.appendChild(w);return}
+      const w=el("span","mixin");w.appendChild(inp("G.w","gemischte Zahl: Ganze","w"));w.appendChild(inFrac("G","gemischte Zahl"));d.appendChild(w);return;
+    }
+    if(vals){const k=p.in.split("."),v=k.length>1?vals[k[0]][k[1]]:vals[k[0]];const intPos=(p.in==="V.A"&&t.A.t==="int")||(p.in==="V.B"&&t.B.t==="int"&&t.op==="mul");d.appendChild(valFrac(v,intPos));return}
+    d.appendChild(inFrac(p.in,p.name));
+  });
+  addChip();
+  d.appendChild(el("span","tagx",tagText(step)));
+  return d;
+}
+
+/* ---------- Aufgabe starten ---------- */
+function renderStats(){$("#stats").innerHTML=Object.keys(KS).map(k=>'<span class="stat" title="'+KN[k]+'"><span class="sr">'+KN[k]+': </span>'+KS[k]+"<b>"+S.stats[k][0]+"</b> gelöst"+(S.stats[k][0]?", "+S.stats[k][1]+" auf Anhieb":"")+"</span>").join("")}
+function wrongList(){return store.get("bmal-wrong",[])}
+function taskKey(t){return JSON.stringify({op:t.op,A:t.A,B:t.B})}
+function renderBadge(){$("#revBadge").textContent=wrongList().length}
+
+function newTask(t,own){
+  S.own=!!own;
+  if(S.review&&!t){const W=wrongList();if(!W.length){showEmptyReview();return}S.revIdx=S.revIdx%W.length;t=JSON.parse(JSON.stringify(W[S.revIdx]))}
+  if(!t)t=L.gen(S.tab,POOL);
+  S.task=t;S.kind=L.kindOf(t);S.firstTry=true;S.wrongSaved=false;
+  if(S.review)setColor(S.kind);
+  const ri=$("#revInfo");
+  if(S.review){ri.textContent="Fehler-Aufgabe "+(S.revIdx+1)+" von "+wrongList().length+" · "+KN[S.kind]}
+  else if(S.own)ri.textContent="Eigene Aufgabe · "+KN[S.kind];
+  else if(S.tab==="mix")ri.textContent="Alles · diesmal: "+KN[S.kind];
+  else ri.textContent=KN[S.kind];
+  if(LEVELS)ri.textContent="Level "+S.level+" · "+ri.textContent;
+  ri.classList.remove("hidden");
+  showTaskUI(true);closeSolution();start();
+}
+function start(){
+  const t=S.task;S.plan=L.plan(t);S.cur=0;S.ctx=L.initCtx(t);S.done=false;
+  $("#stamp").classList.add("hidden");
+  homeBtns();$("#work").after($("#stepbox"));
+  const box=$("#lines");box.innerHTML="";box.appendChild(taskLine(t,true));
+  S.plan.forEach(s=>box.appendChild(buildLine(s,t)));
+  activate(true);
+}
+function fillV(){
+  const d=lineOf("V");if(!d)return;const tag=d.querySelector(".tagx");
+  [...d.children].forEach(x=>{if(!x.classList.contains("eqs")&&!x.classList.contains("tagx"))x.remove()});
+  const F=S.ctx.F,setv=(i,v)=>{i.value=v;fitWidth(i);return i};
+  if(isNum()){
+    const tops=[setv(inp("V.A.z","Zähler, erste Zahl vorgekürzt"),F[0][0])];
+    if(F[1][0]!==1||true)tops.push(setv(inp("V.B.z","Zähler, zweite Zahl vorgekürzt"),F[1][0]));
+    d.insertBefore(combFrac(tops,[setv(inp("V.A.n","Nenner vorgekürzt"),F[0][1])]),tag);return;
+  }
+  if(isDen()){
+    const dens=[setv(inp("V.A.n","Nenner, erste Zahl vorgekürzt"),F[0][1])];
+    if(F[1][1]!==1)dens.push(setv(inp("V.B.n","Nenner, zweite Zahl vorgekürzt"),F[1][1]));
+    d.insertBefore(combFrac(setv(inp("V.A.z","Zähler vorgekürzt"),F[0][0]),dens),tag);return;
+  }
+  const names=["erster Faktor","zweiter Faktor"];
+  ["A","B"].forEach((k,i)=>{
+    if(i===1)d.insertBefore(el("span","opx","·"),tag);
+    const node=F[i][1]===1?inp("V."+k+".z",names[i]+" vorgekürzt"):inFrac("V."+k,names[i]+" vorgekürzt");
+    d.insertBefore(node,tag);
+    const z=d.querySelector('input[data-f="V.'+k+'.z"]'),n=d.querySelector('input[data-f="V.'+k+'.n"]');
+    setv(z,F[i][0]);if(n)setv(n,F[i][1]);
+  });
+}
+function placeBox(scroll){
+  const box=$("#stepbox");if(!S.task){$("#work").after(box);return}
+  const ref=S.done||S.level===3?lineOf(S.plan[S.plan.length-1]):lineOf(S.plan[S.cur]);if(!ref){$("#work").after(box);return}
+  const la=ref.nextElementSibling&&ref.nextElementSibling.classList.contains("lineact")?ref.nextElementSibling:null;
+  (ref._togs||la||ref).after(box);
+  if(scroll)setTimeout(()=>{const r=box.getBoundingClientRect();if(r.bottom>window.innerHeight||r.top<0)box.scrollIntoView({block:r.height>window.innerHeight*.8?"start":"end",behavior:"smooth"})},30);
+}
+function homeBtns(){const a=$("#stepbox .actions");["#checkBtn","#noBtn","#skipBtn"].forEach(q=>a.insertBefore($(q),$("#nextBtn")));document.querySelectorAll(".lineact").forEach(x=>x.remove());document.querySelectorAll(".line.hasok").forEach(x=>x.classList.remove("hasok"));$("#checkBtn").textContent="✓ Prüfen"}
+function lineBtns(line){
+  homeBtns();
+  const ok=el("span","lineact");$("#checkBtn").textContent="OK";ok.appendChild($("#checkBtn"));line.appendChild(ok);line.classList.add("hasok");
+  const nodes=["#noBtn","#skipBtn"].filter(q=>!$(q).classList.contains("hidden")).map(q=>$(q));
+  if(nodes.length){const box=el("div","lineact below");box.append(...nodes);line.after(box)}
+}
+function lineOf(step){return $('#lines .line[data-step="'+step+'"]')}
+function activate(first){
+  if(S.level===3){activate3(first);return}
+  $("#phases").classList.remove("hidden");
+  S.plan.forEach((s,i)=>{const d=lineOf(s);d.classList.toggle("wait",i>S.cur);d.classList.toggle("now",i===S.cur&&!S.done);d.classList.toggle("done",i<S.cur);
+    d.querySelectorAll("input").forEach(x=>x.disabled=i!==S.cur||S.done)});
+  renderPhases();
+  $("#checkBtn").classList.toggle("hidden",S.done);$("#nextBtn").classList.toggle("hidden",!S.done);
+  placeBox(!first);
+  if(S.done){homeBtns();$("#skipBtn").classList.add("hidden");$("#noBtn").classList.add("hidden");return}
+  const step=S.plan[S.cur];
+  if(step==="V"){fillV();lineOf("V").querySelectorAll("input").forEach(x=>x.disabled=false)}
+  const sk=$("#skipBtn");sk.classList.toggle("hidden",step!=="V"&&step!=="G");sk.textContent=step==="V"?"⏭ Nicht vorkürzen":"Als unechten Bruch lassen";
+  const nb=$("#noBtn");nb.classList.toggle("hidden",!["V","R","G"].includes(step));nb.textContent=step==="G"?"🚫 Kann nicht umgewandelt werden":"🚫 Kann nicht gekürzt werden";
+  lineBtns(lineOf(step));placeBox(!first);
+  if(first)hint("info","<p>"+instr(step)+"</p>");
+  const f=lineOf(step).querySelector("input");if(f&&!first)f.focus({preventScroll:true});
+  if(f&&first&&window.matchMedia("(pointer:fine)").matches)f.focus({preventScroll:true});
+}
+function renderPhases(){
+  const names=S.plan.map(tagText).concat(["Geschafft"]),idx=S.done?S.plan.length:S.cur;
+  $("#phases").innerHTML=names.map((l,i)=>'<li class="'+(i<idx?"done":i===idx?"now":"")+'">'+(i+1)+". "+l+(i<idx?" ✓":"")+"</li>").join("");
+}
+function instr(step){
+  const t=S.task;
+  if(step==="U")return"Schreib die gemischte Zahl zuerst als unechten Bruch: Ganze mal Nenner, dann den Zähler dazuzählen. Der Nenner bleibt gleich.";
+  if(step==="K")return"Durch einen Bruch teilst du, indem du mit seinem <strong>Kehrwert</strong> malnimmst. "+(t.A.t==="int"?"Die Zahl "+t.A.v+" schreibst du einfach ab, sie bekommt keinen Nenner. Dahinter kommt der Kehrwert vom Bruch.":"Schreib den ersten Bruch ab und dahinter den Kehrwert vom zweiten.");
+  if(step==="N")return"Durch eine natürliche Zahl teilst du, indem du den <strong>Nenner</strong> mit der Zahl malnimmst. Schreib den Zähler ab. In den Nenner kommen der alte Nenner und die "+t.B.v+", mit einem Malpunkt dazwischen.";
+  if(step==="Z")return(t.op==="div"?"Jetzt nimmst du die Zahl "+t.A.v+" mit dem Bruch mal. ":"")+"Eine natürliche Zahl nimmst du mit einem Bruch mal, indem du sie mit dem <strong>Zähler</strong> malnimmst. In den Zähler kommen der alte Zähler und die Zahl, mit einem Malpunkt dazwischen. Den Nenner schreibst du ab.";
+  if(step==="V")return"Du darfst jetzt schon <strong>vorkürzen</strong>: "+(isNum()?"Teile eine Zahl im Zähler und den Nenner durch dieselbe Zahl.":isDen()?"Teile den Zähler und eine Zahl im Nenner durch dieselbe Zahl.":"Teile immer einen Zähler und einen Nenner durch dieselbe Zahl, das geht auch über Kreuz.")+" Die Zahlen stehen schon da, du überschreibst nur die, die du kürzt. Geht das nicht, tippe auf „Kann nicht gekürzt werden“. Willst du nicht vorkürzen, tippe auf „Nicht vorkürzen“.";
+  if(step==="M"){if(isDen())return"Rechne den Nenner aus. Der Zähler bleibt, wie er ist.";if(isNum())return"Rechne den Zähler aus. Der Nenner bleibt, wie er ist.";const nat=(t.op==="mul"||S.kind==="dnf")&&S.ctx.F.some(f=>f[1]===1);return nat?"Nimm den Zähler mit der natürlichen Zahl mal. Der Nenner bleibt gleich.":"Rechne Zähler mal Zähler und Nenner mal Nenner."}
+  if(step==="R")return"Kürze so weit wie möglich. Lässt sich nichts kürzen, tippe auf „Kann nicht gekürzt werden“.";
+  if(step==="G")return(S.ctx.R&&S.ctx.R[1]===1&&!S.ctx.Rint?"Im Nenner steht 1. So darf das Ergebnis nicht stehen bleiben: Schreib es als <strong>ganze Zahl</strong> ins große Feld. ":"")+"Kannst du das Ergebnis als ganze oder gemischte Zahl schreiben? Dann trag sie ein. Geht das nicht, tippe auf „Kann nicht umgewandelt werden“. Ein unechter Bruch darf auch so stehen bleiben: Dann tippe auf „Als unechten Bruch lassen“.";
+  return"";
+}
+
+/* ---------- Eingabe ---------- */
+function fitWidth(i){i.style.setProperty("--len",Math.max(2,i.value.length))}
+$("#lines").addEventListener("input",e=>{const i=e.target;if(i.tagName!=="INPUT")return;const v=i.value.replace(/\D/g,"").slice(0,4);if(v!==i.value)i.value=v;i.classList.remove("ok","bad");fitWidth(i)});
+$("#lines").addEventListener("keydown",e=>{
+  const i=e.target;if(i.tagName!=="INPUT")return;
+  if(e.key==="Enter"){e.preventDefault();check();return}
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){const f=i.dataset.f,to=e.key==="ArrowDown"?f.replace(/\.z$/,".n"):f.replace(/\.n$/,".z");if(to!==f){e.preventDefault();const x=$('#lines input[data-f="'+to+'"]');if(x)x.focus()}}
+});
+$("#lines").addEventListener("focusin",e=>{if(e.target.tagName==="INPUT")setTimeout(()=>{try{e.target.select()}catch(x){}},0)});
+
+function collect(step){
+  const g=id=>{const x=$('#lines input[data-f="'+id+'"]');if(!x)return undefined;if(x.value==="")return null;return parseInt(x.value,10)};
+  const fr=id=>({z:g(id+".z"),n:g(id+".n")});
+  if(step==="U")return{A:fr("U.A"),B:fr("U.B")};
+  if(step==="K")return{A:fr("K.A"),B:fr("K.B")};
+  if(step==="V")return{A:fr("V.A"),B:fr("V.B")};
+  if(step==="N")return{z:g("N.z"),n1:g("N.n1"),n2:g("N.n2")};
+  if(step==="Z")return{z1:g("Z.z1"),z2:g("Z.z2"),n:g("Z.n")};
+  if(step==="G")return{w:g("G.w"),z:g("G.z"),n:g("G.n")};
+  return fr(step);
+}
+
+/* ---------- Prüfen ---------- */
+/* ---------- Level 3: alles auf einmal ---------- */
+const TOGS={V:[["skip","nicht vorkürzen"],["no","kann nicht gekürzt werden"]],R:[["no","kann nicht gekürzt werden"]],G:[["nomix","kann nicht umgewandelt werden"],["keep","als unechten Bruch lassen"]]};
+function addToggles(){
+  S.plan.forEach(step=>{const d=lineOf(step);if(!TOGS[step]||d._togs)return;
+    const box=el("div","togs togrow");d._togs=box;TOGS[step].forEach(([k,txt])=>{const b=el("button","tog",txt);b.type="button";b.dataset.k=k;b.setAttribute("aria-pressed","false");
+      b.onclick=()=>{if(S.done)return;const on=b.getAttribute("aria-pressed")!=="true";box.querySelectorAll(".tog").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",on?"true":"false");
+        d.classList.toggle("togon",on);d.classList.remove("errline");d.querySelectorAll("input").forEach(x=>{x.disabled=on;if(on)x.value="";x.classList.remove("ok","bad")})};box.appendChild(b)});
+    d.after(box)});
+}
+function activate3(first){
+  homeBtns();addToggles();$("#phases").classList.add("hidden");
+  S.plan.forEach(s=>{const d=lineOf(s);d.classList.remove("wait","now");d.classList.toggle("done",S.done);
+    const tb=d._togs,on=!!(tb&&tb.querySelector('.tog[aria-pressed="true"]'));d.querySelectorAll("input").forEach(x=>x.disabled=S.done||on);if(tb)tb.querySelectorAll(".tog").forEach(x=>x.disabled=S.done)});
+  $("#checkBtn").classList.toggle("hidden",S.done);$("#nextBtn").classList.toggle("hidden",!S.done);
+  $("#skipBtn").classList.add("hidden");$("#noBtn").classList.add("hidden");$("#checkBtn").textContent="✓ Alles prüfen";
+  placeBox(!first);
+  if(S.done)return;
+  if(first){hideNote();const f=$("#lines input");if(f&&window.matchMedia("(pointer:fine)").matches)f.focus({preventScroll:true})}
+}
+function checkAll(){
+  if(S.done||!S.task)return;
+  const t=S.task;let ctx=L.initCtx(t),last=null;
+  const empty=d=>[...d.querySelectorAll("input")].every(x=>x.value==="");
+  $("#lines").querySelectorAll("input").forEach(x=>x.classList.remove("ok","bad"));
+  S.plan.forEach(s=>lineOf(s).classList.remove("errline"));
+  for(const step of S.plan){
+    const d=lineOf(step),tg=d._togs&&d._togs.querySelector('.tog[aria-pressed="true"]');let r;
+    if(tg)r=L.claim(step,t,ctx,tg.dataset.k);
+    else if(step==="V"&&empty(d))r=L.claim("V",t,ctx,"skip");
+    else if(step==="G"&&ctx.Rint&&empty(d))r=L.claim("G",t,ctx,"nomix");
+    else r=L.check(step,t,ctx,collect(step));
+    d.querySelectorAll("input").forEach(x=>{const m=r.marks[x.dataset.f];if(m)x.classList.add(m);else if(r.ok&&x.value!=="")x.classList.add("ok")});
+    if(!r.ok){
+      if(!r.noPenalty)markWrong();d.classList.add("errline");
+      note(r.noPenalty?"info":"bad","<p><strong>Noch nicht ganz.</strong> In der Zeile „"+tagText(step)+"“ stimmt etwas nicht:</p><ul><li>"+r.msgs.join("</li><li>")+"</li></ul><p>Die Zeilen darüber sind richtig. Verbessere und prüfe noch einmal.</p>");
+      const b=d.querySelector("input.bad")||d.querySelector("input");if(b&&!b.disabled)b.focus({preventScroll:true});
+      placeBox(true);return;
+    }
+    ctx=r.ctx;last=r;
+  }
+  S.ctx=ctx;S.cur=S.plan.length;finish(last);
+}
+function check(){
+  if(S.level===3){checkAll();return}
+  if(S.done||!S.task)return;
+  const step=S.plan[S.cur],line=lineOf(step),r=L.check(step,S.task,S.ctx,collect(step));
+  line.querySelectorAll("input").forEach(x=>{x.classList.remove("ok","bad");const m=r.marks[x.dataset.f];if(m)x.classList.add(m)});
+  if(!r.ok&&r.noPenalty){note("info","<p>"+r.msgs.join(" ")+"</p>");return}
+  if(!r.ok){
+    markWrong();
+    const n=line.querySelectorAll("input.bad").length;
+    note("bad","<p><strong>Noch nicht ganz.</strong> "+(n===1?"Ein Feld ist":n+" Felder sind")+" rot markiert:</p><ul><li>"+r.msgs.join("</li><li>")+"</li></ul><p>Verbessere und prüfe noch einmal. Du kannst so oft probieren, wie du willst.</p>");
+    const b=line.querySelector("input.bad");if(b)b.focus({preventScroll:true});
+    placeBox(true);return;
+  }
+  advance(r,line);
+}
+function claimAct(kind){
+  if(S.done||!S.task)return;const step=S.plan[S.cur],line=lineOf(step),r=L.claim(step,S.task,S.ctx,kind);
+  line.querySelectorAll("input").forEach(x=>x.classList.remove("ok","bad"));
+  if(!r.ok){markWrong();note("bad","<p><strong>Noch nicht ganz.</strong></p><ul><li>"+r.msgs.join("</li><li>")+"</li></ul><p>Versuch es noch einmal. Du kannst so oft probieren, wie du willst.</p>");placeBox(true);return}
+  if(step!=="V"||kind!=="skip")line.querySelectorAll("input").forEach(x=>{if(step!=="V")x.value=""});
+  if(r.claimed){line.classList.add("claimed");line.insertBefore(el("span","claim",r.claimed+" ✓"),line.querySelector(".tagx"))}
+  advance(r,line);
+}
+function skip(){if(!S.task||S.done)return;claimAct(S.plan[S.cur]==="V"?"skip":"keep")}
+function advance(r,line){
+  S.ctx=r.ctx;
+  if(r.skipped&&!r.claimed)line.classList.add("skipped");
+  S.cur++;
+  if(S.cur>=S.plan.length){finish(r);return}
+  const nx=S.plan[S.cur];
+  if(nx==="G"&&S.ctx.Rint){activate(false);claimAct("nomix");return}
+  activate(false);
+  hint("good","<p><strong>Richtig!</strong> "+(r.info?r.info+" ":"")+"Weiter geht’s mit Schritt "+(S.cur+1)+": "+tagText(nx)+".</p><p style=\"margin-top:6px\">"+instr(nx)+"</p>");
+}
+function finish(r){
+  S.done=true;activate(false);
+  const k=S.kind,st=S.stats[k];st[0]++;if(S.firstTry)st[1]++;store.set("bmal-stats",S.stats);renderStats();
+  let rev="";
+  if(S.review){if(S.firstTry){store.set("bmal-wrong",wrongList().filter(x=>taskKey(x)!==taskKey(S.task)));rev=" Diesmal ohne Fehler, die Aufgabe fliegt aus dem Fehler-Training! ✂️"}
+    else{S.revIdx++;rev=" Die Aufgabe bleibt im Fehler-Training, damit du sie noch einmal übst."}renderBadge()}
+  const s=$("#stamp");s.textContent=pick(["Prima!","Super!","Klasse!","Spitze!","Toll!","Stark!"]);s.classList.remove("hidden");
+  note("good","<p><strong>Alles richtig gerechnet!</strong> "+(r.info?r.info+" ":"")+L.taskH(S.task)+" = "+L.resH(L.result(S.task))+(S.firstTry?" Und das sogar auf Anhieb! 🌟":"")+rev+"</p>");
+  $("#nextBtn").textContent=S.review?"Nächste Fehler-Aufgabe ▶":"Neue Aufgabe ▶";placeBox(true);$("#nextBtn").focus({preventScroll:true});
+}
+
+/* ---------- Fehler-Training ---------- */
+function markWrong(){S.firstTry=false;if(S.wrongSaved||!S.task)return;S.wrongSaved=true;const W=wrongList(),key=taskKey(S.task);
+  if(!W.some(x=>taskKey(x)===key)){W.push({op:S.task.op,A:S.task.A,B:S.task.B});store.set("bmal-wrong",W.slice(-60))}renderBadge()}
+function showTaskUI(on){["#phases","#work","#checkBtn","#solBtn","#resetBtn","#newBtn"].forEach(q=>$(q).classList.toggle("hidden",!on));if(!on){["#skipBtn","#noBtn","#nextBtn"].forEach(q=>$(q).classList.add("hidden"))}$("#ownBtn").classList.toggle("hidden",S.review)}
+function showEmptyReview(){closeSolution();homeBtns();showTaskUI(false);S.task=null;$("#work").after($("#stepbox"));["#checkBtn","#noBtn","#skipBtn","#nextBtn"].forEach(q=>$(q).classList.add("hidden"));$("#revInfo").classList.add("hidden");$("#phases").innerHTML="";
+  note("good","<p><strong>Keine Fehler-Aufgaben 🎉</strong></p><p style=\"margin-top:6px\">Jede Aufgabe, bei der du beim Prüfen einen Fehler machst, landet automatisch hier. Rechnest du sie im Fehler-Training ohne Fehler, verschwindet sie wieder.</p>")}
+
+/* ---------- Musterlösung ---------- */
+function openSolution(){if(!S.task)return;S.firstTry=false;S.sol=L.solution(S.task);S.solStep=0;$("#solution").classList.remove("hidden");renderSol();setTimeout(()=>$("#solution").scrollIntoView({behavior:"smooth",block:"start"}),30)}
+function closeSolution(){$("#solution").classList.add("hidden")}
+function renderSol(){
+  const st=S.sol[S.solStep],box=$("#solLines");box.innerHTML="";box.appendChild(taskLine(S.task,false));
+  S.plan.forEach(s=>{if(!(s in st.vals))return;const d=buildLine(s,S.task,st.vals);if(s===st.hl)d.classList.add("hl","new");box.appendChild(d)});
+  $("#solText").innerHTML=st.text;
+  const v=$("#solVis");v.innerHTML=st.vis||"";v.classList.toggle("hidden",!st.vis);
+  $("#solCount").textContent="Schritt "+(S.solStep+1)+" von "+S.sol.length;
+  $("#solPrev").disabled=S.solStep===0;$("#solNext").disabled=S.solStep===S.sol.length-1;
+}
+
+/* ---------- Eigene Aufgabe ---------- */
+function setOwnOp(op){S.ownOp=op;document.querySelectorAll(".opsel button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.op===op?"true":"false"))}
+function openOwn(){
+  ["oAg","oAz","oAn","oBg","oBz","oBn"].forEach(i=>$("#"+i).value="");
+  setOwnOp("mul");$("#ownErr").textContent="";$("#overlay").classList.remove("hidden");$("#oAz").focus();
+}
+function ownOk(){
+  const g=p=>({g:$("#o"+p+"g").value,z:$("#o"+p+"z").value,n:$("#o"+p+"n").value});
+  const r=L.parseOwn(g("A"),S.ownOp,g("B"));
+  if(r.err){$("#ownErr").textContent=r.err;return}
+  $("#overlay").classList.add("hidden");newTask(r.task,true);
+}
+
+
+/* ---------- Bedienung ---------- */
+function setTab(k){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.kind===k?"true":"false"));
+  S.tab=k;S.review=k==="rev";S.revIdx=0;setColor(k);
+  $("#newBtn").textContent=S.review?"Nächste Fehler-Aufgabe":"Neue Aufgabe";
+  newTask();
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>setTab(t.dataset.kind));
+function setLevel(n,silent){S.level=n;store.set(KEYP+"-level",n);L.setMax(n===1?60:100);
+  document.querySelectorAll("#levels button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.level===n?"true":"false"));if(!silent)newTask()}
+document.querySelectorAll("#levels button").forEach(b=>b.onclick=()=>setLevel(+b.dataset.level));
+if(LEVELS){$("#levels").classList.remove("hidden");setLevel(S.level,true)}
+$("#checkBtn").onclick=check;
+$("#skipBtn").onclick=skip;
+$("#nextBtn").onclick=()=>$("#newBtn").click();
+$("#noBtn").onclick=()=>claimAct(S.plan[S.cur]==="G"?"nomix":"no");
+$("#solBtn").onclick=openSolution;
+$("#solPrev").onclick=()=>{if(S.solStep>0){S.solStep--;renderSol()}};
+$("#solNext").onclick=()=>{if(S.solStep<S.sol.length-1){S.solStep++;renderSol()}};
+$("#solClose").onclick=()=>{closeSolution();start();window.scrollTo({top:0,behavior:"smooth"})};
+$("#resetBtn").onclick=()=>{closeSolution();start()};
+$("#newBtn").onclick=()=>{if(S.review&&!S.done)S.revIdx++;if(S.review&&S.tab==="rev"&&S.own){S.own=false}newTask()};
+$("#ownBtn").onclick=openOwn;
+$("#ownCancel").onclick=()=>$("#overlay").classList.add("hidden");
+$("#ownOk").onclick=ownOk;
+$("#overlay").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();ownOk()}});
+$("#overlay").addEventListener("input",e=>{const i=e.target;if(i.tagName==="INPUT")i.value=i.value.replace(/\D/g,"")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#overlay").classList.add("hidden")});
+/* QR-Code */
+const PAGE_URL=/^https?:$/.test(location.protocol)?location.origin+location.pathname:"https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%206/05%20Bruchheft%20-%20Br%C3%BCche%20multiplizieren.html";
+function openQr(){
+  const box=$("#qrBox");
+  try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();
+    box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});
+    const svg=box.querySelector("svg");
+    svg.setAttribute("role","img");svg.setAttribute("aria-label","QR-Code zum Bruchheft");
+  }catch(e){box.innerHTML="<p>Der QR-Code konnte nicht geladen werden. Bitte die Seite neu laden.</p>"}
+  $("#qrUrl").textContent=PAGE_URL;$("#qrOverlay").classList.remove("hidden");$("#qrClose").focus();
+}
+const closeQr=()=>{$("#qrOverlay").classList.add("hidden");$("#qrBtn").focus()};
+$("#qrBtn").addEventListener("click",openQr);
+$("#qrClose").addEventListener("click",closeQr);
+$("#qrOverlay").addEventListener("click",e=>{if(e.target.id==="qrOverlay")closeQr()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#qrOverlay").classList.contains("hidden"))closeQr()});
+
+renderStats();renderBadge();setTab("nat");
+})();
+</script>
+</body>
+</html>

@@ -798,7 +798,7 @@ $("#tipChk").addEventListener("change",e=>{tip=e.target.checked;save();if(task&&
 $("#startBtn").addEventListener("click",()=>{mode="s1";save();setTab();newTask()});
 
 /* QR-Code */
-const PAGE_URL="https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%206/01%20Rechenheft%20-%20Vorrangregeln%20mit%20Potenzen.html";
+const PAGE_URL=/^https?:$/.test(location.protocol)?location.origin+location.pathname:"https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%206/01%20Rechenheft%20-%20Vorrangregeln%20mit%20Potenzen.html";
 function openQr(){
   const box=$("#qrBox");
   try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});

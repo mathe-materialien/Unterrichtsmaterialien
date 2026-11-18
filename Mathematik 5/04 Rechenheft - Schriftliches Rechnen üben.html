@@ -649,7 +649,7 @@ function markLevel(){document.querySelectorAll(".lvbtn").forEach(b=>b.setAttribu
 document.querySelectorAll(".lvbtn").forEach(b=>b.addEventListener("click",()=>{level=+b.dataset.level;saveAll();markLevel();newTask()}));
 
 /* QR-Code */
-const PAGE_URL=location.origin+location.pathname;
+const PAGE_URL=/^https?:$/.test(location.protocol)?location.origin+location.pathname:"https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%205/04%20Rechenheft%20-%20Schriftliches%20Rechnen%20%C3%BCben.html";
 function openQr(){
   const box=$("#qrBox");
   try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();

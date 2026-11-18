@@ -607,7 +607,7 @@ function liste(){
 }
 
 /* ---------- QR-Code ---------- */
-const PAGE_URL=location.href.split("#")[0];
+const PAGE_URL=/^https?:$/.test(location.protocol)?location.origin+location.pathname:"https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%205/05%20Mathe-Vokabeln%20-%20Fachbegriffe%20der%20Grundrechenarten.html";
 const qrOverlay=document.getElementById("qrOverlay"), qrBtn=document.getElementById("qrBtn");
 function openQr(){
   const box=document.getElementById("qrBox");

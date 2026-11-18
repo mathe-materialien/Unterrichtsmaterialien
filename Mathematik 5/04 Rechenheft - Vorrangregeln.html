@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Rechenheft – Vorrangregeln</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+/* Karierte Heftseite mit Register-Reitern; Rechnungen werden Zeile für Zeile "ins Heft" geschrieben */
+:root{
+  --paper:#fdfcf7; --desk:#e9eef3; --karo:#cfdcec; --text:#25303f; --muted:#5b6677; --ink:#1c3fa0;
+  --red:#cf2f2a; --green:#1d8248; --hl:#fff09a; --focus:#e6eeff; --line:#b9cbe6; --heart:#e0334a;
+  --kar:#e0592a; --s1:#16877a; --s2:#2f7fc4; --s3:#8352bf; --mix:#c2417a; --rev:#a8791a; --tab:var(--kar);
+  --qr-bg:#ffffff;
+  --hand:"Patrick Hand","Comic Sans MS","Segoe Print",cursive;
+  --ui:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+    --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a; --line:#34446a; --heart:#ff5c72;
+    --kar:#ff7a4d; --s1:#3fc4b0; --s2:#5aa9ec; --s3:#ab85e8; --mix:#ec6fa4; --rev:#e0ae45; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1c2232; --desk:#121620; --karo:#2e3a55; --text:#e7ebf3; --muted:#a4aec3; --ink:#93b6ff;
+  --red:#ff6b64; --green:#55d492; --hl:#5a5120; --focus:#26335a; --line:#34446a; --heart:#ff5c72;
+  --kar:#ff7a4d; --s1:#3fc4b0; --s2:#5aa9ec; --s3:#ab85e8; --mix:#ec6fa4; --rev:#e0ae45; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--desk);color:var(--text);font-family:var(--ui);font-size:16px;line-height:1.5}
+button,input{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--tab);outline-offset:2px}
+.hidden{display:none!important}
+main{max-width:820px;margin:0 auto;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Kopf */
+.cover{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:flex-start;gap:12px}
+.label{background:var(--paper);border:2px solid var(--text);border-radius:6px;padding:8px 18px 6px;transform:rotate(-1.2deg);box-shadow:3px 3px 0 var(--text)}
+.label h1{font-family:var(--hand);font-weight:400;font-size:44px;line-height:1;margin:0;color:var(--ink)}
+.label p{margin:0;font-size:13px;color:var(--muted)}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:auto}
+.stat{background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;border:1px solid var(--karo)}
+.stat b{font-weight:700;font-variant-numeric:tabular-nums}
+.qrbtn{flex:none;width:30px;height:30px;display:grid;place-items:center;border:2px solid var(--text);border-radius:7px;background:var(--paper);color:var(--text);box-shadow:2px 2px 0 var(--text);padding:0}
+.qrbtn:active{transform:translate(2px,2px);box-shadow:none}
+.hearts{display:flex;gap:4px;background:var(--paper);border:2px solid var(--text);border-radius:999px;padding:4px 10px;box-shadow:2px 2px 0 var(--text)}
+.heart{width:24px;height:24px;display:block}
+.heart path{fill:var(--heart);stroke:var(--heart);stroke-width:1.5}
+.heart.lost path{fill:transparent;stroke:var(--muted);stroke-dasharray:2 2}
+.heart.breaking{animation:hbreak .7s ease}
+.heart.half path{fill:url(#halfHeart);stroke:var(--heart)}
+.heart.gain{animation:hgain .9s ease}
+@keyframes hgain{0%{transform:scale(1)}30%{transform:scale(1.7)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+.hlabel{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:4px;white-space:nowrap}
+@keyframes hbreak{0%{transform:scale(1)}20%{transform:scale(1.4) rotate(-12deg)}40%{transform:scale(1.2) rotate(10deg)}100%{transform:scale(1)}}
+
+/* Reiter */
+.tabs{display:flex;flex-wrap:wrap;gap:4px 5px;margin:22px 6px 0 6px;position:relative;z-index:1;padding-top:2px}
+.tab{border:none;border-radius:12px 12px 0 0;padding:10px 12px 12px;font-weight:700;font-size:15px;color:#fff;opacity:.55;transform:translateY(6px);transition:transform .15s,opacity .15s;white-space:nowrap;flex:none}
+.tab[data-mode="card"]{background:var(--kar)} .tab[data-mode="s1"]{background:var(--s1)} .tab[data-mode="s2"]{background:var(--s2)}
+.tab[data-mode="s3"]{background:var(--s3)} .tab[data-mode="mix"]{background:var(--mix)} .tab[data-mode="rev"]{background:var(--rev)}
+.tab[aria-selected="true"]{opacity:1;transform:none}
+.tab .badge{display:inline-block;min-width:22px;padding:0 6px;margin-left:6px;border-radius:999px;background:rgba(255,255,255,.3);font-size:13px;text-align:center}
+.tab small{font-weight:500;opacity:.9;margin-left:4px}
+
+/* Heftseite */
+.sheet{position:relative;background:var(--paper);border-radius:4px 14px 14px 14px;border-top:6px solid var(--tab);padding:18px 16px 22px;box-shadow:0 2px 0 var(--karo),0 10px 30px rgba(20,30,50,.08);
+  background-image:linear-gradient(var(--karo) 1px,transparent 1px),linear-gradient(90deg,var(--karo) 1px,transparent 1px);background-size:22px 22px;background-position:-1px -1px}
+.sheet::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:2px;background:color-mix(in srgb,var(--red) 45%,transparent);pointer-events:none}
+.inner{position:relative;padding-left:40px;min-width:0}
+.pill{background:var(--paper);padding:4px 8px;border-radius:8px;width:fit-content}
+
+/* Fortschritt */
+.progress{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.segs{display:flex;gap:4px;background:var(--paper);padding:5px;border-radius:10px;border:2px solid var(--text);box-shadow:2px 2px 0 var(--text)}
+.seg{width:clamp(16px,5vw,30px);height:14px;border-radius:4px;background:color-mix(in srgb,var(--karo) 60%,transparent);transition:background .3s}
+.seg.full{background:var(--tab)}
+.seg.now{box-shadow:inset 0 0 0 2px var(--tab);animation:pulse 1.4s ease-in-out infinite}
+.seg.pop{animation:pop .5s ease}
+@keyframes pulse{50%{box-shadow:inset 0 0 0 2px transparent}}
+@keyframes pop{0%{transform:scaleY(1)}40%{transform:scaleY(1.8)}100%{transform:scaleY(1)}}
+.progress .count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.taskline{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.taskline small{color:var(--muted);font-size:14px}
+.lvl{font-size:13px;font-weight:700;color:#fff;background:var(--tab);border-radius:999px;padding:1px 10px}
+
+/* Rechenzeilen */
+.lines{display:flex;flex-direction:column;gap:2px;margin:14px 0 10px;overflow-x:auto;padding:6px 2px 8px;position:relative}
+.line{display:flex;align-items:center;gap:6px;min-height:52px;width:max-content}
+.eq{width:28px;text-align:center;font-family:var(--hand);font-size:34px;color:var(--text);flex:none}
+.expr{display:flex;align-items:center;background:var(--paper);border-radius:6px;padding:2px 6px}
+.tk{font-family:var(--hand);font-size:36px;line-height:1.25;padding:0 .08em;color:var(--text);border:none;background:transparent;font-variant-numeric:tabular-nums}
+.tk.op{padding:0 .28em;color:var(--text)}
+.tk.par{color:var(--muted)}
+.old .tk{color:var(--muted)}
+.old .tk.n{color:var(--ink)}
+button.tk.op{position:relative;border-radius:50%;width:46px;height:46px;flex:none;display:inline-grid;place-items:center;line-height:1;padding:0 0 .1em;margin:0 4px;border:2px solid transparent;background:color-mix(in srgb,var(--paper) 85%,var(--tab))}
+button.tk.op:hover{border-style:solid;border-color:var(--tab)}
+button.tk.op.ready{border-style:solid;border-color:var(--text);background:var(--hl)}
+.tk.sel{color:var(--green)!important;font-weight:700}
+button.tk.op.sel{border-color:transparent;box-shadow:none}
+.line.has-sel button.tk.op:not(.sel){background:transparent}
+.tk.wrong{animation:shake .4s ease;border-color:var(--red)!important;color:var(--red)}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.tk.fresh{animation:ink .45s ease}
+@keyframes ink{from{transform:scale(1.5);opacity:0}to{transform:none;opacity:1}}
+.final .expr{border-bottom:6px double var(--ink);border-radius:6px 6px 0 0}
+.why{font-size:13px;color:var(--muted);background:var(--paper);border-radius:6px;padding:0 6px;margin-left:10px;white-space:nowrap}
+
+.line.tpl{flex-wrap:wrap;width:100%;row-gap:8px}
+.line.tpl .okbtn{margin-left:auto;padding:4px 12px;font-size:15px}
+input.tk.box{width:calc(var(--d) * .55em + .7em);height:1.3em;margin:0 3px;padding:0;border:2px solid var(--karo);border-radius:6px;background:var(--paper);color:var(--ink);text-align:center;caret-color:var(--ink)}
+input.tk.box:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 25%,transparent)}
+input.tk.box.target{border:3px solid var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 22%,transparent)}
+input.tk.box.ok{border-color:var(--green);color:var(--green)}
+input.tk.box.bad{border-color:var(--red);color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--paper))}
+.tpl .tk.op,.tpl .tk.par{color:var(--muted)}
+
+.stamp{position:absolute;right:6%;top:30%;transform:rotate(-14deg);border:4px double var(--red);color:var(--red);font-family:var(--hand);font-size:40px;padding:0 16px;border-radius:10px;background:color-mix(in srgb,var(--paper) 80%,transparent);pointer-events:none;animation:stamp .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes stamp{from{transform:rotate(-14deg) scale(2.2);opacity:0}to{transform:rotate(-14deg) scale(1);opacity:1}}
+
+.note{background:var(--paper);border:2px solid var(--karo);border-radius:12px;padding:12px 14px;margin:8px 0 14px;max-width:62ch}
+.note p{margin:0}
+.work{display:flex;gap:6px 18px;align-items:flex-start;flex-wrap:wrap;margin:14px 0 10px}
+.work .lines{flex:1 1 360px;min-width:0;margin:0}
+.work .note{flex:0 1 270px;margin:6px 0 0;font-size:15px}
+.note.good{border-color:var(--green)} .note.good strong{color:var(--green)}
+.note.bad{border-color:var(--red)} .note.bad strong{color:var(--red)}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#mainActions{margin-top:66px}
+.btn{border:2px solid var(--text);background:var(--paper);border-radius:10px;padding:9px 14px;font-weight:500;font-size:15px;box-shadow:2px 2px 0 var(--text);transition:transform .06s,box-shadow .06s}
+.btn:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--text)}
+.btn.main{background:var(--tab);border-color:var(--tab);color:#fff;font-weight:700;box-shadow:2px 2px 0 var(--text)}
+.btn:disabled{opacity:.4;cursor:default}
+.opts{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:14px;color:var(--muted);background:var(--paper);width:fit-content;max-width:100%;padding:4px 8px;border-radius:8px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.opts input{width:18px;height:18px;accent-color:var(--tab)}
+
+.solution{margin-top:18px}
+.solution h2{font-family:var(--hand);font-weight:400;font-size:32px;margin:0;color:var(--ink);background:var(--paper);width:fit-content;padding:0 8px;border-radius:6px}
+.soltext{background:var(--paper);border-left:4px solid var(--tab);padding:10px 14px;border-radius:0 10px 10px 0;min-height:52px;max-width:62ch}
+.solnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.solnav .count{font-size:14px;color:var(--muted);background:var(--paper);padding:2px 8px;border-radius:6px}
+
+/* Karteikarte */
+.kcard{position:relative;background:var(--paper);border-radius:6px;box-shadow:0 1px 0 var(--karo),4px 6px 0 color-mix(in srgb,var(--text) 18%,transparent);padding:22px 20px 24px;transform:rotate(-.4deg);
+  background-image:linear-gradient(var(--red),var(--red)),repeating-linear-gradient(transparent 0 31px,var(--line) 31px 32px);background-size:100% 2px,100% 100%;background-position:0 64px,0 64px;background-repeat:no-repeat,repeat;max-width:100%}
+.kcard h2{font-family:var(--hand);font-weight:400;font-size:44px;line-height:1.05;margin:0 0 18px;color:var(--ink);text-wrap:balance}
+.kcard h3{font-family:var(--hand);font-weight:400;font-size:28px;margin:22px 0 6px;color:var(--ink)}
+.kgrid{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+@media (min-width:700px){.kgrid{grid-template-columns:1.1fr 1fr}}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:r}
+.rules li{counter-increment:r;display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:start;background:var(--paper);border-radius:8px;padding:4px}
+.rules li::before{content:counter(r);width:36px;height:36px;border-radius:50%;border:2px solid var(--text);display:grid;place-items:center;font-family:var(--hand);font-size:24px;background:var(--hl)}
+.rules b{font-family:var(--hand);font-size:26px;font-weight:400;display:block;line-height:1.1;color:var(--text)}
+.rules span{font-size:15px;color:var(--muted)}
+.comic{display:block;width:100%;height:auto;border-radius:8px;border:2px solid var(--karo);background:#fff}
+figure{margin:0}
+.pics{display:flex;gap:16px;align-items:flex-end;justify-content:center;flex-wrap:wrap}
+.pic-hier{width:150px;max-width:40%} .pic-kuh{width:280px;max-width:100%}
+.pic-vorfahrt{max-width:560px}
+.pics figcaption{text-align:center;font-family:var(--hand);font-size:20px;color:var(--ink)}
+figcaption{font-size:13px;color:var(--muted);margin-top:4px;background:var(--paper)}
+.klap{font-family:var(--hand);font-size:30px;text-align:center;color:var(--ink);background:var(--paper);margin:6px 0 0}
+.klap u{text-decoration-thickness:3px;text-decoration-color:var(--red)}
+.ex .lines{margin:4px 0 6px}
+.ex .tk{font-size:30px}
+.ex .eq{font-size:28px}
+.ex .line{min-height:42px}
+.howto{background:var(--paper);border:2px dashed var(--karo);border-radius:10px;padding:10px 14px;max-width:62ch}
+.howto p{margin:0}
+.start{margin-top:18px}
+
+/* Dialoge */
+.overlay{position:fixed;inset:0;background:rgba(15,20,35,.5);display:grid;place-items:center;padding:16px;z-index:20}
+.modal{background:var(--paper);border:2px solid var(--text);border-radius:14px;box-shadow:5px 5px 0 var(--text);padding:20px;max-width:440px;width:100%}
+.modal h2{font-family:var(--hand);font-weight:400;font-size:34px;margin:0 0 8px;color:var(--ink);line-height:1.1}
+.modal p{margin:0 0 10px}
+.modal .actions{justify-content:flex-end;margin-top:12px}
+.modal .hearts{width:fit-content;margin:4px 0 12px}
+.modal input#ownIn{width:100%;border:2px solid var(--karo);border-radius:8px;padding:8px 10px;font-family:var(--hand);font-size:28px;background:var(--paper)}
+.keys{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.keys button{width:46px;height:42px;border:2px solid var(--text);border-radius:8px;background:var(--paper);font-family:var(--hand);font-size:26px;box-shadow:2px 2px 0 var(--text);padding:0}
+.err{color:var(--red);min-height:22px;font-size:14px;margin:6px 0}
+.qrmodal{max-width:none;width:auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.qrmodal h2{margin:0}
+.qrbox{background:var(--qr-bg);padding:12px;border-radius:10px;border:2px solid var(--karo);line-height:0}
+.qrbox svg{display:block;width:min(calc(100vw - 100px),calc(100vh - 250px),460px);height:auto;min-width:160px}
+.qrurl{font-size:13px;color:var(--muted);margin:0;max-width:min(calc(100vw - 100px),460px);overflow-wrap:anywhere;user-select:all}
+
+@media (max-width:560px){
+  .inner{padding-left:22px}
+  .sheet{padding-left:10px;padding-right:10px}
+  .sheet::before{left:22px}
+  .label h1{font-size:36px}
+  .tab{padding:8px 11px 10px;font-size:15px}
+  .tk{font-size:30px} button.tk.op{width:40px;height:40px}
+  .eq{font-size:28px;width:22px}
+  .kcard{padding:18px 12px 20px} .kcard h2{font-size:36px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="halfHeart"><stop offset="50%" style="stop-color:var(--heart)"/><stop offset="50%" style="stop-color:transparent"/></linearGradient></defs></svg>
+</head>
+<body>
+<main>
+  <header class="cover">
+    <div class="brand">
+      <button class="qrbtn" id="qrBtn" title="QR-Code zu dieser Seite zeigen" aria-label="QR-Code zu dieser Seite zeigen">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h2v2h-2zm2 2h2v2h-2zm2-2h2v2h-2zm2 2h2v2h-2zm-6 2h2v2h-2zm4 0h2v2h-2zm-2 2h2v2h-2zm4 0h2v2h-2z"/></svg>
+      </button>
+      <div class="label"><h1>Rechenheft</h1><p>Vorrangregeln üben</p></div>
+    </div>
+    <div class="side">
+      <div class="hearts" id="hearts" role="img"></div>
+      <span class="stat" id="stat"></span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Bereich">
+    <button class="tab" role="tab" data-mode="card">📇 Basiswissen</button>
+    <button class="tab" role="tab" data-mode="s1">Stufe 1<small>einfach</small></button>
+    <button class="tab" role="tab" data-mode="s2">Stufe 2<small>Klammern</small></button>
+    <button class="tab" role="tab" data-mode="s3">Stufe 3<small>knifflig</small></button>
+    <button class="tab" role="tab" data-mode="rev">🔁 Fehler-Training<span class="badge" id="revBadge">0</span></button>
+  </nav>
+
+  <section class="sheet">
+    <div class="inner">
+
+      <!-- Karteikarte -->
+      <div id="cardView" class="hidden">
+        <article class="kcard">
+          <h2>Vorrangregeln</h2>
+          <div class="kgrid">
+            <div>
+              <ol class="rules">
+                <li><div><b>Klammer zuerst</b><span>Was in Klammern steht, rechnest du zuerst aus. Bei Klammern in Klammern rechnest du die innere zuerst.</span></div></li>
+                <li><div><b>Punkt vor Strich</b><span>Mal · und Geteilt : (Punktrechnung) kommen vor Plus + und Minus − (Strichrechnung).</span></div></li>
+                <li><div><b>Sonst von links nach rechts</b><span>Stehen nur Strichrechnungen oder nur Punktrechnungen da, rechnest du der Reihe nach von links nach rechts.</span></div></li>
+              </ol>
+              <p class="klap"><u>Kla</u>mmer – <u>Pu</u>nkt – <u>Stri</u>ch</p>
+            </div>
+            <div class="pics">
+              <figure class="pic-kuh">
+                <img class="comic" src="data:image/webp;base64,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" alt="Das Kla-Pu-Stri: ein Tier mit Klammer-Hörnern, Punkt-Augen und einem Plus-Strich-Maul.">
+                <figcaption>Das Kla-Pu-Stri</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <h3>So schreibst du im Heft</h3>
+          <div class="howto"><p>Markiere zuerst, was du als Erstes rechnest. Schreibe darunter die ganze Aufgabe neu, mit einem = am Anfang der Zeile. Mach so weiter, bis nur noch eine Zahl übrig ist. Das Ergebnis unterstreichst du doppelt.</p></div>
+
+          <div class="actions start"><button class="btn main" id="startBtn">Los geht's mit Stufe 1</button></div>
+        </article>
+      </div>
+
+      <!-- Üben -->
+      <div id="playView">
+        <div class="progress" id="progress">
+          <div class="segs" id="segs" role="progressbar" aria-valuemin="0" aria-valuemax="10"></div>
+          <span class="count" id="progCount"></span>
+        </div>
+        <div class="taskline pill"><small>Aufgabe</small><span class="lvl hidden" id="lvlTag"></span><small id="taskInfo"></small></div>
+        <div class="work">
+          <div class="lines" id="lines" aria-live="polite"></div>
+          <div class="note" id="note" aria-live="polite"></div>
+        </div>
+        <div class="stamp hidden" id="stamp"></div>
+        <div class="actions" id="mainActions">
+          <button class="btn" id="solBtn">👀 Musterlösung</button>
+          <button class="btn" id="resetBtn">↺ Nochmal von vorn</button>
+          <button class="btn" id="newBtn">Andere Aufgabe</button>
+          <button class="btn" id="ownBtn">✏ Eigene Aufgabe</button>
+        </div>
+        <div class="opts" id="opts">
+          <label><input type="checkbox" id="tipChk"> Tipp: zeigen, was ich zuerst rechnen darf</label>
+        </div>
+
+        <div class="solution hidden" id="solution">
+          <h2>Musterlösung</h2>
+          <div class="lines" id="solLines"></div>
+          <div class="soltext" id="solText" aria-live="polite"></div>
+          <div class="solnav">
+            <button class="btn" id="solPrev">◀ Zurück</button>
+            <button class="btn main" id="solNext">Weiter ▶</button>
+            <span class="count" id="solCount"></span>
+            <button class="btn" id="solClose">Selbst nochmal probieren</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay hidden" id="msgOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="msgTitle">
+    <h2 id="msgTitle"></h2>
+    <div id="msgBody"></div>
+    <div class="actions" id="msgActions"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="ownOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ownTitle">
+    <h2 id="ownTitle">Eigene Aufgabe</h2>
+    <p>Schreibe eine Aufgabe, zum Beispiel <b>4 · (8 + 12)</b>. Für Mal geht auch * oder x, für Geteilt auch /.</p>
+    <input id="ownIn" autocomplete="off" aria-label="Eigene Aufgabe">
+    <div class="keys" id="keys"><button data-k="·">·</button><button data-k=":">:</button><button data-k="+">+</button><button data-k="−">−</button><button data-k="(">(</button><button data-k=")">)</button></div>
+    <div class="err" id="ownErr"></div>
+    <div class="actions"><button class="btn" id="ownCancel">Abbrechen</button><button class="btn main" id="ownOk">Rechnen</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="qrOverlay">
+  <div class="modal qrmodal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+    <h2 id="qrTitle">Rechenheft öffnen</h2>
+    <div class="qrbox" id="qrBox"></div>
+    <p class="qrurl" id="qrUrl"></p>
+    <div class="actions" style="justify-content:center"><button class="btn main" id="qrClose">Schließen</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/*LOGIC-START*/
+const SYM={"+":"+","-":"−","*":"·",":":":"};
+const isP=o=>o==="*"||o===":";
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const fmt=n=>n.toLocaleString("de-DE");
+
+function parse(src){
+  const s=String(src).replace(/[−–—]/g,"-").replace(/[·×xX*⋅]/g,"*").replace(/[÷/]/g,":").replace(/\[/g,"(").replace(/\]/g,")").replace(/\\cdot/g,"*").replace(/\\big|\\left|\\right|\\\(|\\\)/g,"");
+  const tk=[];let i=0;
+  while(i<s.length){const c=s[i];
+    if(/\s|=/.test(c)){i++;continue}
+    if(/\d/.test(c)){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;const v=+s.slice(i,j).replace(/\./g,"");tk.push({t:"n",v});i=j;continue}
+    if("+-*:".includes(c)){tk.push({t:"op",v:c});i++;continue}
+    if(c==="("||c===")"){tk.push({t:c});i++;continue}
+    return{err:"Das Zeichen „"+c+"“ kenne ich nicht."};
+  }
+  let want="val",d=0;
+  for(const x of tk){
+    if(want==="val"){if(x.t==="n")want="op";else if(x.t==="(")d++;else return{err:"Da fehlt eine Zahl."}}
+    else{if(x.t==="op")want="val";else if(x.t===")"){d--;if(d<0)return{err:"Da ist eine Klammer zu viel zu."}}else return{err:"Zwischen zwei Zahlen fehlt ein Rechenzeichen."}}
+  }
+  if(!tk.length)return{err:"Bitte gib eine Aufgabe ein."};
+  if(want==="val")return{err:"Am Ende fehlt eine Zahl."};
+  if(d)return{err:"Es fehlt eine schließende Klammer."};
+  if(!tk.some(x=>x.t==="op"))return{err:"Da ist ja gar keine Rechnung."};
+  return{tk};
+}
+function depths(tk){let d=0;return tk.map(x=>{if(x.t==="(")return ++d;if(x.t===")")return d--;return d})}
+function group(tk,i){
+  let d=0,lo=-1,hi=tk.length;
+  for(let j=i-1;j>=0;j--){if(tk[j].t===")")d++;else if(tk[j].t==="("){if(!d){lo=j;break}d--}}
+  d=0;for(let j=i+1;j<tk.length;j++){if(tk[j].t==="(")d++;else if(tk[j].t===")"){if(!d){hi=j;break}d--}}
+  return[lo,hi];
+}
+function groupOps(tk,i){const[lo,hi]=group(tk,i),r=[];let d=0;
+  for(let j=lo+1;j<hi;j++){const x=tk[j];if(x.t==="(")d++;else if(x.t===")")d--;else if(x.t==="op"&&!d)r.push(j)}return r}
+/* ok | paren | punkt | ltr */
+function status(tk,i){
+  const L=tk[i-1],R=tk[i+1];if(!L||!R||L.t!=="n"||R.t!=="n")return"paren";
+  const op=tk[i].v,prev=tk[i-2];
+  if(isP(op))return prev&&prev.t==="op"&&isP(prev.v)?"ltr":"ok";
+  if(groupOps(tk,i).some(j=>isP(tk[j].v)))return"punkt";
+  return prev&&prev.t==="op"?"ltr":"ok";
+}
+function readyOps(tk){const r=[];tk.forEach((x,i)=>{if(x.t==="op"&&status(tk,i)==="ok")r.push(i)});return r}
+function calc(a,op,b){if(op==="+")return a+b;if(op==="-")return a>=b?a-b:null;if(op==="*")return a*b;return b&&a%b===0?a/b:null}
+function reduce(tk,i,v){
+  const a=tk.slice(0,i-1).concat([{t:"n",v}],tk.slice(i+2));let pos=i-1;
+  while(a[pos-1]&&a[pos-1].t==="("&&a[pos+1]&&a[pos+1].t===")"){a.splice(pos+1,1);a.splice(pos-1,1);pos--}
+  return{tk:a,pos};
+}
+function reason(tk,i){
+  const d=depths(tk)[i],ops=groupOps(tk,i),op=tk[i].v,hasS=ops.some(j=>!isP(tk[j].v)),many=ops.length>1;
+  if(d>0){let r=d>=2?"Innere Klammer zuerst":"Klammer zuerst";if(many)r+=isP(op)&&hasS?". In der Klammer gilt Punkt vor Strich":". In der Klammer von links nach rechts";return r}
+  if(isP(op)&&hasS)return"Punkt vor Strich";
+  if(many)return"Von links nach rechts";
+  return"Zum Schluss bleibt nur noch eine Rechnung";
+}
+function solve(tk){
+  const steps=[];let cur=tk,g=0;
+  while(cur.length>1&&g++<40){
+    const r=readyOps(cur);if(!r.length)return null;const dd=depths(cur);
+    r.sort((x,y)=>(dd[y]-dd[x])||((isP(cur[y].v)?1:0)-(isP(cur[x].v)?1:0))||(x-y));
+    const i=r[0],a=cur[i-1].v,b=cur[i+1].v,op=cur[i].v,v=calc(a,op,b);if(v==null)return null;
+    const red=reduce(cur,i,v);steps.push({tk:cur,i,a,op,b,v,why:reason(cur,i),after:red.tk,pos:red.pos});cur=red.tk;
+  }
+  return cur.length===1?{steps,result:cur[0].v}:null;
+}
+function toText(tk){let s="";tk.forEach((x,i)=>{const t=x.t==="n"?fmt(x.v):x.t==="op"?SYM[x.v]:x.t;
+  if(i&&!(x.t===")"||tk[i-1].t==="("))s+=" ";s+=t});return s}
+function meta(tk){const dd=depths(tk);let p=0,s=0,pairs=0;tk.forEach(x=>{if(x.t==="op")isP(x.v)?p++:s++;if(x.t==="(")pairs++});
+  let gIn=0,gOut=0;tk.forEach((x,i)=>{if(x.t==="op"){const n=groupOps(tk,i).length;if(dd[i]>0)gIn=Math.max(gIn,n);else gOut=Math.max(gOut,n)}});
+  return{depth:Math.max(0,...dd.filter((_,i)=>tk[i].t==="(")),p,s,ops:p+s,pairs,gIn,gOut}}
+
+/* Zufallsaufgaben: Baum von oben nach unten mit Zielwerten, damit alles aufgeht */
+function gen(t,k){
+  if(k===0)return{n:t};
+  for(const op of shuffle(["+","-","*",":"])){
+    const kl=rnd(0,k-1),kr=k-1-kl;let l,r;
+    if(op==="+"){if(t<4)continue;l=rnd(Math.max(1,Math.floor(t*.15)),t-1);r=t-l}
+    else if(op==="-"){const b=rnd(2,Math.min(60,Math.max(2,t)));if(t+b>200)continue;l=t+b;r=b}
+    else if(op==="*"){const ps=[];for(let d=2;d<=12;d++)if(t%d===0&&t/d>=2&&t/d<=25)ps.push([d,t/d]);if(!ps.length)continue;[l,r]=pick(ps);if(Math.random()<.5)[l,r]=[r,l]}
+    else{if(t>20||t<2)continue;const ds=[];for(let d=2;d<=15;d++)if(t*d<=180)ds.push(d);if(!ds.length)continue;r=pick(ds);l=t*r}
+    const L=gen(l,kl),R=gen(r,kr);if(!L||!R)continue;return{op,l:L,r:R};
+  }
+  return null;
+}
+function ser(n){
+  if(n.n!=null)return[{t:"n",v:n.n}];
+  let L=ser(n.l),R=ser(n.r);
+  const lo=n.l.op,ro=n.r.op;
+  const needL=isP(n.op)&&lo&&!isP(lo);
+  const needR=ro&&((isP(n.op)&&!isP(ro))||(n.op===":"&&isP(ro))||(n.op==="*"&&ro===":")||(n.op==="-"&&!isP(ro)));
+  if(needL)L=[{t:"("}].concat(L,[{t:")"}]);if(needR)R=[{t:"("}].concat(R,[{t:")"}]);
+  return L.concat([{t:"op",v:n.op}],R);
+}
+function okSteps(steps){return steps.every(s=>s.op==="*"?(Math.min(s.a,s.b)<=12&&s.v<=300):s.op===":"?(s.b<=15&&s.v<=25):(s.a<=300&&s.b<=300))}
+const LV={
+  1:{k:[2,3],test:m=>m.depth===0&&m.p>=1&&m.s>=1},
+  2:{k:[2,3],test:m=>m.depth===1&&m.ops<=3&&m.pairs<=2&&m.gIn<=2&&m.gOut<=3},
+  3:{k:[3,5],test:m=>m.gIn<=3&&m.gOut<=3&&(m.depth===2||(m.depth===1&&m.ops>=4&&m.p>=2&&m.s>=2))}};
+const EX={
+  1:["3 · 7 + 12","8 + 14 : 2","16 − 8 · 2 + 23","27 : 3 + 25 · 4"],
+  2:["4 · (8 + 12)","21 : (8 − 1)","(25 + 5) · 3 + 19","(54 + 6) : (23 − 8)"],
+  3:["4 · ((5 + 13) : 3)","75 : ((14 − 9) · 5)","144 : 12 − 121 : (9 + 2)","(8 + 12 : (2 + 4)) · (28 − 13)"]};
+function genTask(level,avoid){
+  const L=LV[level];
+  for(let n=0;n<6000;n++){
+    const node=gen(rnd(6,150),rnd(L.k[0],L.k[1]));if(!node)continue;
+    const tk=ser(node);if(!L.test(meta(tk)))continue;
+    const sol=solve(tk);if(!sol||!okSteps(sol.steps))continue;
+    const txt=toText(tk);if(avoid&&avoid.includes(txt))continue;
+    return txt;
+  }
+  return pick(EX[level]);
+}
+/*LOGIC-END*/
+
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const ROUND=10,LIVES=5;
+const MODES=["card","s1","s2","s3","rev"];
+const NAMES={s1:"Stufe 1",s2:"Stufe 2",s3:"Stufe 3"};
+let mode=store.get("vr_mode","card");if(!MODES.includes(mode))mode="card";
+let rounds=store.get("vr_rounds",{});if(typeof rounds!=="object"||!rounds)rounds={};
+let review=store.get("vr_review",[]);if(!Array.isArray(review))review=[];
+let solved=store.get("vr_solved",0);
+let tip=store.get("vr_tip",false);
+let task=null,cur=null,lines=[],sel=null,stepLost=false,hadError=false,done=false,locked=false,solShown=false,fresh=-1,wrongI=-1,revPos=0,solStep=0;
+const recent=[];
+
+function save(){store.set("vr_mode",mode);store.set("vr_rounds",rounds);store.set("vr_review",review);store.set("vr_solved",solved);store.set("vr_tip",tip)}
+/* Herzen gelten für alle Stufen gemeinsam */
+function H(){if(!rounds._h||typeof rounds._h!=="object")rounds._h={hearts:LIVES};return rounds._h}
+function R(){if(!rounds[mode]||typeof rounds[mode]!=="object")rounds[mode]={done:0,hearts:LIVES,fixed:0};return rounds[mode]}
+const isRoundMode=()=>["s1","s2","s3"].includes(mode);
+const counted=()=>isRoundMode()&&task&&!task.own;
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------- Kopf: Herzen, Fortschritt ---------- */
+const HEART='<svg class="heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+function heartsHtml(n){let h="";for(let i=0;i<LIVES;i++)h+=HEART.replace('class="heart"','class="heart'+(n>=i+1?"":n>=i+.5?" half":" lost")+'"');return h}
+const heartWord=n=>String(n).replace(".",",")+(n===1?" Herz":" Herzen");
+function roundOf(k){if(!rounds[k]||typeof rounds[k]!=="object")rounds[k]={done:0,hearts:LIVES,fixed:0};return rounds[k]}
+/* Im Fehler-Training zeigt der Kopf die Herzen der Stufe, aus der die Aufgabe stammt */
+function heartKey(){return isRoundMode()||mode==="rev"?"all":null}
+function renderHead(breakIdx,gainIdx){
+  const hk=heartKey(),hs=$("#hearts");hs.classList.toggle("hidden",!hk);
+  if(hk){const n=H().hearts;
+    hs.innerHTML=heartsHtml(n);hs.setAttribute("aria-label",heartWord(n)+" von "+LIVES);
+    const svgs=hs.querySelectorAll("svg");
+    if(breakIdx!=null&&svgs[breakIdx])svgs[breakIdx].classList.add("breaking");
+    if(gainIdx!=null&&svgs[gainIdx])svgs[gainIdx].classList.add("gain");}
+  $("#stat").innerHTML=`✔ <b>${solved}</b> gelöst`;
+  $("#revBadge").textContent=review.length;
+  const pr=$("#progress");pr.classList.toggle("hidden",!isRoundMode());
+  if(isRoundMode()){const r=R(),segs=$("#segs");let h="";
+    for(let i=0;i<ROUND;i++)h+=`<span class="seg${i<r.done?" full":""}${i===r.done&&r.done<ROUND?" now":""}"></span>`;
+    segs.innerHTML=h;segs.setAttribute("aria-valuenow",r.done);segs.setAttribute("aria-label",NAMES[mode]+": "+r.done+" von "+ROUND+" Aufgaben geschafft");
+    $("#progCount").textContent=`${r.done} von ${ROUND} geschafft`;}
+}
+function popSeg(i){const s=$("#segs").children[i];if(s)s.classList.add("pop")}
+
+function setTab(){
+  document.documentElement.style.setProperty("--tab",`var(--${mode==="card"?"kar":mode})`);
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.mode===mode?"true":"false"));
+  $("#cardView").classList.toggle("hidden",mode!=="card");
+  $("#playView").classList.toggle("hidden",mode==="card");
+  $("#ownBtn").classList.toggle("hidden",mode==="rev");
+  renderHead();
+}
+
+/* ---------- Zeilen zeichnen ---------- */
+function lineHtml(tk,o){
+  o=o||{};let h="";
+  tk.forEach((x,i)=>{
+    let c="tk";
+    if(o.sel!=null&&i>=o.sel-1&&i<=o.sel+1)c+=" sel";
+    if(o.fresh===i)c+=" fresh";
+    if(x.t==="n")h+=`<span class="${c} n">${fmt(x.v)}</span>`;
+    else if(x.t==="op"){
+      if(o.btn){if(o.ready&&o.ready.includes(i))c+=" ready";if(o.wrong===i)c+=" wrong";
+        h+=`<button class="${c} op" data-i="${i}" aria-label="${{"+":"Plus","-":"Minus","*":"Mal",":":"Geteilt"}[x.v]} rechnen: ${esc(toText(tk.slice(Math.max(0,i-1),i+2)))}">${SYM[x.v]}</button>`;}
+      else h+=`<span class="${c} op">${SYM[x.v]}</span>`;
+    }else h+=`<span class="${c} par">${x.t}</span>`;
+  });
+  return h;
+}
+function row(tk,first,o,cls,why){return `<div class="line${cls?" "+cls:""}"><span class="eq">${first?"":"="}</span><div class="expr">${lineHtml(tk,o)}</div>${why?`<span class="why">${esc(why)}</span>`:""}</div>`}
+
+/* ---------- Aufgaben ---------- */
+function makeTask(src,level,own){const p=parse(src);const sol=solve(p.tk);return{src:toText(p.tk),tk:p.tk,sol,level,own:!!own}}
+function nextSrc(){
+  const level=+mode[1],r=R();
+  if(r.fixed<EX[level].length){const s=EX[level][r.fixed];r.fixed++;save();return{src:s,level}}
+  return{src:genTask(level,recent),level};
+}
+function newTask(){
+  $("#taskInfo").textContent="";
+  if(mode==="card")return;
+  if(mode==="rev"){
+    if(!review.length){task=null;showEmpty();return}
+    revPos=revPos%review.length;const e=review[revPos];
+    start(makeTask(e.src,e.level));renderHead();
+    const bonus=e.level&&H().hearts<LIVES?" · richtig gelöst: ½ Herz zurück":"";
+    $("#taskInfo").textContent=`${revPos+1} von ${review.length} im Fehler-Training${bonus}`;
+    return;
+  }
+  if(H().hearts<=0){showOver();return}
+  if(R().done>=ROUND){showWin();return}
+  const n=nextSrc();recent.push(n.src);if(recent.length>8)recent.shift();
+  start(makeTask(n.src,n.level));
+}
+function start(t){
+  task=t;cur=t.tk;lines=[t.tk];sel=null;tpl=null;stepLost=false;hadError=false;done=false;solShown=false;fresh=-1;wrongI=-1;
+  locked=isRoundMode()&&!t.own&&H().hearts<=0;
+  $("#solution").classList.add("hidden");$("#stamp").classList.add("hidden");
+  $("#mainActions").classList.remove("hidden");$("#opts").classList.remove("hidden");$("#lines").classList.remove("hidden");
+  const lt=$("#lvlTag");lt.textContent=t.own?"Eigene Aufgabe":"Stufe "+t.level;lt.classList.remove("hidden");
+  if(t.own)$("#taskInfo").textContent="zählt nicht für den Fortschritt";
+  render();
+  hideNote();
+  focusFirstOp();
+}
+function showEmpty(){
+  $("#lvlTag").classList.add("hidden");$("#lines").innerHTML="";$("#lines").classList.add("hidden");
+  $("#mainActions").classList.add("hidden");$("#opts").classList.add("hidden");$("#solution").classList.add("hidden");$("#stamp").classList.add("hidden");
+  setNote("good","<p><strong>Hier ist gerade nichts zu tun.</strong> Aufgaben, bei denen du dich vertan oder die Musterlösung angeschaut hast, landen hier zum Üben.</p>");
+}
+let tpl=null;
+function tplHtml(){
+  let h="";
+  tpl.tk.forEach((x,i)=>{
+    if(x.t==="n"){const d=Math.max(2,String(x.v).length);
+      h+=`<input class="tk box${i===tpl.pos?" target":""}" style="--d:${d}" data-i="${i}" type="text" inputmode="numeric" autocomplete="off" maxlength="5" aria-label="${i===tpl.pos?"Ergebnis der markierten Rechnung":"Zahl abschreiben"}">`;}
+    else if(x.t==="op")h+=`<span class="tk op">${SYM[x.v]}</span>`;
+    else h+=`<span class="tk par">${x.t}</span>`;
+  });
+  return `<div class="line tpl"><span class="eq">=</span><div class="expr">${h}</div><button class="btn main okbtn" id="tplOk">OK</button></div>`;
+}
+function render(){
+  const keep={};document.querySelectorAll("#lines input.box").forEach(el=>{keep[el.dataset.i]={v:el.value,c:el.className}});
+  let h="";
+  lines.forEach((tk,k)=>{
+    const last=k===lines.length-1;
+    if(!last)h+=row(tk,k===0,{},"old");
+    else if(done)h+=row(tk,k===0,{fresh},"final");
+    else h+=row(tk,k===0,{btn:!locked,sel,fresh,ready:tip?readyOps(tk):null,wrong:wrongI},sel!=null?"has-sel":"");
+  });
+  const showTpl=sel!=null&&!done&&!locked&&tpl;
+  if(showTpl)h+=tplHtml();
+  const lw=$("#lines");lw.innerHTML=h;
+  lw.querySelectorAll("button.tk.op").forEach(b=>b.addEventListener("click",()=>chooseOp(+b.dataset.i)));
+  if(showTpl){
+    lw.querySelectorAll("input.box").forEach(el=>{const k=keep[el.dataset.i];if(k){el.value=k.v;el.className=k.c}
+      el.addEventListener("input",()=>{el.value=el.value.replace(/\D/g,"");el.classList.remove("ok","bad")});
+      el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();const em=[...lw.querySelectorAll("input.box")].find(x=>!x.value);if(em&&el.value)em.focus();else checkTpl()}});
+    });
+    $("#tplOk").addEventListener("click",checkTpl);
+  }
+  lw.scrollLeft=0;
+}
+/* Kein automatischer Fokus aufs erste Rechenzeichen: sonst sieht es aus wie ein Hinweis */
+function focusFirstOp(){const a=document.activeElement;if(a&&a!==document.body&&a.blur)a.blur()}
+function setNote(cls,html){const n=$("#note");n.className="note"+(cls?" "+cls:"");n.innerHTML=html}
+function hideNote(){$("#note").className="note hidden";$("#note").innerHTML=""}
+
+
+const WHY={
+  paren:"<strong>Klammer zuerst!</strong> Neben diesem Rechenzeichen steht eine Klammer. Rechne zuerst aus, was in der Klammer steht.",
+  punkt:"<strong>Punkt vor Strich!</strong> Hier gibt es noch eine Mal- oder Geteilt-Rechnung. Die ist zuerst dran.",
+  ltr:"<strong>Von links nach rechts!</strong> Weiter links steht eine Rechnung derselben Art. Die kommt zuerst."};
+function mistake(){
+  if(stepLost)return;stepLost=true;
+  if(!hadError){hadError=true;addReview()}
+  loseHeart();
+}
+function chooseOp(i){
+  if(done||locked)return;
+  const st=status(cur,i);
+  if(st!=="ok"){
+    wrongI=i;sel=null;tpl=null;render();wrongI=-1;
+    const extra="";
+    setNote("bad","<p>"+WHY[st]+extra+(counted()&&!stepLost?" Das kostet ein Herz.":"")+"</p>");
+    mistake();return;
+  }
+  sel=i;wrongI=-1;
+  const v=calc(cur[i-1].v,cur[i].v,cur[i+1].v);tpl=Object.assign({v},reduce(cur,i,v));
+  render();
+  hideNote();
+  const f=document.querySelector("#lines input.box");if(f)f.focus();
+}
+function checkTpl(){
+  if(sel==null||done||locked||!tpl)return;
+  const boxes=[...document.querySelectorAll("#lines input.box")];
+  const empty=boxes.find(x=>!x.value);
+  if(empty){setNote("bad","<p><strong>Da fehlt noch etwas.</strong> Fülle zuerst alle Kästchen aus.</p>");empty.focus();return}
+  let badT=false,badO=false;
+  boxes.forEach(el=>{const i=+el.dataset.i,ok=+el.value===tpl.tk[i].v;el.classList.toggle("ok",ok);el.classList.toggle("bad",!ok);if(!ok){if(i===tpl.pos)badT=true;else badO=true}});
+  if(badT||badO){
+    const a=cur[sel-1].v,op=cur[sel].v,b=cur[sel+1].v;
+    let m="";
+    if(badT)m+=`<strong>Im grün umrandeten Kästchen stimmt das Ergebnis nicht.</strong> Rechne ${fmt(a)} ${SYM[op]} ${fmt(b)} noch einmal. `;
+    if(badO)m+=`<strong>${badT?"Außerdem":"Beim Abschreiben ist etwas schiefgegangen."}</strong> ${badT?"sind Zahlen falsch abgeschrieben. ":""}Die Zahlen, mit denen du gerade nicht rechnest, bleiben genau gleich.`;
+    setNote("bad","<p>"+m+(counted()&&!stepLost?" Das kostet ein Herz.":"")+"</p>");
+    mistake();if(!locked){const f=boxes.find(x=>x.classList.contains("bad"));if(f){f.focus();f.select()}}return;
+  }
+  cur=tpl.tk;lines.push(cur);fresh=tpl.pos;sel=null;tpl=null;stepLost=false;
+  if(cur.length===1){finish();return}
+  render();
+  hideNote();
+  focusFirstOp();
+}
+function finish(){
+  done=true;solved++;render();
+  const msg=pick(["Super!","Toll!","Klasse!","Prima!","Spitze!","Stark!"]);
+  const s=$("#stamp");s.textContent=msg;s.classList.remove("hidden");
+  let extra="";
+  let gain=null;
+  if(mode==="rev"&&!hadError){removeReview();
+    /* Jede korrigierte Aufgabe bringt ein halbes Herz für ihre Stufe zurück */
+    if(task.level){const r=H();if(r.hearts<LIVES){gain=Math.ceil(r.hearts+.5)-1;r.hearts=Math.min(LIVES,r.hearts+.5)}}}
+  let won=false;
+  if(counted()){const r=R();r.done++;won=r.done>=ROUND}
+  save();renderHead(null,gain);if(counted())popSeg(R().done-1);
+  $("#note").classList.add("hidden");
+  $("#newBtn").textContent="Nächste Aufgabe";$("#newBtn").focus();
+  if(won)setTimeout(showWin,900);
+}
+function loseHeart(){
+  if(!counted())return;const r=H();if(r.hearts<=0)return;
+  const before=r.hearts;r.hearts=Math.max(0,r.hearts-1);save();renderHead(Math.ceil(before)-1);
+  if(r.hearts<=0){locked=true;sel=null;render();setTimeout(showOver,700)}
+}
+function sameSrc(a,b){return a.src===b.src}
+function addReview(){if(!task)return;const e={src:task.src,level:task.level};if(!review.some(x=>sameSrc(x,e))){review.push(e);save();renderHead()}}
+function removeReview(){const i=review.findIndex(x=>x.src===task.src);if(i>=0){review.splice(i,1);if(revPos>i)revPos--;save();renderHead()}}
+
+/* ---------- Dialoge: Runde vorbei / geschafft ---------- */
+function msg(title,body,buttons){
+  $("#msgTitle").textContent=title;$("#msgBody").innerHTML=body;
+  const a=$("#msgActions");a.innerHTML="";
+  buttons.forEach(([label,fn,main])=>{const b=document.createElement("button");b.className="btn"+(main?" main":"");b.textContent=label;b.addEventListener("click",()=>{$("#msgOverlay").classList.add("hidden");fn()});a.appendChild(b)});
+  $("#msgOverlay").classList.remove("hidden");const m=a.querySelector(".main");if(m)m.focus();
+}
+function newRound(refill){const r=R();r.done=0;if(refill===true)H().hearts=LIVES;save();renderHead();newTask()}
+function showOver(){
+  const r=R();
+  const can=review.some(e=>e.level);
+  const btns=[["Lösung dieser Aufgabe ansehen",()=>{if(task&&!done)openSolution()}]];
+  if(can)btns.push(["Herzen zurückholen",()=>{mode="rev";revPos=Math.max(0,review.findIndex(e=>e.level));save();setTab();newTask()}]);
+  btns.push(["Neu starten mit 5 Herzen",()=>newRound(true),true]);
+  msg("Keine Herzen mehr",`<div class="hearts">${heartsHtml(0)}</div><p>Du hast in dieser Runde <b>${r.done} von ${ROUND}</b> Aufgaben geschafft.</p><p>${can?`Im <b>Fehler-Training</b> bekommst du für jede richtig verbesserte Aufgabe ein halbes Herz zurück. Dann kannst du hier weiterspielen.`:"Starte neu mit 5 Herzen. Diese Runde beginnt dann von vorn."}</p>`,btns);
+}
+function showWin(){
+  const r=H(),nxt={s1:"s2",s2:"s3"}[mode];
+  const btns=[["Diese Stufe nochmal",()=>newRound(false)]];
+  if(nxt)btns.push(["Weiter mit "+NAMES[nxt],()=>{const n=R();n.done=0;mode=nxt;revPos=0;save();setTab();newTask()},true]);
+  else btns.push(["Noch eine Runde",()=>newRound(false),true]);
+  btns[0][2]=!nxt?false:btns[0][2];
+  msg(NAMES[mode]+" geschafft!",`<div class="hearts">${heartsHtml(r.hearts)}</div><p>Alle ${ROUND} Aufgaben gelöst, und du hast noch <b>${heartWord(r.hearts)}</b> von ${LIVES}. ${r.hearts===LIVES?"Ganz ohne Fehler, stark!":"Gut gemacht!"} Deine Herzen nimmst du in die nächste Stufe mit.</p>`,btns);
+}
+
+/* ---------- Musterlösung ---------- */
+function openSolution(){
+  if(!task)return;
+  if(!solShown&&!done){solShown=true;if(!hadError){hadError=true;addReview()}if(!locked&&!stepLost){stepLost=true;loseHeart()}}
+  solStep=0;$("#solution").classList.remove("hidden");showSolStep();$("#solution").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function showSolStep(){
+  const S=task.sol.steps,n=S.length;let h="",text;
+  for(let k=0;k<=Math.min(solStep,n);k++){
+    const tk=k<n?S[k].tk:S[n-1].after;
+    const o={sel:k===solStep&&k<n?S[k].i:null,fresh:k===solStep&&k>0?S[k-1].pos:null};
+    h+=row(tk,k===0,o,k<solStep?"old":(k===n?"final":""),k===solStep&&k<n?S[k].why:"");
+  }
+  if(solStep<n){const s=S[solStep];text=`${s.why}: ${fmt(s.a)} ${SYM[s.op]} ${fmt(s.b)} = ${fmt(s.v)}. Schreibe die Aufgabe in der nächsten Zeile neu, mit ${fmt(s.v)} an dieser Stelle.`}
+  else text=`Fertig! Nur noch eine Zahl ist übrig. ${task.src} = ${fmt(task.sol.result)}.`;
+  $("#solLines").innerHTML=h;$("#solText").textContent=text;
+  $("#solCount").textContent=`Schritt ${solStep+1} von ${n+1}`;$("#solPrev").disabled=solStep===0;$("#solNext").disabled=solStep===n;
+}
+
+/* ---------- Karteikarte ---------- */
+function exampleHtml(src,whyOn){
+  const p=parse(src),sol=solve(p.tk),S=sol.steps;let h="";
+  S.forEach((s,k)=>{h+=row(s.tk,k===0,{sel:s.i},"",whyOn?s.why:"")});
+  h+=row(S[S.length-1].after,false,{},"final");
+  return `<div class="lines">${h}</div>`;
+}
+function renderCard(){
+}
+
+/* ---------- Eigene Aufgabe ---------- */
+function openOwn(){$("#ownErr").textContent="";$("#ownOverlay").classList.remove("hidden");const i=$("#ownIn");i.focus();i.select()}
+function okOwn(){
+  const p=parse($("#ownIn").value);let err=p.err||"";
+  if(!err){if(p.tk.some(x=>x.t==="n"&&x.v>9999))err="Bitte nur Zahlen bis 9 999.";else if(p.tk.filter(x=>x.t==="op").length>8)err="Bitte höchstens 8 Rechenzeichen.";
+    else if(!solve(p.tk))err="Bei dieser Aufgabe kommt unterwegs eine Zahl unter 0 oder eine Division mit Rest heraus. Bitte wähle eine andere.";}
+  if(err){$("#ownErr").textContent=err;return}
+  $("#ownOverlay").classList.add("hidden");start(makeTask($("#ownIn").value,null,true));
+}
+
+/* ---------- Ereignisse ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.mode;revPos=0;save();setTab();$("#newBtn").textContent="Andere Aufgabe";newTask()}));
+$("#solBtn").addEventListener("click",openSolution);
+$("#resetBtn").addEventListener("click",()=>{if(task){const keepErr=hadError;start(task);hadError=keepErr}});
+$("#newBtn").addEventListener("click",()=>{if(mode==="rev"&&done)revPos++;else if(mode==="rev")revPos++;$("#newBtn").textContent="Andere Aufgabe";newTask()});
+$("#ownBtn").addEventListener("click",openOwn);
+$("#ownCancel").addEventListener("click",()=>$("#ownOverlay").classList.add("hidden"));
+$("#ownOk").addEventListener("click",okOwn);
+$("#ownIn").addEventListener("keydown",e=>{if(e.key==="Enter")okOwn();if(e.key==="Escape")$("#ownOverlay").classList.add("hidden")});
+$("#keys").addEventListener("click",e=>{const k=e.target.dataset&&e.target.dataset.k;if(!k)return;const i=$("#ownIn"),s=i.selectionStart??i.value.length,en=i.selectionEnd??s;
+  const ins=/[()]/.test(k)?k:" "+k+" ";i.value=i.value.slice(0,s)+ins+i.value.slice(en);i.focus();const p=s+ins.length;i.setSelectionRange(p,p)});
+$("#solPrev").addEventListener("click",()=>{if(solStep>0){solStep--;showSolStep()}});
+$("#solNext").addEventListener("click",()=>{if(solStep<task.sol.steps.length){solStep++;showSolStep()}});
+$("#solClose").addEventListener("click",()=>{if(locked&&H().hearts<=0){showOver();return}const keep=hadError;start(task);hadError=keep;$(".sheet").scrollIntoView({behavior:"smooth"})});
+$("#tipChk").checked=tip;
+$("#tipChk").addEventListener("change",e=>{tip=e.target.checked;save();if(task&&mode!=="card")render()});
+$("#startBtn").addEventListener("click",()=>{mode="s1";save();setTab();newTask()});
+
+/* QR-Code */
+const PAGE_URL="https://mathe-materialien.github.io/Unterrichtsmaterialien/Mathematik%205/04%20Rechenheft%20-%20Vorrangregeln.html";
+function openQr(){
+  const box=$("#qrBox");
+  try{const q=qrcode(0,"M");q.addData(PAGE_URL);q.make();box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true});
+    const svg=box.querySelector("svg");svg.setAttribute("role","img");svg.setAttribute("aria-label","QR-Code zum Rechenheft");
+  }catch(e){box.innerHTML="<p>Der QR-Code konnte nicht geladen werden. Bitte die Seite neu laden.</p>"}
+  $("#qrUrl").textContent=PAGE_URL;$("#qrOverlay").classList.remove("hidden");$("#qrClose").focus();
+}
+const closeQr=()=>{$("#qrOverlay").classList.add("hidden");$("#qrBtn").focus()};
+$("#qrBtn").addEventListener("click",openQr);
+$("#qrClose").addEventListener("click",closeQr);
+$("#qrOverlay").addEventListener("click",e=>{if(e.target.id==="qrOverlay")closeQr()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("#qrOverlay").classList.contains("hidden"))closeQr();$("#ownOverlay").classList.add("hidden")}});
+
+renderCard();setTab();newTask();
+})();
+</script>
+</body>
+</html>

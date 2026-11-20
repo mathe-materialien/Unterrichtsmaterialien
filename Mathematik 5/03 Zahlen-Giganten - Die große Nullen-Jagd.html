@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zahlen-Giganten – Die große Nullen-Jagd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eaf1ff; --bg2:#d9e6ff; --card:#ffffff; --ink:#23204a; --muted:#625e8c; --line:#d6dcf3;
+  --accent:#5b3df5; --accent-ink:#ffffff; --good:#12a36b; --bad:#e8434b; --gold:#f5a900;
+  --c0:#d6336c; --c1:#f06f00; --c2:#5b3df5; --c3:#0b8fd1; --c4:#12a36b;
+  --shadow:0 6px 0 rgba(35,32,74,.12);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#16143a; --bg2:#201d52; --card:#262260; --ink:#f2f0ff; --muted:#b4afe0; --line:#3b3680;
+    --accent:#8f7bff; --accent-ink:#16143a; --good:#34d399; --bad:#ff6b73; --gold:#ffc53d;
+    --c0:#ff6b9d; --c1:#ffa04d; --c2:#a594ff; --c3:#4cc3ff; --c4:#34d399;
+    --shadow:0 6px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16143a; --bg2:#201d52; --card:#262260; --ink:#f2f0ff; --muted:#b4afe0; --line:#3b3680;
+  --accent:#8f7bff; --accent-ink:#16143a; --good:#34d399; --bad:#ff6b73; --gold:#ffc53d;
+  --c0:#ff6b9d; --c1:#ffa04d; --c2:#a594ff; --c3:#4cc3ff; --c4:#34d399;
+  --shadow:0 6px 0 rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.45;
+  -webkit-tap-highlight-color:transparent;overflow-x:hidden}
+.zeros{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.zeros span{position:absolute;font-family:"Baloo 2",sans-serif;font-weight:800;color:var(--bg2);line-height:1;user-select:none}
+main{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:16px 16px 40px}
+h1,h2,h3{font-family:"Baloo 2","Nunito",system-ui,sans-serif;line-height:1.05;margin:0}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.hidden{display:none!important}
+
+/* Kopf */
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.iconbtn{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:15px}
+
+/* Start */
+.hero{text-align:center;padding:18px 0 8px}
+.logo{font-size:clamp(44px,11vw,84px);font-weight:800;letter-spacing:-1px}
+.logo .g{display:inline-block}
+.logo .g:nth-child(1){color:var(--c0)} .logo .g:nth-child(2){color:var(--c1)} .logo .g:nth-child(3){color:var(--c2)} .logo .g:nth-child(4){color:var(--c3)} .logo .g:nth-child(5){color:var(--c4)}
+.sub{font-size:19px;color:var(--muted);margin-top:6px;font-weight:700}
+.prof{display:flex;align-items:flex-end;gap:12px;margin:22px 0 18px}
+.owl{font-size:62px;line-height:1;flex:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.12));transition:transform .2s}
+.owl.jump{animation:jump .55s ease}
+.owl.shake{animation:shake .5s ease}
+@keyframes jump{30%{transform:translateY(-18px) rotate(-8deg)}60%{transform:translateY(0) rotate(6deg)}}
+@keyframes shake{20%,60%{transform:translateX(-8px) rotate(-6deg)}40%,80%{transform:translateX(8px) rotate(6deg)}}
+.bubble{position:relative;background:var(--card);border:2px solid var(--line);border-radius:20px 20px 20px 4px;padding:12px 16px;font-weight:700;box-shadow:var(--shadow);flex:1}
+.name-row{display:flex;gap:10px;align-items:center;margin:0 0 18px;flex-wrap:wrap}
+.name-row label{font-weight:800}
+.name-row input{flex:1;min-width:160px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:10px 14px;font:inherit;font-weight:700}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.mode{text-align:left;background:var(--card);border:3px solid var(--line);border-radius:22px;padding:16px 16px 14px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.mode:hover{transform:translateY(-3px);border-color:var(--accent)}
+.mode:active{transform:translateY(2px)}
+.mode .em{font-size:36px;display:block}
+.mode h3{font-size:25px;margin:6px 0 4px}
+.mode p{margin:0;color:var(--muted);font-weight:700;font-size:15px}
+.rules{margin:22px 0 0;background:var(--card);border-radius:22px;padding:16px 18px;border:2px dashed var(--line)}
+.rules h2{font-size:24px;margin-bottom:6px}
+.rules p{margin:6px 0;font-weight:600}
+.scores{margin-top:18px;background:var(--card);border-radius:22px;padding:16px 18px;border:2px solid var(--line)}
+.scores h2{font-size:24px;margin-bottom:8px}
+.scores ol{margin:0;padding-left:26px;font-weight:700}
+.scores li{padding:3px 0}
+.scores .pts{color:var(--accent);font-weight:800}
+.scores .empty{color:var(--muted);font-weight:700;margin:0}
+
+/* HUD */
+.hud{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:10px 14px;box-shadow:var(--shadow)}
+.hearts{font-size:22px;letter-spacing:2px;white-space:nowrap}
+.hearts .lost{filter:grayscale(1);opacity:.3}
+.lvl{text-align:center;min-width:0}
+.lvl .name{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;gap:5px;justify-content:center;margin-top:3px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--gold)}
+.score{text-align:right;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:26px;line-height:1}
+.score small{display:block;font-family:"Nunito",sans-serif;font-size:13px;color:var(--muted);font-weight:800}
+.combo{display:inline-block;margin-top:2px;font-size:14px;font-weight:800;color:var(--c1)}
+.timer{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 4px}
+.timer div{height:100%;width:100%;background:var(--good);border-radius:99px;transition:width .1s linear,background .3s}
+
+.gamebar{display:flex;align-items:center;gap:10px;margin:4px 0 12px}
+.gamebar .owl{font-size:48px}
+.gamebar .bubble{font-size:16px;padding:10px 14px}
+
+.card{background:var(--card);border:3px solid var(--line);border-radius:26px;padding:20px 18px;box-shadow:var(--shadow)}
+.task{font-weight:800;color:var(--muted);font-size:16px;margin:0 0 10px}
+.bignum{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(34px,9vw,66px);line-height:1.05;text-align:center;margin:8px 0 16px;overflow-wrap:anywhere;letter-spacing:.5px}
+.bignum .sep{color:var(--muted);opacity:.6}
+.wordbox{font-family:"Baloo 2",sans-serif;font-weight:700;font-size:clamp(22px,5.4vw,32px);text-align:center;line-height:1.25;margin:8px 0 16px;overflow-wrap:anywhere;hyphens:auto;padding:14px;border-radius:18px;background:var(--bg)}
+.options{display:grid;gap:10px}
+.opt{text-align:left;width:100%;background:var(--bg);border:3px solid var(--line);border-radius:18px;padding:12px 14px;font-weight:800;font-size:17px;overflow-wrap:anywhere;hyphens:auto;display:flex;gap:12px;align-items:flex-start;transition:transform .1s,border-color .1s}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateX(3px)}
+.opt .k{flex:none;width:28px;height:28px;border-radius:9px;background:var(--card);border:2px solid var(--line);display:grid;place-items:center;font-size:14px}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 16%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--card))}
+.opt.gone{opacity:.25;text-decoration:line-through}
+.opt:disabled{cursor:default}
+.speakrow{display:flex;gap:10px;justify-content:center;margin:6px 0 16px;flex-wrap:wrap}
+.btn{border:none;border-radius:16px;padding:12px 20px;font-weight:800;font-size:18px;background:var(--accent);color:var(--accent-ink);box-shadow:0 5px 0 color-mix(in srgb,var(--accent) 60%,#000);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+.btn.soft{background:var(--bg);color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn.big{font-size:22px;padding:14px 28px}
+.btn:disabled{opacity:.45;cursor:default}
+.answer{display:flex;gap:10px;flex-wrap:wrap}
+.answer input{flex:1;min-width:0;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:28px;padding:10px 16px;border-radius:16px;border:3px solid var(--line);background:var(--bg);color:var(--ink);letter-spacing:1px}
+.preview{min-height:26px;margin-top:8px;font-weight:800;color:var(--muted)}
+.preview b{color:var(--ink);font-family:"Baloo 2",sans-serif;font-size:20px}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.hint{margin-top:12px;padding:10px 14px;border-radius:14px;background:color-mix(in srgb,var(--gold) 20%,var(--card));font-weight:800;overflow-wrap:anywhere}
+
+/* Feedback */
+.feedback{margin-top:16px;border-radius:22px;padding:16px;border:3px solid var(--good);background:color-mix(in srgb,var(--good) 10%,var(--card))}
+.feedback.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 9%,var(--card))}
+.feedback h3{font-size:26px}
+.feedback .gain{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:22px;color:var(--good);margin:2px 0 8px}
+.feedback .sol{font-weight:700;margin:8px 0;overflow-wrap:anywhere}
+.feedback .sol b{font-family:"Baloo 2",sans-serif;font-size:22px}
+.fact{margin-top:10px;font-weight:700;font-size:15px;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin:10px 0 4px}
+.stw{border-collapse:separate;border-spacing:6px 0;min-width:100%}
+.stw th{font-size:13px;font-weight:800;padding:6px 8px;border-radius:12px 12px 0 0;color:#fff;white-space:nowrap}
+.stw td{text-align:center;padding:6px 8px;background:var(--card);border:2px solid var(--line);border-top:none}
+.stw td.dg{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:26px;letter-spacing:2px}
+.stw td.wd{font-size:13px;font-weight:700;border-radius:0 0 12px 12px;color:var(--muted);min-width:90px;overflow-wrap:anywhere}
+.k0{background:var(--c0)}.k1{background:var(--c1)}.k2{background:var(--c2)}.k3{background:var(--c3)}.k4{background:var(--c4)}
+.t0{color:var(--c0)}.t1{color:var(--c1)}.t2{color:var(--c2)}.t3{color:var(--c3)}.t4{color:var(--c4)}
+
+.float{position:fixed;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:34px;color:var(--good);pointer-events:none;z-index:50;animation:up 1.1s ease-out forwards;text-shadow:0 2px 0 var(--card)}
+@keyframes up{from{opacity:1;transform:translate(-50%,0) scale(.8)}to{opacity:0;transform:translate(-50%,-90px) scale(1.2)}}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(10,8,40,.55);display:grid;place-items:center;z-index:40;padding:20px}
+.modal{background:var(--card);border-radius:28px;padding:24px 22px;max-width:480px;width:100%;text-align:center;border:3px solid var(--line);box-shadow:0 10px 0 rgba(0,0,0,.2);animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.modal .em{font-size:64px}
+.modal h2{font-size:34px;margin:4px 0 8px}
+.modal p{font-weight:700;margin:8px 0}
+.modal .merk{background:var(--bg);border-radius:16px;padding:12px;font-weight:800}
+
+/* Ende */
+.end{text-align:center;padding-top:10px}
+.end .final{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:clamp(56px,16vw,96px);color:var(--accent);line-height:1}
+.end .rank{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:30px;margin:6px 0}
+.stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:16px 0}
+.stats div{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:10px 16px;font-weight:800}
+.stats b{display:block;font-family:"Baloo 2",sans-serif;font-size:28px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+@media (max-width:520px){
+  body{font-size:16px}
+  .hud{grid-template-columns:auto 1fr auto;padding:8px 10px}
+  .hearts{font-size:18px}
+  .score{font-size:22px}
+  .lvl .name{font-size:16px}
+  .answer input{font-size:24px}
+  .answer .btn{width:100%}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+.hearts{display:grid;grid-template-columns:repeat(5,auto);gap:1px 3px;font-size:14px;letter-spacing:0;line-height:1.15}
+.hearts.rec{display:block;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:20px}
+.watch{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:28px;line-height:1}
+.pen{font-size:13px;font-weight:800;color:var(--bad)}
+.modal .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.tabs{display:flex;gap:8px;margin:4px 0 12px;flex-wrap:wrap}
+.tab{border:2px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 14px;font-weight:800;font-size:15px}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.src{font-size:13px;font-weight:800;color:var(--muted);margin:0 0 8px}
+.board{width:100%;border-collapse:collapse;font-weight:700}
+.board td,.board th{padding:7px 6px;text-align:left;border-bottom:2px solid var(--line)}
+.board th{font-size:13px;color:var(--muted)}
+.board td.r{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:20px;width:44px}
+.board td.v{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:19px;color:var(--accent);white-space:nowrap;text-align:right}
+.board th.v{text-align:right}
+.board tr.me td{background:color-mix(in srgb,var(--gold) 22%,var(--card))}
+.board small{color:var(--muted);font-weight:700}
+.bigrank{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:26px;margin:4px 0}
+.mode.rec{border-color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="zeros" id="zeros" aria-hidden="true"></div>
+<canvas id="confetti"></canvas>
+<main>
+  <div class="top">
+    <button class="iconbtn" id="soundBtn" aria-label="Ton an oder aus">🔊 Ton an</button>
+    <button class="iconbtn hidden" id="quitBtn">✖ Spiel beenden</button>
+  </div>
+
+  <section id="start">
+    <div class="hero">
+      <h1 class="logo"><span class="g">Zah</span><span class="g">len</span><span class="g">-Gi</span><span class="g">gan</span><span class="g">ten</span></h1>
+      <p class="sub">Die große Nullen-Jagd – von Tausend bis Billion</p>
+    </div>
+    <div class="prof">
+      <div class="owl">🦉</div>
+      <div class="bubble">Hallo! Ich bin Professor Nullinger. Ich zähle Nullen zum Frühstück – aber bei einer Billion werde ich nie satt. Hilfst du mir?</div>
+    </div>
+    <div class="name-row">
+      <label for="nameIn">Dein Spielername:</label>
+      <input id="nameIn" maxlength="16" placeholder="z. B. Nullen-Ninja" autocomplete="off">
+    </div>
+    <div class="modes">
+      <button class="mode rec" data-mode="record"><span class="em">⏱️</span><h3>Rekord-Jagd</h3><p>10 Zahlen, die Stoppuhr läuft. Wer ist am schnellsten? Mit Rangliste!</p></button>
+      <button class="mode" data-mode="choice"><span class="em">🗣️</span><h3>Sprich's richtig!</h3><p>Du siehst eine Zahl. Welches Zahlwort passt genau?</p></button>
+      <button class="mode" data-mode="dictation"><span class="em">🎧</span><h3>Zahlen-Diktat</h3><p>Hör genau hin und schreib die Zahl in Ziffern.</p></button>
+      <button class="mode" data-mode="words"><span class="em">🕵️</span><h3>Wort-Detektiv</h3><p>Knacke das Zahlwort und schreib die Zahl auf.</p></button>
+      <button class="mode" data-mode="mix"><span class="em">🌀</span><h3>Giganten-Mix</h3><p>Alle drei Spiele wild gemischt. Für Profis!</p></button>
+    </div>
+    <div class="rules">
+      <h2>So funktioniert's</h2>
+      <p>❤️ Du hast 10 Herzen. Jeder Fehler kostet eins.</p>
+      <p>⏱️ Du hast viel Zeit: 2 Minuten zum Auswählen, 3 Minuten zum Eintippen. Wer schneller ist, bekommt Extrapunkte.</p>
+      <p>🔥 Mehrere Richtige hintereinander erhöhen deinen Punkte-Multiplikator.</p>
+      <p>⭐ Nach 5 richtigen Antworten reist du ins nächste Level und bekommst ein Bonusherz.</p>
+      <p>💡 Du hast 2 Tipp-Joker pro Spiel. Ein Joker streicht zwei falsche Antworten weg oder verrät, wie viele Stellen die Zahl hat. Dafür gibt es nur die halben Punkte. Ab Level 6 bekommst du pro Level einen Joker dazu (höchstens 3).</p>
+      <p>🏁 Rekord-Jagd: Die Uhr läuft nur, während du eine Aufgabe löst. Jeder Fehler gibt 30 Sekunden Strafzeit, ein Tipp-Joker 10 Sekunden.</p>
+    </div>
+    <div class="scores">
+      <h2>🏆 Rangliste</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="record" aria-selected="true">⏱️ Schnellste Rekord-Jagd</button>
+        <button class="tab" role="tab" data-tab="score" aria-selected="false">⭐ Meiste Punkte</button>
+      </div>
+      <p class="src" id="boardSrc"></p>
+      <div id="scoreList"></div>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="hud">
+      <div class="hearts" id="hearts"></div>
+      <div class="lvl"><div class="name" id="lvlName"></div><div class="dots" id="dots"></div></div>
+      <div class="score" id="scoreBox"><small>Punkte</small><span id="score">0</span><div class="combo" id="combo"></div></div>
+    </div>
+    <div class="timer" id="timerWrap" aria-hidden="true"><div id="timerBar"></div></div>
+    <div class="gamebar">
+      <div class="owl" id="owl">🦉</div>
+      <div class="bubble" id="say" aria-live="polite"></div>
+    </div>
+    <div class="card" id="card"></div>
+  </section>
+
+  <section id="end" class="hidden">
+    <div class="end">
+      <div class="owl" style="font-size:80px">🦉</div>
+      <p class="sub" id="endMsg"></p>
+      <div class="final" id="finalScore">0</div>
+      <div class="rank" id="rank"></div>
+      <div class="bigrank" id="placeInfo"></div>
+      <div class="stats" id="stats"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn big" id="againBtn">Nochmal spielen</button>
+        <button class="btn big soft" id="menuBtn">Zur Rangliste</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="overlay" class="overlay hidden"></div>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- Deko-Nullen ---------- */
+(function(){const z=$("#zeros");for(let i=0;i<14;i++){const s=document.createElement("span");s.textContent="0";s.style.left=rnd(-5,95)+"%";s.style.top=rnd(-5,95)+"%";s.style.fontSize=rnd(60,200)+"px";s.style.transform="rotate("+rnd(-30,30)+"deg)";z.appendChild(s)}})();
+
+/* ---------- Zahlwörter ---------- */
+const ONES=["","ein","zwei","drei","vier","fünf","sechs","sieben","acht","neun"];
+const TEENS=["zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","siebzehn","achtzehn","neunzehn"];
+const TENS=["","","zwanzig","dreißig","vierzig","fünfzig","sechzig","siebzig","achtzig","neunzig"];
+const UNITS=[["Billion","Billionen"],["Milliarde","Milliarden"],["Million","Millionen"]];
+const CLASS=["Billionen","Milliarden","Millionen","Tausender","Einer"];
+function two(n,fin){if(!n)return"";if(n===1)return fin?"eins":"ein";if(n<10)return ONES[n];if(n<20)return TEENS[n-10];const t=Math.floor(n/10),u=n%10;return u?ONES[u]+"und"+TENS[t]:TENS[t]}
+function h3(n,fin,sp){const h=Math.floor(n/100),r=n%100;const a=h?ONES[h]+"hundert":"",b=two(r,fin);return sp&&a&&b?a+" "+b:a+b}
+function chunk(g,i,sp){const v=g[i];if(!v)return"";
+  if(i<3)return v===1?"eine "+UNITS[i][0]:h3(v,false,sp)+" "+UNITS[i][1];
+  if(i===3)return h3(v,false,sp)+(sp?" ":"")+"tausend";
+  return h3(v,true,sp)}
+function words(g,sp){
+  if(g.every(v=>!v))return"null";
+  const parts=[];for(let i=0;i<3;i++){const c=chunk(g,i,sp);if(c)parts.push(c)}
+  const tail=chunk(g,3,sp)+(sp&&g[3]&&g[4]?" ":"")+chunk(g,4,sp);
+  if(tail)parts.push(tail);return parts.join(" ")}
+function topIdx(g){let i=0;while(i<4&&!g[i])i++;return i}
+function digitStr(g,sep){const t=topIdx(g);let s=String(g[t]);for(let j=t+1;j<5;j++)s+=(sep||"")+String(g[j]).padStart(3,"0");return s}
+function digitsToGroups(str){str=str.replace(/^0+/,"");const g=[0,0,0,0,0];let k=4;while(str.length&&k>=0){g[k]=parseInt(str.slice(-3),10);str=str.slice(0,-3);k--}return g}
+function colorNum(g){const t=topIdx(g);let h="";for(let j=t;j<5;j++){if(j>t)h+='<span class="sep">.</span>';h+='<span class="t'+j+'">'+(j===t?g[j]:String(g[j]).padStart(3,"0"))+"</span>"}return h}
+
+/* ---------- Zahlen erzeugen ---------- */
+function randGroup(top){const r=Math.random();
+  if(top){if(r<.3)return rnd(1,9);if(r<.6)return rnd(10,99);return rnd(100,999)}
+  if(r<.22)return 0;if(r<.36)return rnd(1,9)*100;if(r<.5)return rnd(1,9)*100+rnd(1,9);if(r<.6)return rnd(1,99);return rnd(100,999)}
+function validG(d){if(d.every(v=>!v))return false;for(let i=0;i<5;i++){if(d[i]<0||d[i]>999)return false}for(let i=0;i<3;i++){if(d[i]!==1&&d[i]%100===1)return false}return true}
+function genNumber(level){
+  const top=level<=4?4-level:rnd(0,3);let g;
+  do{g=[0,0,0,0,0];for(let i=top;i<5;i++)g[i]=randGroup(i===top)}while(!validG(g));
+  return g}
+
+/* ---------- Fallen-Antworten ---------- */
+function numericVariant(g){
+  const d=g.slice(),top=topIdx(g),nz=[];for(let i=top;i<5;i++)if(g[i])nz.push(i);
+  const t=rnd(0,4);
+  if(t===0){const c=nz.filter(i=>{const r=g[i]%100,a=Math.floor(r/10),b=r%10;return a>=1&&b>=1&&a!==b});if(!c.length)return null;const i=pick(c),r=g[i]%100;d[i]=g[i]-r+(r%10)*10+Math.floor(r/10)}
+  else if(t===1){const i=pick(nz),v=g[i],h=Math.floor(v/100),z=Math.floor(v/10)%10,e=v%10;
+    if(h&&!z&&e)d[i]=h*100+e*10;else if(h&&z&&!e)d[i]=h*100+z;else if(v<100)d[i]=v*10;else d[i]=h*100+e*10+z}
+  else if(t===2){const zs=[];for(let i=top+1;i<5;i++)if(!g[i])zs.push(i);const low=nz.filter(i=>i!==top);
+    if(zs.length&&Math.random()<.5)d[pick(zs)]=rnd(1,999);else if(low.length)d[pick(low)]=0;else return null}
+  else if(t===3){if(top>0&&Math.random()<.5){for(let i=0;i<4;i++)d[i]=g[i+1];d[4]=0}else if(top<4){for(let i=4;i>0;i--)d[i]=g[i-1];d[0]=0}else return null}
+  else{const i=pick(nz);d[i]=Math.max(1,Math.min(999,g[i]+pick([-100,100,-10,10,-1,1])))}
+  return d}
+function makeDistractors(g){
+  const correct=words(g),set=new Set([correct]),unitD=[],numD=[];
+  const swaps=[["Millionen","Milliarden","Milliard"],["Milliarden","Billionen","Billion"],["Billionen","Milliarden","Milliard"],["Milliarden","Millionen","Million"],["Million","Milliarde","Milliard"],["Milliarde","Billion","Billion"],["Billion","Milliarde","Milliard"],["Milliarde","Million","Million"]];
+  for(const [a,b,stem] of shuffle(swaps.slice())){const re=new RegExp("\\b"+a+"\\b");if(re.test(correct)&&!correct.includes(stem)){const s=correct.replace(re,b);if(!set.has(s)){set.add(s);unitD.push(s)}}}
+  for(let k=0;k<80&&numD.length<6;k++){const d=numericVariant(g);if(!d||!validG(d))continue;const s=words(d);if(!set.has(s)){set.add(s);numD.push(s)}}
+  shuffle(numD);const out=[];if(unitD.length)out.push(unitD.shift());
+  while(out.length<3&&numD.length)out.push(numD.shift());
+  while(out.length<3&&unitD.length)out.push(unitD.shift());
+  let guard=0;while(out.length<3&&guard++<60){const s=words(genNumber(state.level));if(!set.has(s)){set.add(s);out.push(s)}}
+  return out}
+
+/* ---------- Ton ---------- */
+let actx=null,soundOn=true;
+function tone(f,dur,type,when,vol){if(!soundOn)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),gn=actx.createGain(),t=actx.currentTime+(when||0);o.type=type||"sine";o.frequency.value=f;gn.gain.setValueAtTime(vol||.12,t);gn.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(gn).connect(actx.destination);o.start(t);o.stop(t+dur+.02)}catch(e){}}
+const sfx={
+  good(){[523,659,784,1047].forEach((f,i)=>tone(f,.16,"triangle",i*.07,.14))},
+  bad(){tone(220,.28,"sawtooth",0,.07);tone(155,.4,"sawtooth",.14,.07)},
+  level(){[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,.2,"square",i*.1,.05))},
+  tick(){tone(880,.05,"square",0,.03)},
+  click(){tone(600,.05,"triangle",0,.05)}
+};
+
+/* ---------- Sprachausgabe ---------- */
+const ttsOK="speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
+let deVoice=null;
+function loadVoices(){if(!ttsOK)return;const v=speechSynthesis.getVoices();deVoice=v.find(x=>/^de[-_]DE/i.test(x.lang))||v.find(x=>/^de/i.test(x.lang))||null}
+if(ttsOK){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function speak(text,slow){if(!ttsOK)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="de-DE";if(deVoice)u.voice=deVoice;u.rate=slow?.62:.9;speechSynthesis.speak(u)}catch(e){}}
+
+/* ---------- Speicher ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- Texte ---------- */
+const LEVELS=[null,
+ {name:"🏕️ Tausender-Tal",em:"🏕️",hi:"Willkommen im Tausender-Tal!",merk:"Tausend hat 3 Nullen: 1.000. Immer drei Ziffern bilden eine Gruppe!"},
+ {name:"🌊 Millionen-Meer",em:"🌊",hi:"Tauch ab ins Millionen-Meer!",merk:"Eine Million = tausend Tausender = 1.000.000 (6 Nullen). Man schreibt sie als eigenes Wort: „zwei Millionen dreihunderttausend“."},
+ {name:"🏔️ Milliarden-Berg",em:"🏔️",hi:"Kletter hinauf auf den Milliarden-Berg!",merk:"Eine Milliarde = tausend Millionen = 1.000.000.000 (9 Nullen)."},
+ {name:"🌌 Billionen-Galaxie",em:"🌌",hi:"Willkommen in der Billionen-Galaxie!",merk:"Eine Billion = tausend Milliarden = 1.000.000.000.000 (12 Nullen). Achtung Falle: Das englische „billion“ ist unsere Milliarde!"},
+ {name:"🌀 Giganten-Chaos",em:"🌀",hi:"Willkommen im Giganten-Chaos!",merk:"Ab jetzt ist alles gemischt: Tausender, Millionen, Milliarden und Billionen. Nur echte Zahlen-Giganten überleben!"}];
+const PRAISE=["Zahl-tastisch! 🎉","Du bist eine echte Rechen-Rakete! 🚀","Nullen gezählt, Nullen besiegt! 💪","Mathe-Magie! ✨","Bravo! Selbst ich hätte länger gebraucht – und ich bin Professor!","Wow! Deine Nullen stehen stramm wie Soldaten.","Treffer! Die Billionen zittern schon vor dir.","Genial! Hast du heimlich einen Taschenrechner verschluckt?","Uhu-hu-huuu! Perfekt!","So sauber, da kann man vom Stellenwert essen!"];
+const OOPS=["Upsi! Da hat sich eine Null verlaufen. 🙈","Die Nullen haben Party gemacht – ohne dich.","Knapp daneben ist auch vorbei, sagt meine Oma.","Autsch! Aber aus Fehlern werden Giganten.","Hoppla! Schau in die Stellenwerttafel, die verrät alles.","Die Zahl hat dich ausgetrickst! Nächstes Mal schnappst du sie.","Oh nein! Mir sind vor Schreck zwei Federn ausgefallen."];
+const TIMEOUT=["Zeit um! Die Zahl ist einfach davongerannt. 🏃","Tick, tack … bumm! Zu langsam – aber du schaffst das!"];
+const THINK=["Lass dir Zeit, lies ganz in Ruhe.","Tipp: Zähle die Dreiergruppen von rechts!","Ganz ruhig. Eine Null nach der anderen.","Ich drück dir alle Krallen!","Hmm, das ist eine dicke Zahl. Lecker!","Konzentration! Die Nullen schauen zu."];
+const FACTS=["Eine Million Sekunden sind etwa 11½ Tage.","Eine Milliarde Sekunden sind rund 31 Jahre und 8 Monate.","Eine Billion Sekunden sind über 31.000 Jahre – viel länger, als es die Schrift gibt!","Auf der Erde leben ungefähr 8 Milliarden Menschen.","Ein Turm aus einer Million 1-Euro-Münzen wäre über 2 Kilometer hoch.","Die Sonne ist rund 150 Millionen Kilometer von der Erde entfernt.","Dein Herz schlägt in 80 Jahren ungefähr 3 Milliarden Mal.","Wenn du jede Sekunde eine Zahl sagst, brauchst du bis zu einer Million fast 12 Tage – ohne Schlafen!","Im Englischen heißt unsere Milliarde „billion“. Das sorgt oft für Verwechslungen!","Nach der Billion kommen Billiarde, Trillion, Trilliarde … Die Reihe geht immer weiter."];
+const RANKS=[[0,"Zahlen-Zwerg 🐣"],[3000,"Tausender-Tüftler 🔍"],[8000,"Millionen-Meister 🌊"],[15000,"Milliarden-Magier 🧙"],[25000,"Billionen-Boss 👑"]];
+const REC_RANKS=[[Infinity,"Zahlen-Schnecke 🐌"],[600000,"Zahlen-Igel 🦔"],[360000,"Zahlen-Hase 🐇"],[240000,"Zahlen-Gepard 🐆"],[150000,"Zahlen-Rakete 🚀"]];
+const MODENAMES={choice:"Sprich's richtig!",dictation:"Zahlen-Diktat",words:"Wort-Detektiv",mix:"Giganten-Mix",record:"Rekord-Jagd"};
+const REC_Q=10,PEN_WRONG=30000,PEN_JOKER=10000,START_HEARTS=10,MAX_HEARTS=10,PER_LEVEL=5,T_CHOICE=120,T_TYPE=180;
+
+function fmtTime(ms){const t=Math.round(ms/100)/10,m=Math.floor(t/60),sec=(t-m*60).toFixed(1).replace(".",",");return m?m+":"+(sec.length<4?"0":"")+sec+" min":sec+" s"}
+
+/* ---------- Gemeinsame Rangliste ---------- */
+let db=null,dbWritable=true,globalScores=null,globalRecords=null,boardTab="record";
+const mine=new Set(store.get("zg-mine",[]));
+function cleanScore(d){return d&&typeof d.name==="string"&&typeof d.score==="number"&&isFinite(d.score)}
+function cleanRec(d){return d&&typeof d.name==="string"&&typeof d.timeMs==="number"&&isFinite(d.timeMs)&&d.timeMs>0}
+(async()=>{
+  try{if(!window.claude||!window.claude.use)return;db=await window.claude.use("db");}catch(e){db=null}
+  if(!db){renderScores();return}
+  try{
+    db.collection("scores").orderBy("score","desc").limit(25).onSnapshot(s=>{globalScores=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(cleanScore);renderScores()},()=>{globalScores=null;renderScores()});
+    db.collection("records").orderBy("timeMs","asc").limit(25).onSnapshot(s=>{globalRecords=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(cleanRec);renderScores()},()=>{globalRecords=null;renderScores()});
+  }catch(e){db=null}
+  renderScores();
+})();
+async function saveShared(col,data){
+  if(!db||!dbWritable)return null;
+  try{const ref=await db.collection(col).add(data);mine.add(ref.id);store.set("zg-mine",[...mine].slice(-60));return ref.id}
+  catch(e){if(e&&(e.code==="invalid_argument"||e.code==="not_granted"))dbWritable=false;return null}
+}
+async function sharedRank(t){
+  if(!db)return null;
+  try{const s=await db.collection("records").where("timeMs","<",t).limit(1000).get();return{rank:s.size+1}}catch(e){return null}
+}
+
+/* ---------- Spielzustand ---------- */
+const state={mode:"choice",score:0,hearts:START_HEARTS,streak:0,best:0,level:1,inLevel:0,correct:0,total:0,jokers:2,q:null,tMax:T_CHOICE,tStart:0,timer:null,answered:false,usedJoker:false,levelUp:false,lastTick:0,warned:false,
+  qIndex:0,recMs:0,penMs:0,qStart:0,watch:null};
+const isRec=()=>state.mode==="record";
+
+function show(id){["start","game","end"].forEach(s=>$("#"+s).classList.toggle("hidden",s!==id));$("#quitBtn").classList.toggle("hidden",id!=="game");window.scrollTo(0,0)}
+function owlDo(cls){const o=$("#owl");o.classList.remove("jump","shake");void o.offsetWidth;o.classList.add(cls)}
+function say(t){$("#say").textContent=t}
+function mult(){return 1+Math.min(4,Math.floor(state.streak/3))*.5}
+function recElapsed(){return state.recMs+state.penMs+(state.answered||!state.qStart?0:performance.now()-state.qStart)}
+
+function renderHud(){
+  const hEl=$("#hearts");
+  if(isRec()){
+    hEl.className="hearts rec";hEl.textContent="Aufgabe "+Math.min(state.qIndex+1,REC_Q)+"/"+REC_Q;
+    $("#lvlName").textContent=LEVELS[Math.min(state.level,5)].name;
+    let d="";for(let i=0;i<REC_Q;i++)d+='<i class="'+(i<state.qIndex?"on":"")+'"></i>';$("#dots").innerHTML=d;
+    $("#scoreBox").innerHTML='<small>Stoppuhr</small><span class="watch" id="watch">'+fmtTime(recElapsed())+"</span>"+(state.penMs?'<div class="pen">inkl. +'+Math.round(state.penMs/1000)+" s Strafzeit</div>":"");
+    return;
+  }
+  hEl.className="hearts";let h="";for(let i=0;i<Math.max(START_HEARTS,state.hearts);i++)h+=i<state.hearts?"<span>❤️</span>":'<span class="lost">🤍</span>';
+  hEl.innerHTML=h;hEl.setAttribute("aria-label",state.hearts+" Herzen");
+  $("#lvlName").textContent="Level "+state.level+": "+LEVELS[Math.min(state.level,5)].name;
+  let d="";for(let i=0;i<PER_LEVEL;i++)d+='<i class="'+(i<state.inLevel?"on":"")+'"></i>';$("#dots").innerHTML=d;
+  const m=mult();
+  $("#scoreBox").innerHTML='<small>Punkte</small><span id="score">'+state.score.toLocaleString("de-DE")+'</span><div class="combo">'+(state.streak>=2?"🔥 Serie "+state.streak+(m>1?" · ×"+String(m).replace(".",","):""):"")+"</div>";
+}
+
+function startGame(mode){
+  if(mode==="dictation"&&!ttsOK){modal('<div class="em">🔇</div><h2>Kein Vorlesen möglich</h2><p>Dein Browser kann leider keine Zahlen vorlesen. Probiere den Wort-Detektiv oder einen anderen Browser!</p>',[{label:"Okay"}]);return}
+  Object.assign(state,{mode,score:0,hearts:START_HEARTS,streak:0,best:0,level:1,inLevel:0,correct:0,total:0,jokers:mode==="record"?2:2,levelUp:false,qIndex:0,recMs:0,penMs:0,qStart:0});
+  store.set("zg-name",$("#nameIn").value.trim());
+  show("game");$("#timerWrap").classList.toggle("hidden",isRec());
+  clearInterval(state.watch);
+  if(isRec()){state.watch=setInterval(()=>{const w=$("#watch");if(w)w.textContent=fmtTime(recElapsed())},100);say("Auf die Plätze, fertig, los! Die Uhr läuft nur, während du rätst. 🏁")}
+  else say(pick(["Los geht's! Wir starten ganz entspannt im Tausender-Tal.","Auf zur Nullen-Jagd! Erst mal kleine Giganten."]));
+  renderHud();newQuestion();
+}
+
+function newQuestion(){
+  clearTimer();
+  if(isRec())state.level=Math.floor(state.qIndex/2)+1;
+  const types=ttsOK?["choice","dictation","words"]:["choice","words"];
+  let type=isRec()?types[state.qIndex%types.length]:state.mode==="mix"?pick(types):state.mode;
+  const g=genNumber(state.level);
+  const q={type,g,n:digitStr(g),written:words(g),spoken:words(g,true)};
+  if(type==="choice")q.options=shuffle([q.written].concat(makeDistractors(g)));
+  state.q=q;state.answered=false;state.usedJoker=false;state.warned=false;
+  const card=$("#card");let h="";
+  if(type==="choice"){
+    h+='<p class="task">🗣️ Wie spricht man diese Zahl richtig aus?</p><div class="bignum">'+colorNum(g)+'</div><div class="options">';
+    q.options.forEach((o,i)=>{h+='<button class="opt" data-i="'+i+'"><span class="k">'+(i+1)+"</span><span>"+esc(o)+"</span></button>"});
+    h+="</div>";
+  }else{
+    if(type==="dictation")h+='<p class="task">🎧 Hör gut zu und schreib die Zahl in Ziffern auf!</p><div class="speakrow"><button class="btn" id="playBtn">🔊 Anhören</button><button class="btn soft" id="slowBtn">🐢 Langsam</button></div>';
+    else h+='<p class="task">🕵️ Welche Zahl versteckt sich in diesem Zahlwort?</p><div class="wordbox" lang="de">'+esc(q.written)+"</div>";
+    h+='<div class="answer"><input id="ans" inputmode="numeric" autocomplete="off" placeholder="Zahl in Ziffern" aria-label="Deine Antwort in Ziffern"><button class="btn" id="checkBtn">Prüfen</button></div><div class="preview" id="preview"></div>';
+  }
+  h+='<div id="hintBox"></div><div class="actions"><button class="btn soft" id="jokerBtn">💡 Tipp-Joker ('+state.jokers+')'+(isRec()?" +10 s":"")+'</button></div><div id="fb"></div>';
+  card.innerHTML=h;
+  $("#jokerBtn").disabled=state.jokers<=0;$("#jokerBtn").onclick=useJoker;
+  if(type==="choice"){card.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(+b.dataset.i))}
+  else{
+    const inp=$("#ans");
+    inp.oninput=()=>{const d=inp.value.replace(/\D/g,"").replace(/^0+(?=\d)/,"");if(d.length>15)inp.value=d.slice(0,15);
+      const dd=d.slice(0,15);if(!dd){$("#preview").innerHTML="";return}
+      $("#preview").innerHTML="Du schreibst: <b>"+colorNum(digitsToGroups(dd))+"</b> ("+dd.length+" Stellen)"};
+    inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();answer(inp.value)}};
+    $("#checkBtn").onclick=()=>answer(inp.value);
+    if(type==="dictation"){$("#playBtn").onclick=()=>speak(q.spoken);$("#slowBtn").onclick=()=>speak(q.spoken,true);setTimeout(()=>{if(state.q===q)speak(q.spoken)},450)}
+    setTimeout(()=>inp.focus({preventScroll:true}),60);
+  }
+  if(!isRec()&&Math.random()<.35)say(pick(THINK));
+  state.qStart=performance.now();renderHud();
+  if(!isRec())startTimer(type==="choice"?T_CHOICE:T_TYPE);
+}
+
+function useJoker(){
+  if(state.jokers<=0||state.usedJoker||state.answered)return;
+  state.jokers--;state.usedJoker=true;$("#jokerBtn").disabled=true;$("#jokerBtn").textContent="💡 Tipp-Joker ("+state.jokers+")";sfx.click();
+  if(isRec()){state.penMs+=PEN_JOKER;renderHud()}
+  const q=state.q;
+  if(q.type==="choice"){
+    const wrong=[...document.querySelectorAll(".opt")].filter(b=>q.options[+b.dataset.i]!==q.written);
+    shuffle(wrong).slice(0,2).forEach(b=>{b.disabled=true;b.classList.add("gone")});
+    say("Schwupps! Zwei falsche Antworten sind weggeflattert.");
+  }else{
+    const t=topIdx(q.g);let sk="";for(let j=t;j<5;j++){if(j>t)sk+=".";sk+=(j===t?String(q.g[j]):"000").replace(/\d/g,"_ ").trim()}
+    $("#hintBox").innerHTML='<div class="hint">💡 Die Zahl hat '+q.n.length+" Stellen: "+sk+"<br>Sie beginnt bei den "+["Billionen","Milliarden","Millionen","Tausendern","Einern"][t]+".</div>";
+    say("Psst … schau mal in den gelben Kasten!");
+  }
+}
+
+/* ---------- Timer (normale Modi) ---------- */
+function startTimer(sec){state.tMax=sec;state.tStart=performance.now();state.lastTick=sec;const bar=$("#timerBar");
+  state.timer=setInterval(()=>{const left=Math.max(0,sec-(performance.now()-state.tStart)/1000),p=left/sec;
+    bar.style.width=(p*100)+"%";bar.style.background=p>.5?"var(--good)":p>.2?"var(--gold)":"var(--bad)";
+    if(p<.2&&!state.warned){state.warned=true;say("Noch ein bisschen Zeit – du schaffst das! ⏳")}
+    const s=Math.ceil(left);if(s<=5&&s<state.lastTick&&s>0){sfx.tick();state.lastTick=s}
+    if(left<=0){clearTimer();answer(null,true)}},200)}
+function clearTimer(){if(state.timer){clearInterval(state.timer);state.timer=null}}
+function timeLeft(){return Math.max(0,state.tMax-(performance.now()-state.tStart)/1000)}
+
+/* ---------- Auswertung ---------- */
+function answer(val,timeout){
+  if(state.answered)return;const q=state.q;
+  if(!timeout&&q.type!=="choice"&&!String(val).replace(/\D/g,"")){say("Du musst schon eine Zahl eintippen! 😄");return}
+  const left=timeLeft();clearTimer();
+  if(isRec())state.recMs+=performance.now()-state.qStart;
+  state.answered=true;state.total++;
+  let ok=false,given="";
+  if(!timeout&&q.type==="choice"){ok=q.options[val]===q.written;
+    document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;const i=+b.dataset.i;if(q.options[i]===q.written)b.classList.add("right");else if(i===val)b.classList.add("wrong")})}
+  else if(!timeout){given=String(val).replace(/\D/g,"").replace(/^0+(?=\d)/,"");ok=given===q.n}
+  if($("#ans")){$("#ans").disabled=true;$("#checkBtn").disabled=true}
+  if(q.type==="choice"&&timeout)document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;if(q.options[+b.dataset.i]===q.written)b.classList.add("right")});
+  $("#jokerBtn").disabled=true;
+
+  let pts=0;
+  if(ok){
+    state.streak++;state.best=Math.max(state.best,state.streak);state.correct++;
+    sfx.good();owlDo("jump");
+    if(isRec()){floatPts("✓");say(pick(PRAISE))}
+    else{
+      state.inLevel++;
+      const base=[0,100,150,200,250,300][Math.min(state.level,5)];
+      pts=base*(1+.5*left/state.tMax)*mult();if(state.usedJoker)pts/=2;pts=Math.round(pts/5)*5;
+      state.score+=pts;floatPts("+"+pts);
+      if(state.streak%3===0)say(state.streak+"er-Serie! 🔥 Dein Multiplikator steigt auf ×"+String(mult()).replace(".",",")+"!");else say(pick(PRAISE));
+      if(state.inLevel>=PER_LEVEL)state.levelUp=true;
+    }
+  }else{
+    state.streak=0;sfx.bad();owlDo("shake");
+    if(isRec()){state.penMs+=PEN_WRONG;floatPts("+30 s",true)}else state.hearts--;
+    say(timeout?pick(TIMEOUT):pick(OOPS));
+  }
+  if(isRec())state.qIndex++;
+  renderHud();
+
+  const last=isRec()?state.qIndex>=REC_Q:state.hearts<=0;
+  let h='<div class="feedback'+(ok?"":" bad")+'"><h3>'+(ok?"✅ Richtig!":timeout?"⏰ Zeit um!":"❌ Leider falsch")+"</h3>";
+  if(ok&&!isRec())h+='<div class="gain">+'+pts.toLocaleString("de-DE")+" Punkte"+(state.usedJoker?" (Joker: halbe Punkte)":"")+"</div>";
+  if(!ok&&isRec())h+='<div class="gain" style="color:var(--bad)">+30 Sekunden Strafzeit</div>';
+  if(!ok&&!isRec())h+='<div class="gain" style="color:var(--bad)">−1 ❤️ (noch '+state.hearts+")</div>";
+  if(isRec())h+='<p class="sol">⏸️ Die Stoppuhr ist angehalten – lies in Ruhe.</p>';
+  if(!ok&&given)h+='<p class="sol">Deine Zahl: <b>'+colorNum(digitsToGroups(given))+"</b>"+(given.length!==q.n.length?" – du hast "+given.length+" statt "+q.n.length+" Stellen.":"")+"</p>";
+  h+='<p class="sol">Richtig ist: <b>'+colorNum(q.g)+"</b><br>„"+esc(q.written)+"“</p>";
+  h+='<div class="tablewrap">'+placeTable(q.g)+"</div>";
+  if(!isRec()&&Math.random()<.4)h+='<p class="fact">🦉 Wusstest du? '+pick(FACTS)+"</p>";
+  h+='<div class="actions">'+(ttsOK?'<button class="btn soft" id="hearBtn">🔊 So spricht man sie</button>':"<span></span>")+'<button class="btn" id="nextBtn">'+(last?"Zum Ergebnis":"Weiter")+"</button></div></div>";
+  $("#fb").innerHTML=h;
+  if(ttsOK)$("#hearBtn").onclick=()=>speak(q.spoken);
+  $("#nextBtn").onclick=next;
+  setTimeout(()=>{const nb=$("#nextBtn");if(!nb)return;nb.focus({preventScroll:true});$("#fb").scrollIntoView({behavior:"smooth",block:"nearest"})},80);
+}
+
+function placeTable(g){
+  const t=topIdx(g);let th="",dg="",wd="";
+  for(let j=t;j<5;j++){th+='<th class="k'+j+'">'+CLASS[j]+"</th>";dg+='<td class="dg t'+j+'">'+(j===t?g[j]:String(g[j]).padStart(3,"0"))+"</td>";wd+='<td class="wd">'+(esc(chunk(g,j))||"–")+"</td>"}
+  return '<table class="stw" aria-label="Stellenwerttafel"><tr>'+th+"</tr><tr>"+dg+"</tr><tr>"+wd+"</tr></table>";
+}
+function floatPts(txt,bad){const b=$("#scoreBox").getBoundingClientRect();const d=document.createElement("div");d.className="float";if(bad)d.style.color="var(--bad)";d.textContent=txt;d.style.left=(b.left+b.width/2)+"px";d.style.top=(b.bottom+10)+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1200)}
+
+function next(){
+  if(!state.answered)return;
+  if(isRec()){if(state.qIndex>=REC_Q)endRecord();else newQuestion();return}
+  if(state.hearts<=0){endGame();return}
+  if(state.levelUp){state.levelUp=false;doLevelUp();return}
+  newQuestion();
+}
+
+function doLevelUp(){
+  state.level++;state.inLevel=0;let bonus=false;
+  if(state.hearts<MAX_HEARTS){state.hearts++;bonus=true}
+  if(state.level>5&&state.jokers<3)state.jokers++;
+  renderHud();sfx.level();confetti();
+  const L=LEVELS[Math.min(state.level,5)];
+  modal('<div class="em">'+L.em+'</div><h2>Level '+state.level+"!</h2><p>"+esc(L.hi)+'</p><p class="merk">📌 '+esc(L.merk)+"</p>"+(bonus?"<p>❤️ Bonus: Du bekommst ein Extra-Herz!</p>":""),[{label:"Weiter geht's!",fn:()=>{say("Neues Level, neue Nullen! Auf geht's!");newQuestion()}}]);
+}
+
+function modal(html,buttons){const o=$("#overlay");
+  o.innerHTML='<div class="modal" role="dialog" aria-modal="true">'+html+'<div class="row">'+buttons.map((b,i)=>'<button class="btn big'+(b.soft?" soft":"")+'" data-b="'+i+'">'+esc(b.label)+"</button>").join("")+"</div></div>";
+  o.classList.remove("hidden");
+  o.querySelectorAll("[data-b]").forEach(el=>el.onclick=()=>{o.classList.add("hidden");o.innerHTML="";const b=buttons[+el.dataset.b];b.fn&&b.fn()});
+  o.querySelector("[data-b]").focus();
+}
+
+/* ---------- Ende ---------- */
+function playerName(){return($("#nameIn").value.trim()||"Anonymer Gigant").slice(0,16)}
+function stopAll(){clearTimer();clearInterval(state.watch);if(ttsOK)try{speechSynthesis.cancel()}catch(e){}}
+
+async function endGame(){
+  stopAll();const name=playerName();
+  const prevBest=Math.max(0,...(globalScores||store.get("zg-scores",[])).map(s=>s.score));
+  if(state.score>0){
+    const entry={name,score:state.score,mode:state.mode,level:state.level,correct:state.correct,d:Date.now()};
+    const list=store.get("zg-scores",[]);list.push(entry);list.sort((a,b)=>b.score-a.score);store.set("zg-scores",list.slice(0,10));
+    saveShared("scores",entry);
+  }
+  show("end");
+  let rank=RANKS[0][1];RANKS.forEach(r=>{if(state.score>=r[0])rank=r[1]});
+  const rec=state.score>0&&state.score>prevBest;
+  $("#endMsg").textContent=rec?"🎉 NEUER REKORD! Professor Nullinger fällt vor Staunen vom Ast!":state.correct>=15?"Starke Leistung! Die Nullen haben Respekt vor dir.":"Gut gekämpft! Beim nächsten Mal knackst du noch größere Zahlen.";
+  $("#finalScore").textContent=state.score.toLocaleString("de-DE")+" Punkte";
+  $("#rank").textContent=rank;$("#placeInfo").textContent="";
+  const quote=state.total?Math.round(state.correct/state.total*100):0;
+  $("#stats").innerHTML="<div><b>"+state.correct+"</b>richtig</div><div><b>"+quote+" %</b>Trefferquote</div><div><b>"+state.best+"</b>beste Serie</div><div><b>"+state.level+"</b>Level erreicht</div>";
+  if(rec)setTimeout(confetti,200);
+  boardTab="score";renderScores();
+}
+
+async function endRecord(){
+  stopAll();const name=playerName();const t=Math.round(state.recMs+state.penMs);
+  const wrong=REC_Q-state.correct;
+  const personal=store.get("zg-records",[]);
+  const myBest=personal.length?Math.min(...personal.map(r=>r.timeMs)):Infinity;
+  const allBest=globalRecords&&globalRecords.length?globalRecords[0].timeMs:myBest;
+  const entry={name,timeMs:t,wrong,correct:state.correct,d:Date.now()};
+  personal.push(entry);personal.sort((a,b)=>a.timeMs-b.timeMs);store.set("zg-records",personal.slice(0,10));
+  show("end");
+  $("#finalScore").textContent=fmtTime(t);
+  let r=REC_RANKS[0][1];REC_RANKS.forEach(x=>{if(t<=x[0])r=x[1]});$("#rank").textContent=r;
+  $("#stats").innerHTML="<div><b>"+state.correct+"/"+REC_Q+"</b>richtig</div><div><b>"+fmtTime(state.recMs)+"</b>reine Zeit</div><div><b>+"+Math.round(state.penMs/1000)+" s</b>Strafzeit</div><div><b>"+(myBest<Infinity?fmtTime(Math.min(myBest,t)):fmtTime(t))+"</b>dein Bestwert</div>";
+  const topRecord=t<allBest,newPB=t<myBest;
+  $("#endMsg").textContent=topRecord?"🏆 ABSOLUTER REKORD! Niemand war bisher schneller als du!":newPB&&myBest<Infinity?"🎉 Neue persönliche Bestzeit! Du wirst immer schneller.":"Geschafft! Jede Runde macht dich schneller.";
+  if(topRecord||newPB)setTimeout(confetti,200);
+  $("#placeInfo").textContent="";
+  if(db){
+    $("#placeInfo").textContent="Platz wird berechnet …";
+    await saveShared("records",entry);
+    const rk=await sharedRank(t);
+    $("#placeInfo").textContent=rk?"🥇 Platz "+rk.rank+" von allen Spielern"+(rk.rank===1?"!":""):"";
+  }else{
+    const pos=personal.findIndex(x=>x===entry)+1;
+    $("#placeInfo").textContent="Platz "+pos+" auf diesem Gerät";
+  }
+  boardTab="record";renderScores();
+}
+
+function quit(){
+  modal('<div class="em">🤔</div><h2>Spiel beenden?</h2><p>'+(isRec()?"Die Rekord-Jagd wird abgebrochen und nicht gewertet.":"Deine Punkte werden gespeichert.")+"</p>",[{label:"Ja, beenden",fn:()=>{if(isRec()){stopAll();renderScores();show("start")}else endGame()}},{label:"Weiterspielen",soft:true}]);
+}
+
+/* ---------- Rangliste anzeigen ---------- */
+function renderScores(){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===boardTab?"true":"false"));
+  const shared=boardTab==="record"?globalRecords:globalScores;
+  const useShared=db&&shared!==null;
+  $("#boardSrc").textContent=useShared?"🌍 Alle Spielerinnen und Spieler"+(dbWritable?"":" (du kannst hier nur lesen, deine Ergebnisse bleiben auf diesem Gerät)"):"📱 Nur Ergebnisse von diesem Gerät";
+  const el=$("#scoreList");
+  if(boardTab==="record"){
+    const list=useShared?shared:store.get("zg-records",[]);
+    if(!list.length){el.innerHTML='<p class="empty">Noch keine Zeiten. Starte die Rekord-Jagd und stell den ersten Rekord auf!</p>';return}
+    el.innerHTML='<table class="board"><tr><th>Platz</th><th>Name</th><th class="v">Zeit</th></tr>'+list.slice(0,20).map((s,i)=>'<tr class="'+(s.id&&mine.has(s.id)?"me":"")+'"><td class="r">'+(["🥇","🥈","🥉"][i]||i+1)+"</td><td>"+esc(s.name.slice(0,16))+"<br><small>"+(+s.correct||0)+"/"+REC_Q+" richtig</small></td><td class=\"v\">"+fmtTime(s.timeMs)+"</td></tr>").join("")+"</table>";
+  }else{
+    const list=useShared?shared:store.get("zg-scores",[]);
+    if(!list.length){el.innerHTML='<p class="empty">Noch keine Punkte. Spiel eine Runde und trag dich ein!</p>';return}
+    el.innerHTML='<table class="board"><tr><th>Platz</th><th>Name</th><th class="v">Punkte</th></tr>'+list.slice(0,20).map((s,i)=>'<tr class="'+(s.id&&mine.has(s.id)?"me":"")+'"><td class="r">'+(["🥇","🥈","🥉"][i]||i+1)+"</td><td>"+esc(s.name.slice(0,16))+"<br><small>"+esc(MODENAMES[s.mode]||"")+", Level "+(+s.level||1)+"</small></td><td class=\"v\">"+s.score.toLocaleString("de-DE")+"</td></tr>").join("")+"</table>";
+  }
+}
+
+/* ---------- Konfetti ---------- */
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const c=$("#confetti"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cs=getComputedStyle(document.documentElement),cols=["--c0","--c1","--c2","--c3","--c4","--gold"].map(v=>cs.getPropertyValue(v).trim());
+  const P=[];for(let i=0;i<140;i++)P.push({x:c.width/2+rnd(-60,60),y:c.height*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*13-4,r:rnd(5,10),c:pick(cols),a:Math.random()*6,s:Math.random()<.3});
+  let f=0;(function loop(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;
+    if(p.s){x.font="bold "+(p.r*2.4)+"px 'Baloo 2',sans-serif";x.fillText("0",-p.r/1.5,p.r/1.2)}else x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});
+    if(++f<150)requestAnimationFrame(loop);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+/* ---------- Tastatur ---------- */
+document.addEventListener("keydown",e=>{
+  if(!$("#overlay").classList.contains("hidden"))return;
+  if($("#game").classList.contains("hidden"))return;
+  if(state.answered&&e.key==="Enter"){e.preventDefault();next();return}
+  if(!state.answered&&state.q&&state.q.type==="choice"&&/^[1-4]$/.test(e.key)){const b=document.querySelector('.opt[data-i="'+(+e.key-1)+'"]');if(b&&!b.disabled)answer(+e.key-1)}
+});
+
+/* ---------- Start ---------- */
+document.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{sfx.click();startGame(b.dataset.mode)});
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{boardTab=t.dataset.tab;renderScores()});
+$("#againBtn").onclick=()=>startGame(state.mode);
+$("#menuBtn").onclick=()=>{renderScores();show("start");setTimeout(()=>$(".scores").scrollIntoView({behavior:"smooth"}),50)};
+$("#quitBtn").onclick=quit;
+$("#soundBtn").onclick=()=>{soundOn=!soundOn;$("#soundBtn").textContent=soundOn?"🔊 Ton an":"🔇 Ton aus";store.set("zg-sound",soundOn)};
+soundOn=store.get("zg-sound",true);$("#soundBtn").textContent=soundOn?"🔊 Ton an":"🔇 Ton aus";
+$("#nameIn").value=store.get("zg-name","")||"";
+if(!ttsOK){const d=document.querySelector('.mode[data-mode="dictation"] p');d.textContent="Dein Browser kann leider nicht vorlesen – probiere einen anderen Modus."}
+renderScores();
+})();
+</script>
+</body>
+</html>

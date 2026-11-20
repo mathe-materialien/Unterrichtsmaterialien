@@ -122,11 +122,17 @@ def eintrag_html(e):
         knopf, farbe, ziel = f"⬇ {e['typ']}", "text-bg-warning", "download"
     else:
         knopf, farbe, ziel = "Ansehen", "text-bg-primary", 'target="_blank" rel="noopener"'
+    url = html.escape(e["url"])
+    titel = html.escape(e["titel"])
     return f"""
-          <a href="{html.escape(e['url'])}" {ziel} class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-3 eintrag">
-            <span>{symbol} {html.escape(e['titel'])}</span>
-            <span class="badge rounded-pill {farbe}">{html.escape(knopf)}</span>
-          </a>"""
+          <div class="list-group-item d-flex flex-wrap align-items-center gap-2 eintrag">
+            <a href="{url}" {ziel} class="eintrag-titel flex-grow-1 text-reset text-decoration-none">{symbol} {titel}</a>
+            <span class="d-flex align-items-center gap-1 ms-auto">
+              <button type="button" class="btn btn-sm btn-outline-secondary link-kopieren" data-url="{url}" title="Link kopieren">🔗 Link</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary qr-zeigen" data-url="{url}" data-titel="{titel}" title="QR-Code zeigen">QR</button>
+              <a href="{url}" {ziel} class="badge rounded-pill text-decoration-none {farbe}">{html.escape(knopf)}</a>
+            </span>
+          </div>"""
 
 
 gruppen = []
@@ -177,6 +183,10 @@ seite = f"""<!DOCTYPE html>
     .thema {{ margin-top: 1rem; }}
     .thema-titel {{ color: #0d6efd; text-transform: uppercase; letter-spacing: .04em; font-size: .8rem; font-weight: 700; margin-bottom: .25rem; }}
     .list-group-item:hover {{ background-color: #f1f3f5; }}
+    .eintrag .btn-sm {{ --bs-btn-padding-y: .1rem; --bs-btn-padding-x: .45rem; --bs-btn-font-size: .75rem; }}
+    .eintrag .badge {{ font-size: .75rem; padding: .35em .75em; }}
+    #qr-titel {{ font-weight: 600; margin-bottom: 1rem; }}
+    #qr-adresse {{ word-break: break-all; }}
     #qr-fenster {{ border: none; border-radius: 1rem; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,.25); text-align: center; }}
     #qr-fenster::backdrop {{ background: rgba(0,0,0,.5); }}
     #qr-bild img, #qr-bild canvas {{ margin: 0 auto; width: min(70vw, 320px); height: auto; }}
@@ -203,8 +213,9 @@ seite = f"""<!DOCTYPE html>
     <footer class="text-center text-muted small mt-4">Stand: {stand}</footer>
   </div>
 
-  <!-- Verstecktes Extra: Klick auf 📚 öffnet einen QR-Code zu dieser Seite -->
+  <!-- QR-Fenster: für jeden Eintrag (Knopf „QR“) und versteckt für die ganze Seite (Klick auf 📚) -->
   <dialog id="qr-fenster">
+    <div id="qr-titel"></div>
     <div id="qr-bild"></div>
     <p class="text-muted small mt-3 mb-3" id="qr-adresse"></p>
     <button type="button" class="btn btn-primary" id="qr-schliessen">Schließen</button>
@@ -213,22 +224,43 @@ seite = f"""<!DOCTYPE html>
   <script>
     (function () {{
       const fenster = document.getElementById("qr-fenster");
-      const adresse = location.origin + location.pathname.replace(/index\\.html$/, "");
-      let fertig = false;
-      function zeigen() {{
-        if (!fertig) {{
-          new QRCode(document.getElementById("qr-bild"), {{ text: adresse, width: 512, height: 512, correctLevel: QRCode.CorrectLevel.M }});
-          document.getElementById("qr-adresse").textContent = adresse;
-          fertig = true;
-        }}
-        fenster.showModal();
-      }}
-      document.getElementById("qr-knopf").addEventListener("click", function () {{
-        if (window.QRCode) return zeigen();
+      const bild = document.getElementById("qr-bild");
+      function absolut(url) {{ return new URL(url, document.baseURI).href; }}
+      function bibliothek(fertig) {{
+        if (window.QRCode) return fertig();
         const skript = document.createElement("script");
         skript.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
-        skript.onload = zeigen;
+        skript.onload = fertig;
         document.head.appendChild(skript);
+      }}
+      function zeigen(adresse, titel) {{
+        bibliothek(function () {{
+          bild.innerHTML = "";
+          new QRCode(bild, {{ text: adresse, width: 512, height: 512, correctLevel: QRCode.CorrectLevel.M }});
+          document.getElementById("qr-titel").textContent = titel;
+          document.getElementById("qr-adresse").textContent = adresse;
+          fenster.showModal();
+        }});
+      }}
+      document.getElementById("qr-knopf").addEventListener("click", function () {{
+        zeigen(location.origin + location.pathname.replace(/index\\.html$/, ""), document.title);
+      }});
+      document.querySelectorAll(".qr-zeigen").forEach(function (k) {{
+        k.addEventListener("click", function () {{ zeigen(absolut(k.dataset.url), k.dataset.titel); }});
+      }});
+      document.querySelectorAll(".link-kopieren").forEach(function (k) {{
+        k.addEventListener("click", function () {{
+          const adresse = absolut(k.dataset.url);
+          const fertig = function () {{
+            k.textContent = "✓ Kopiert";
+            setTimeout(function () {{ k.textContent = "🔗 Link"; }}, 1500);
+          }};
+          if (navigator.clipboard && window.isSecureContext) {{
+            navigator.clipboard.writeText(adresse).then(fertig, function () {{ window.prompt("Link kopieren:", adresse); }});
+          }} else {{
+            window.prompt("Link kopieren:", adresse);
+          }}
+        }});
       }});
       document.getElementById("qr-schliessen").addEventListener("click", function () {{ fenster.close(); }});
       fenster.addEventListener("click", function (e) {{ if (e.target === fenster) fenster.close(); }});
@@ -243,7 +275,7 @@ seite = f"""<!DOCTYPE html>
         karte.querySelectorAll(".thema, .list-group").forEach(function (b) {{ b.hidden = false; }});
         karte.querySelectorAll(".eintrag").forEach(function (e) {{
           const thema = e.closest(".thema");
-          const text = gruppe + " " + (thema ? thema.querySelector(".thema-titel").textContent.toLowerCase() : "") + " " + e.textContent.toLowerCase();
+          const text = gruppe + " " + (thema ? thema.querySelector(".thema-titel").textContent.toLowerCase() : "") + " " + e.querySelector(".eintrag-titel").textContent.toLowerCase();
           const passt = woerter.every(function (w) {{ return text.includes(w); }});
           e.classList.toggle("d-none", !passt);
           if (passt) sichtbar++;

@@ -184,7 +184,7 @@ seite = f"""<!DOCTYPE html>
     .thema-titel {{ color: #0d6efd; text-transform: uppercase; letter-spacing: .04em; font-size: .8rem; font-weight: 700; margin-bottom: .25rem; }}
     .list-group-item:hover {{ background-color: #f1f3f5; }}
     .eintrag .btn-sm {{ --bs-btn-padding-y: .1rem; --bs-btn-padding-x: .45rem; --bs-btn-font-size: .75rem; }}
-    .eintrag .badge {{ font-size: .75rem; padding: .35em .75em; }}
+    .eintrag .badge {{ font-size: .75rem; padding: .35em .75em; min-width: 7.5em; text-align: center; }}
     #qr-titel {{ font-weight: 600; margin-bottom: 1rem; }}
     #qr-adresse {{ word-break: break-all; }}
     #qr-fenster {{ border: none; border-radius: 1rem; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,.25); text-align: center; }}

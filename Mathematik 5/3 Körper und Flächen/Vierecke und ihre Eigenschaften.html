@@ -28,7 +28,7 @@ h1{margin:0;font-size:clamp(26px,3.4vw,36px);line-height:1.1;color:var(--blue);t
 .btn.primary{background:var(--blue);color:var(--bg)}
 .btn:focus-visible,.cell:focus-visible,.card:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
 .status{flex:1 1 260px;font-weight:600;min-height:1.5em}
-.status.ok{color:var(--okline)}.status.bad{color:var(--badline)}
+.status.ok{color:var(--okline)}.status.hint{color:var(--blue)}.status.bad{color:var(--badline)}
 .main{display:grid;gap:24px;align-items:start}
 @media(min-width:1040px){.main{grid-template-columns:minmax(0,1fr) 360px}}
 .table{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:88px 52px repeat(5,68px);max-width:800px}
@@ -124,7 +124,10 @@ if(checked){
 const filled=CELLS.filter(c=>place[c.id]);
 const right=filled.filter(c=>{const k=cardById(place[c.id]);return k.t===c.t&&k.v===c.v}).length;
 if(right===CELLS.length){st.textContent='Super! Alles richtig.';st.classList.add('ok')}
-else{const open=CELLS.length-filled.length;st.textContent=`${right} von ${CELLS.length} richtig.`+(filled.length>right?' Schau dir die rot markierten Kärtchen noch einmal an.':'')+(open?` Noch ${open} Felder frei.`:'');st.classList.add(right===filled.length?'ok':'bad')}
+else{const open=CELLS.length-filled.length;
+const colsOk=!open&&CELLS.filter(c=>c.t==='n').every(c=>cardById(place[c.id]).v===c.v)&&[0,1,2,3,4].every(i=>{const v=CELLS.filter(c=>c.t==='p'&&c.col===i+1).map(c=>cardById(place[c.id]).v).sort((a,b)=>a-b);return v.every((x,j)=>x===j)});
+if(colsOk){st.textContent=`${right} von ${CELLS.length} richtig. Tipp: Alle Kärtchen stehen schon in der richtigen Spalte! Ordne sie jetzt so, dass in jeder Zeile überall dieselbe Eigenschaft steht.`;st.classList.add('hint');}
+else st.textContent=`${right} von ${CELLS.length} richtig.`+(filled.length>right?' Schau dir die rot markierten Kärtchen noch einmal an.':'')+(open?` Noch ${open} Felder frei.`:'');if(!colsOk)st.classList.add(right===filled.length?'ok':'bad')}
 }else st.textContent=note;
 }
 function drop(id,cellId){

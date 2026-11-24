@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vierecke – interaktiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ruhiges Schul-Arbeitsblatt, klar und freundlich, ohne Ablenkung
+   IDEA: das gedruckte AB mit Schnipseln – nur dass die Kärtchen sich ziehen lassen
+   PICTURE: die Treppentabelle mit den fünf farbigen Vierecken ist das Bild
+   COLOUR and TYPE: weißes Papier, Tintenblau #1F4E79, Farben der Figuren; Source Sans 3
+   LAYOUT: iPad quer: Tabelle links, Kärtchen rechts; hochkant: Kärtchen unter der Tabelle */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#15191f);--ink:light-dark(#1a1a1a,#eef1f5);--muted:light-dark(#4b5563,#aab3bf);
+--line:light-dark(#1f2937,#8b95a3);--blue:light-dark(#1F4E79,#8fbbe6);--card:light-dark(#ffffff,#222832);
+--cardline:light-dark(#9aa3ae,#5d6773);--pool:light-dark(#f3f5f8,#1c2129);--sel:light-dark(#1F4E79,#8fbbe6);
+--ok:light-dark(#e3f6e8,#173524);--okline:light-dark(#178a3d,#4cc777);--bad:light-dark(#fde6e6,#3d1b1b);--badline:light-dark(#c62828,#ff7b7b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1240px;margin:0 auto;padding:clamp(18px,3vw,36px) max(3vw,14px) 40px}
+h1{margin:0;font-size:clamp(26px,3.4vw,36px);line-height:1.1;color:var(--blue);text-wrap:balance}
+.intro{margin:8px 0 0;color:var(--muted);max-width:68ch}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 18px}
+.btn{font:inherit;font-weight:600;min-height:46px;padding:0 20px;border-radius:10px;border:1.5px solid var(--blue);background:transparent;color:var(--blue);cursor:pointer}
+.btn.primary{background:var(--blue);color:var(--bg)}
+.btn:focus-visible,.cell:focus-visible,.card:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.status{flex:1 1 260px;font-weight:600;min-height:1.5em}
+.status.ok{color:var(--okline)}.status.bad{color:var(--badline)}
+.main{display:grid;gap:24px;align-items:start}
+@media(min-width:1040px){.main{grid-template-columns:minmax(0,1fr) 360px}}
+.table{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:88px 52px repeat(5,68px);max-width:800px}
+.img,.cell{border-right:1.5px solid var(--line);border-bottom:1.5px solid var(--line)}
+.bt{border-top:1.5px solid var(--line)}.bl{border-left:1.5px solid var(--line)}
+.img{display:flex;align-items:center;justify-content:center;padding:4px}
+.img svg{width:100%;max-width:140px;height:76px}
+.cell{font:inherit;color:inherit;background:transparent;padding:4px;margin:0;border-top:0;border-left:0;border-radius:0;display:flex;cursor:pointer;position:relative}
+.bl.cell{border-left:1.5px solid var(--line)}
+.cell.nm{background:color-mix(in srgb,var(--tint) 24%,transparent)}
+.cell.over{background:color-mix(in srgb,var(--sel) 14%,transparent)}
+.cell.target{background:color-mix(in srgb,var(--sel) 7%,transparent)}
+.card{font:inherit;font-size:15px;line-height:1.25;color:var(--ink);background:var(--card);border:1.5px dashed var(--cardline);border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;padding:4px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.card.name{font-weight:700}
+.cell .card{flex:1;border-style:solid;border-color:var(--cardline)}
+.cell.ok .card{background:var(--ok);border-color:var(--okline)}
+.cell.bad .card{background:var(--bad);border-color:var(--badline)}
+.cell.ok::after,.cell.bad::after{position:absolute;top:2px;right:6px;font-weight:700;font-size:15px}
+.cell.ok::after{content:"✓";color:var(--okline)}.cell.bad::after{content:"✗";color:var(--badline)}
+.pool{background:var(--pool);border-radius:14px;padding:16px}
+.pool h2{margin:0 0 8px;font-size:17px;color:var(--blue)}
+.pool h2+.grid{margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.grid .card{min-height:60px}.grid .card.name{min-height:44px}
+.card.selected{border:2.5px solid var(--sel);box-shadow:0 0 0 3px color-mix(in srgb,var(--sel) 25%,transparent)}
+.card.lifting{opacity:.35}
+.empty{color:var(--muted);font-size:15px;margin:0}
+.ghost{position:fixed;z-index:10;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.25);transform:rotate(-2deg) scale(1.04);border-style:solid}
+@media(prefers-reduced-motion:no-preference){.cell .card{animation:drop .18s ease-out}@keyframes drop{from{transform:scale(1.06)}to{transform:none}}}
+@media(max-width:600px){.card{font-size:13px;white-space:normal}.table{grid-template-rows:64px 46px repeat(5,72px)}.img svg{height:56px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Vierecke und ihre Eigenschaften</h1>
+<p class="intro">Ziehe die Kärtchen in die passenden Felder. Du kannst auch zuerst ein Kärtchen und dann ein Feld antippen. Wenn du ein eingesetztes Kärtchen antippst, kommt es zurück.</p>
+<div class="bar">
+<button class="btn primary" id="check" type="button">Überprüfen</button>
+<button class="btn" id="reset" type="button">Neu mischen</button>
+<div class="status" id="status" aria-live="polite"></div>
+</div>
+<div class="main">
+<div class="table" id="table"></div>
+<div class="pool" id="pool"></div>
+</div>
+</div>
+<script>
+{
+const NAMES=['Viereck','Trapez','Parallelogramm','Rechteck','Quadrat'];
+const PROPS=['4 Ecken und<br>4 Seiten','2 Seiten sind<br>zueinander parallel','weitere 2 Seiten<br>sind parallel','4 rechte<br>Winkel','alle 4 Seiten<br>sind gleich lang'];
+const SHAPES=[
+'<polygon points="10,52 88,8 124,62 56,86" fill="#F7A06A" stroke="#E0662A" stroke-width="2"/>',
+'<polygon points="45,10 97,10 126,80 16,80" fill="#FFD77A" stroke="#E8A800" stroke-width="2"/>',
+'<polygon points="38,26 134,26 102,66 6,66" fill="#A8D09F" stroke="#5C9A52" stroke-width="2"/>',
+'<rect x="22" y="24" width="96" height="42" fill="#A9C8EE" stroke="#4A8AD4" stroke-width="2"/>',
+'<rect x="35" y="10" width="70" height="70" fill="#EDB0F5" stroke="#C85ED8" stroke-width="2"/>'];
+const TINTS=['#F7A06A','#FFC94D','#8CC084','#7FAEE8','#E08AEE'];
+const CELLS=[];
+for(let c=0;c<5;c++)CELLS.push({id:'n'+c,t:'n',v:c,row:2,col:c+1,bl:c===0});
+for(let r=0;r<5;r++)for(let c=r;c<5;c++)CELLS.push({id:'p'+r+c,t:'p',v:r,row:r+3,col:c+1,bl:c===r});
+const cellById=id=>CELLS.find(x=>x.id===id);
+let cards=[],place={},sel=null,checked=false,note='';
+const $=id=>document.getElementById(id);
+const cardById=id=>cards.find(x=>x.id===id);
+const label=k=>k.t==='n'?NAMES[k.v]:PROPS[k.v];
+const plain=k=>label(k).replace('<br>',' ');
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function init(){
+cards=[];let n=0;
+NAMES.forEach((_,i)=>cards.push({id:'k'+n++,t:'n',v:i}));
+for(let r=0;r<5;r++)for(let c=r;c<5;c++)cards.push({id:'k'+n++,t:'p',v:r});
+shuffle(cards);place={};sel=null;checked=false;note='';render();
+}
+const where=id=>Object.keys(place).find(c=>place[c]===id);
+function render(){
+const selCard=sel&&cardById(sel);
+let h='';
+SHAPES.forEach((s,i)=>{h+=`<div class="img bt${i===0?' bl':''}" style="grid-row:1;grid-column:${i+1}"><svg viewBox="0 0 140 90" role="img" aria-label="${NAMES[i]}">${s}</svg></div>`});
+CELLS.forEach(c=>{
+const k=place[c.id]&&cardById(place[c.id]);
+let cls='cell'+(c.bl?' bl':'')+(c.t==='n'?' nm':'');
+if(checked&&k)cls+=(k.t===c.t&&k.v===c.v)?' ok':' bad';
+if(!k&&selCard&&selCard.t===c.t)cls+=' target';
+const aria=k?`${plain(k)} – zum Zurücklegen antippen`:(c.t==='n'?'leeres Namensfeld':'leeres Eigenschaftsfeld');
+h+=`<button type="button" class="${cls}" data-cell="${c.id}" style="grid-row:${c.row};grid-column:${c.col}${c.t==='n'?';--tint:'+TINTS[c.v]:''}" aria-label="${aria}">${k?`<span class="card${k.t==='n'?' name':''}" data-card="${k.id}">${label(k)}</span>`:''}</button>`;
+});
+$('table').innerHTML=h;
+const free=cards.filter(k=>!where(k.id));
+const group=t=>{const l=free.filter(k=>k.t===t);return l.length?`<div class="grid">${l.map(k=>`<button type="button" class="card${k.t==='n'?' name':''}${sel===k.id?' selected':''}" data-card="${k.id}" aria-pressed="${sel===k.id}">${label(k)}</button>`).join('')}</div>`:`<p class="empty">Alle eingesetzt.</p>`};
+$('pool').innerHTML=`<h2>Namen</h2>${group('n')}<h2>Eigenschaften</h2>${group('p')}`;
+const st=$('status');st.className='status';
+if(checked){
+const filled=CELLS.filter(c=>place[c.id]);
+const right=filled.filter(c=>{const k=cardById(place[c.id]);return k.t===c.t&&k.v===c.v}).length;
+if(right===CELLS.length){st.textContent='Super! Alles richtig.';st.classList.add('ok')}
+else{const open=CELLS.length-filled.length;st.textContent=`${right} von ${CELLS.length} richtig.`+(filled.length>right?' Schau dir die rot markierten Kärtchen noch einmal an.':'')+(open?` Noch ${open} Felder frei.`:'');st.classList.add(right===filled.length?'ok':'bad')}
+}else st.textContent=note;
+}
+function drop(id,cellId){
+const k=cardById(id),c=cellById(cellId);
+if(!k||!c)return;
+if(k.t!==c.t){note=k.t==='n'?'Namen gehören in die Zeile direkt unter den Figuren.':'Eigenschaften gehören in die Felder unter der Namenszeile.';sel=null;render();return}
+const from=where(id);if(from)delete place[from];
+place[cellId]=id;sel=null;checked=false;note='';render();
+}
+function unplace(id){const from=where(id);if(from)delete place[from];sel=null;checked=false;note='';render()}
+let drag=null,suppress=0;
+document.addEventListener('pointerdown',e=>{
+const el=e.target.closest('[data-card]');if(!el||e.button>0)return;
+const r=el.getBoundingClientRect();
+drag={id:el.dataset.card,el,x:e.clientX,y:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,w:r.width,h:r.height,moved:false,ghost:null,over:null};
+});
+document.addEventListener('pointermove',e=>{
+if(!drag)return;
+if(!drag.moved){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<6)return;
+drag.moved=true;const g=drag.el.cloneNode(true);g.removeAttribute('data-card');g.classList.add('ghost');g.classList.remove('selected');
+g.style.width=drag.w+'px';g.style.height=drag.h+'px';document.body.appendChild(g);drag.ghost=g;drag.el.classList.add('lifting')}
+e.preventDefault();
+drag.ghost.style.left=(e.clientX-drag.dx)+'px';drag.ghost.style.top=(e.clientY-drag.dy)+'px';
+const t=document.elementFromPoint(e.clientX,e.clientY),cell=t&&t.closest('.cell');
+if(drag.over&&drag.over!==cell)drag.over.classList.remove('over');
+if(cell){cell.classList.add('over');drag.over=cell}else drag.over=null;
+},{passive:false});
+function endDrag(e,cancel){
+if(!drag)return;const d=drag;drag=null;
+if(!d.moved)return;
+suppress=Date.now();d.ghost.remove();d.el.classList.remove('lifting');
+if(cancel){render();return}
+const t=document.elementFromPoint(e.clientX,e.clientY);
+const cell=t&&t.closest('.cell');
+if(cell)drop(d.id,cell.dataset.cell);
+else if(t&&t.closest('#pool'))unplace(d.id);
+else render();
+}
+document.addEventListener('pointerup',e=>endDrag(e,false));
+document.addEventListener('pointercancel',e=>endDrag(e,true));
+document.addEventListener('click',e=>{
+if(Date.now()-suppress<350)return;
+const cell=e.target.closest('.cell');
+if(cell){const id=cell.dataset.cell;
+if(sel){drop(sel,id);return}
+if(place[id]){unplace(place[id]);return}
+return}
+const k=e.target.closest('#pool [data-card]');
+if(k){sel=sel===k.dataset.card?null:k.dataset.card;note='';render()}
+});
+$('check').addEventListener('click',()=>{checked=true;sel=null;render()});
+$('reset').addEventListener('click',init);
+init();
+}
+</script>
+</body>
+</html>
